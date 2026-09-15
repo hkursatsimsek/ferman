@@ -1,0 +1,56 @@
+{
+  "units": [
+    {
+      "id": "kalkan",
+      "cost": 30,
+      "maxHP": 160,
+      "speedMilliCellsPerSecond": 900,
+      "rangeMilliCells": 1000,
+      "damage": 8,
+      "attackIntervalTicks": 30,
+      "armor": 4,
+      "moraleMax": 120,
+      "counters": [],
+      "ability": "shieldWall"
+    },
+    {
+      "id": "mizrakci",
+      "cost": 25,
+      "maxHP": 110,
+      "speedMilliCellsPerSecond": 1100,
+      "rangeMilliCells": 1500,
+      "damage": 12,
+      "attackIntervalTicks": 27,
+      "armor": 2,
+      "moraleMax": 100,
+      "counters": ["suvari"],
+      "ability": "spearWall"
+    },
+    {
+      "id": "okcu",
+      "cost": 30,
+      "maxHP": 70,
+      "speedMilliCellsPerSecond": 1000,
+      "rangeMilliCells": 6000,
+      "damage": 10,
+      "attackIntervalTicks": 36,
+      "armor": 0,
+      "moraleMax": 90,
+      "counters": ["mizrakci"],
+      "ability": "volley"
+    },
+    {
+      "id": "suvari",
+      "cost": 40,
+      "maxHP": 120,
+      "speedMilliCellsPerSecond": 2400,
+      "rangeMilliCells": 1000,
+      "damage": 14,
+      "attackIntervalTicks": 24,
+      "armor": 1,
+      "moraleMax": 110,
+      "counters": ["okcu"],
+      "ability": "charge"
+    }
+  ]
+}
