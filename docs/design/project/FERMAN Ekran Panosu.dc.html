@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Archivo+Narrow:wght@500;600;700&family=Public+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"><style>
+body{margin:0;background:#12181C;font-family:'Public Sans',system-ui,sans-serif}
+a{color:#9A7B3F;text-decoration:none}a:hover{color:#C2A05C}
+.dv-turn{padding:48px 48px 40px;border-bottom:1px solid rgba(214,208,194,.1);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 6px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#D6D0C2;color:#0F161B;border-radius:4px;text-decoration:none}
+.dv-tname{font:600 14px/1.2 'Archivo',sans-serif;color:#D6D0C2;letter-spacing:-.01em}
+.dv-sub{font:400 12px/1.5 'Public Sans',sans-serif;color:rgba(214,208,194,.55);margin:0 0 26px;max-width:60ch}
+.dv-rowhd{display:flex;align-items:baseline;gap:10px;margin:34px 0 18px}
+.dv-rowhd span{font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em}
+.dv-rowhd i{flex:1;height:1px;background:rgba(214,208,194,.12)}
+.dv-opts{display:flex;flex-wrap:wrap;gap:30px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(214,208,194,.12);color:#D6D0C2;border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 'Public Sans',sans-serif;color:rgba(214,208,194,.55)}
+.dv-card{max-width:100%;border-radius:3px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.45)}
+.dv-opt:target .dv-oid{background:#6FE3F5;color:#0F161B}
+.dv-next{margin:26px 0 0;font:12px/1.6 'Public Sans',sans-serif;color:rgba(214,208,194,.45)}
+</style></helmet>
+
+<section class="dv-turn" id="t0" style="background:#0B1013">
+<div class="dv-thd"><a class="dv-tid" href="#t0">0</a><span class="dv-tname">FERMAN — varsayımlar ve tasarım gerekçesi</span></div>
+<sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:20px;max-width:1180px">
+<div style="flex:1 1 340px;min-width:280px;background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:14px;padding:22px 24px">
+<div style="font:600 13px/1 'Archivo',sans-serif;color:#9A7B3F;margin-bottom:14px;letter-spacing:.02em">Varsayımlar</div>
+<ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">
+<li>Statik ekran panosu istendi — 393×852pt referans, gerçek iPhone ölçeğinde.</li>
+<li>Karanlık mod asıl tasarım; açık mod palet türevi brief'te verilmediği için materyalden türettim (aşağıda not ettim).</li>
+<li>Doğal dil girişi yalnızca görsel — mikrofon şeridi var, ayrıştırma yok.</li>
+<li>Türkçe metinler brief'ten harfiyen alındı, yeniden yazılmadı.</li>
+</ul>
+</div>
+<div style="flex:1 1 340px;min-width:280px;background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:14px;padding:22px 24px">
+<div style="font:600 13px/1 'Archivo',sans-serif;color:#9A7B3F;margin-bottom:14px;letter-spacing:.02em">Kararlar</div>
+<ul style="margin:0;padding-left:18px;font:400 13px/1.7 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">
+<li><b style="color:#D6D0C2">Pusula bir nesne, bir satır değil.</b> Kâğıt 2pt köşede kesilir, kendi gölgesini düşürür, hafif eğilir. Yığında hiçbir çizgi, girinti veya ayraç yok.</li>
+<li><b style="color:#D6D0C2">Koşul ile eylem yalnızca tipografiyle ayrılır.</b> Koşul 17/24 normal, eylem altında kalın ve geniş aralıklı — kutu yok, renk yok.</li>
+<li><b style="color:#D6D0C2">Parametreler kâğıda mürekkeple doldurulmuş boşluklar gibi.</b> Noktalı altı çizgi = dokunulabilir; kadran pusulanın üstünde açılır.</li>
+<li><b style="color:#D6D0C2">Kıvılcım yalnızca üç yerde:</b> savaş ekranında tetiklenme anı, o pusulanın sayacı, analizde çalışan emirlerin çubuğu. Menüde, butonda, başlıkta yok.</li>
+</ul>
+</div>
+<div style="flex:1 1 300px;min-width:280px;background:#1B262D;border:1px solid rgba(179,74,58,.3);border-radius:14px;padding:22px 24px">
+<div style="font:600 13px/1 'Archivo',sans-serif;color:#B34A3A;margin-bottom:14px;letter-spacing:.02em">Kontrol: "bu bir kod editörü mü?"</div>
+<div style="font:400 13px/1.7 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Monospace yok · sözdizimi rengi yok · girintili blok yok · <i>if/else/{ }/→</i> yok · terminal zemini yok · "derle / çalıştır / fonksiyon" kelimesi yok.<br><br>Editör ekranında okunan tek şey Türkçe bir cümle ve altında bir emir. Test: <b style="color:#D6D0C2">"bunu ben de yazabilirim."</b></div>
+</div>
+</div>
+</sc-if>
+</section>
+
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Karanlık mod — asıl tasarım</span></div>
+<p class="dv-sub">Teslim sırasına göre: token sistemi, sonra Emir Editörü, sonra kalan ekranlar. Her kart 393×852pt.</p>
+
+<div class="dv-rowhd"><span>Token sistemi ve bileşen envanteri</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a"><div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Token referans sayfası — §3</div>
+<div class="dv-card" style="width:820px;background:#0F161B;border:1px solid rgba(214,208,194,.1);border-radius:14px;padding:30px 32px 34px">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Kum Masası</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65);margin-top:6px">Malzeme tokenları. Marka rengi yok: soğuk kum, ham kâğıt, oksitlenmiş pirinç, çiğ demir.</div>
+
+<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-top:26px">
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#0F161B"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">ink</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#0F161B</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#1B262D"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">slate</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#1B262D</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#24323A"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">slate-raised</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#24323A</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#5E6A63"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">sand</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#5E6A63</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#7A8780"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">sand-lit</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#7A8780</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#D6D0C2"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">paper</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#D6D0C2</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#2A2622"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">paper-ink</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#2A2622</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#9A7B3F"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">brass — senin ordun</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#9A7B3F</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(214,208,194,.14);border-radius:8px;overflow:hidden"><div style="height:56px;background:#6C6660"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">iron — düşman</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#6C6660</div></div></div>
+<div style="background:#0F161B;border:1px solid rgba(179,74,58,.35);border-radius:8px;overflow:hidden"><div style="height:56px;background:#B34A3A"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">alarm</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#B34A3A</div></div></div>
+</div>
+
+<div style="display:flex;gap:14px;align-items:stretch;margin-top:14px">
+<div style="width:132px;border:1px solid rgba(111,227,245,.4);border-radius:8px;overflow:hidden;flex:none"><div style="height:56px;background:#6FE3F5"></div><div style="padding:8px 10px 10px;border-top:1px solid rgba(214,208,194,.1)"><div style="font:500 12px/16px 'Archivo',sans-serif;color:#D6D0C2">spark</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">#6FE3F5</div></div></div>
+<div style="flex:1;border:1px solid rgba(111,227,245,.22);border-radius:8px;padding:14px 16px;background:rgba(111,227,245,.04)"><div style="font:500 13px/18px 'Archivo',sans-serif;color:#6FE3F5">Kıvılcım arayüzün hiçbir yerinde kullanılmaz.</div><div style="font:400 13px/19px 'Public Sans',sans-serif;color:rgba(214,208,194,.72);margin-top:5px">Yalnızca bir kural tetiklendiği anda: birimin üzerinde çakan kıvılcım, listedeki pusulanın bir anlık çerçevesi, analizdeki tetiklenme çubuğu. Renk körlüğü için tetiklenme aynı anda rakam ve çubuk uzunluğuyla da kodlanır.</div></div>
+</div>
+
+<div style="display:flex;gap:26px;margin-top:30px;flex-wrap:wrap">
+<div style="flex:1 1 380px;min-width:340px">
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:16px">Tip ölçeği</div>
+<div style="display:flex;flex-direction:column;gap:14px">
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2;flex:1">Cephe Yarıldı</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Archivo Semibold 28/32<br>tracking −0.02em</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:500 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2;flex:1">14. Cephe — Taş Geçit</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Archivo Medium 20/26</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#D6D0C2;flex:1">düşman 3 kareden yakınsa</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Public Sans Reg 17/24<br>pusula koşulu</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#D6D0C2;flex:1">GERİ ÇEKİL</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Public Sans Bold 17/24<br>pusula eylemi</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;flex:1">Askerlerin emir almazsa düşmana doğru yürür.</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Public Sans Reg 15/22</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65);flex:1">Sis — düşman kompozisyonu gizli</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Public Sans Reg 13/18<br>opaklık 0.65</div></div>
+<div style="display:flex;align-items:baseline;gap:14px"><div style="font:500 24px/28px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;flex:1;font-variant-numeric:tabular-nums">248 / 310 · 00:23 · 14 kez</div><div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);width:150px;flex:none">Archivo Narrow Medium<br>tabular figures</div></div>
+</div>
+</div>
+<div style="flex:1 1 300px;min-width:280px">
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:16px">Köşe yarıçapı — malzemeye göre</div>
+<div style="display:flex;flex-direction:column;gap:9px">
+<div style="display:flex;align-items:center;gap:12px"><div style="width:52px;height:34px;background:#D6D0C2;border-radius:2px;flex:none"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Emir pusulası — <b style="color:#D6D0C2;font-variant-numeric:tabular-nums">2pt</b>, kâğıt keskin kesilir</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:52px;height:34px;background:#24323A;border:1px solid rgba(214,208,194,.14);border-radius:14px;flex:none"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Panel / sheet — <b style="color:#D6D0C2;font-variant-numeric:tabular-nums">14pt</b>, metal muhafaza</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:52px;height:34px;background:#9A7B3F;border-radius:8px;flex:none"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Buton — <b style="color:#D6D0C2;font-variant-numeric:tabular-nums">8pt</b></div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:52px;display:flex;justify-content:center;flex:none"><div style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426)"></div></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Birim jetonu — tam yuvarlak, döküm figür</div></div>
+<div style="display:flex;align-items:center;gap:12px"><div style="width:52px;height:34px;background:radial-gradient(ellipse at 50% 30%,#7A8780,#5E6A63 70%);border-radius:0;flex:none"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">Kum masası — <b style="color:#D6D0C2;font-variant-numeric:tabular-nums">0pt</b>, kenarı yok</div></div>
+</div>
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin:26px 0 14px">Boşluk — 4pt tabanı</div>
+<div style="display:flex;align-items:flex-end;gap:8px">
+<div style="text-align:center"><div style="width:4px;height:4px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">4</div></div>
+<div style="text-align:center"><div style="width:8px;height:8px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">8</div></div>
+<div style="text-align:center"><div style="width:12px;height:12px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">12</div></div>
+<div style="text-align:center"><div style="width:16px;height:16px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">16</div></div>
+<div style="text-align:center"><div style="width:24px;height:24px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">24</div></div>
+<div style="text-align:center"><div style="width:32px;height:32px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">32</div></div>
+<div style="text-align:center"><div style="width:48px;height:48px;background:#9A7B3F"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">48</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1b"><div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Bileşen envanteri — §5, durumlarıyla</div>
+<div class="dv-card" style="width:560px;background:#0F161B;border:1px solid rgba(214,208,194,.1);border-radius:14px;padding:28px 30px 32px">
+<div style="font:500 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">EmirPusulası</div>
+<div style="display:flex;flex-direction:column;gap:12px;margin-top:16px">
+
+<div style="position:relative;background:#D6D0C2;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.035) 0 1px,transparent 1px 4px);border-radius:2px;padding:13px 15px 14px;box-shadow:0 2px 0 rgba(0,0,0,.35),0 8px 16px rgba(0,0,0,.3)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:1px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">düşman <span style="border-bottom:1.5px dotted rgba(42,38,34,.5);padding:0 1px">3</span> kareden yakınsa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:2px">GERİ ÇEKİL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3px;flex:none;margin-top:4px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span></div>
+</div>
+</div>
+<div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:-6px">normal</div>
+
+<div style="position:relative;background:#DCD7CA;border-radius:2px;padding:13px 15px 14px;transform:rotate(-1.1deg);box-shadow:0 14px 28px rgba(0,0,0,.5),0 2px 0 rgba(0,0,0,.3)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:1px">2</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">canım <span style="border-bottom:1.5px dotted rgba(42,38,34,.5);padding:0 1px">%35</span>'in altındaysa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:2px">SİPER AL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3px;flex:none;margin-top:4px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.6);display:block"></span></div>
+</div>
+</div>
+<div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:-6px">sürükleniyor — hafif eğilme, yükselen gölge, haptik darbe</div>
+
+<div style="position:relative;background:#D6D0C2;border-radius:2px;padding:13px 15px 14px;box-shadow:0 0 0 2px #6FE3F5,0 0 24px rgba(111,227,245,.4),0 2px 0 rgba(0,0,0,.35)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:1px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">düşman <span style="border-bottom:1.5px dotted rgba(42,38,34,.5);padding:0 1px">3</span> kareden yakınsa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:2px">GERİ ÇEKİL</div></div>
+<div style="font:500 13px/1 'Archivo Narrow','Archivo',sans-serif;color:#2A2622;flex:none;margin-top:5px;font-variant-numeric:tabular-nums">14×</div>
+</div>
+</div>
+<div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:-6px">tetiklendi — yalnızca bu durumda kıvılcım; sayaç rakamı da artar</div>
+
+<div style="position:relative;background:rgba(214,208,194,.14);border-radius:2px;padding:13px 15px 14px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:22px;height:22px;border-radius:50%;border:1.5px solid rgba(214,208,194,.28);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.4);flex:none;font-variant-numeric:tabular-nums;margin-top:1px">3</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.38)">düşman okçuysa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(214,208,194,.38);margin-top:2px">KUŞAT</div></div>
+</div>
+</div>
+<div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:-6px">devre dışı — bu birim için geçersiz</div>
+
+<div style="position:relative;border:1.5px dashed rgba(214,208,194,.3);border-radius:2px;padding:13px 15px 14px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:22px;height:22px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.35);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.55);flex:none;font-variant-numeric:tabular-nums;margin-top:1px">4</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.55)">başka durumda</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(214,208,194,.7);margin-top:2px">İLERLE</div></div>
+</div>
+</div>
+<div style="font:400 11px/15px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:-6px">varsayılan — kâğıda basılmamış, silinemez, taşınamaz</div>
+</div>
+
+<div style="height:1px;background:rgba(214,208,194,.1);margin:26px 0 22px"></div>
+<div style="display:flex;gap:34px;flex-wrap:wrap">
+<div>
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:14px">BirimJetonu</div>
+<div style="display:flex;align-items:flex-end;gap:16px">
+<div style="text-align:center"><div style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.5)"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:8px">masa</div></div>
+<div style="text-align:center"><div style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 7px rgba(0,0,0,.5)"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:8px">tepsi</div></div>
+<div style="text-align:center"><div style="width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 0 0 2px #C2A05C,0 4px 7px rgba(0,0,0,.5)"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:8px">seçili</div></div>
+<div style="text-align:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 4px 7px rgba(0,0,0,.5)"></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:8px">demir</div></div>
+</div>
+</div>
+<div style="flex:1;min-width:220px">
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:14px">TetiklenmeÇubuğu</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;align-items:center;gap:10px"><div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.55);width:12px;font-variant-numeric:tabular-nums">1</div><div style="flex:1;height:6px;background:rgba(214,208,194,.1);border-radius:1px;overflow:hidden"><div style="width:74%;height:100%;background:#9A7B3F"></div></div><div style="font:500 12px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.7);width:30px;text-align:right;font-variant-numeric:tabular-nums">14</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="font:500 11px/1 'Archivo',sans-serif;color:#6FE3F5;width:12px;font-variant-numeric:tabular-nums">2</div><div style="flex:1;height:6px;background:rgba(214,208,194,.1);border-radius:1px;overflow:hidden"><div style="width:42%;height:100%;background:#6FE3F5;box-shadow:0 0 12px rgba(111,227,245,.8)"></div></div><div style="font:500 12px/1 'Archivo Narrow','Archivo',sans-serif;color:#6FE3F5;width:30px;text-align:right;font-variant-numeric:tabular-nums">8</div></div>
+<div style="display:flex;align-items:center;gap:10px"><div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.35);width:12px;font-variant-numeric:tabular-nums">3</div><div style="flex:1;height:6px;background:rgba(214,208,194,.1);border-radius:1px"></div><div style="font:500 12px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.35);width:30px;text-align:right;font-variant-numeric:tabular-nums">0</div></div>
+</div>
+</div>
+</div>
+<div style="display:flex;gap:34px;flex-wrap:wrap;margin-top:24px">
+<div style="flex:1;min-width:220px">
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:14px">BütçeGöstergesi</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<div><div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65)">Bütçe</div><div style="font:500 17px/20px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">248 / 310</div></div><div style="height:3px;background:rgba(214,208,194,.12);margin-top:7px"><div style="width:80%;height:100%;background:#9A7B3F"></div></div></div>
+<div><div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65)">Aşım</div><div style="font:500 17px/20px 'Archivo Narrow','Archivo',sans-serif;color:#B34A3A;font-variant-numeric:tabular-nums">335 / 310</div></div><div style="height:3px;background:rgba(214,208,194,.12);margin-top:7px"><div style="width:100%;height:100%;background:#B34A3A"></div></div></div>
+</div>
+</div>
+<div style="flex:none">
+<div style="font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);letter-spacing:.04em;margin-bottom:14px">CepheBayrağı</div>
+<div style="display:flex;gap:26px;align-items:flex-end">
+<div style="text-align:center"><div style="width:26px;height:44px;position:relative;margin:0 auto"><div style="position:absolute;left:11px;top:0;width:2px;height:44px;background:#9A7B3F"></div><div style="position:absolute;left:13px;top:3px;width:13px;height:10px;background:#9A7B3F"></div></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">geçildi</div></div>
+<div style="text-align:center"><div style="width:26px;height:44px;position:relative;margin:0 auto"><div style="position:absolute;left:11px;top:0;width:2px;height:44px;background:#C2A05C"></div><div style="position:absolute;left:13px;top:3px;width:13px;height:10px;background:#C2A05C;box-shadow:0 0 14px rgba(194,160,92,.7)"></div></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:#C2A05C;margin-top:6px">açık</div></div>
+<div style="text-align:center"><div style="width:26px;height:44px;position:relative;margin:0 auto"><div style="position:absolute;left:11px;top:6px;width:2px;height:38px;background:#6C6660"></div><div style="position:absolute;left:13px;top:9px;width:13px;height:10px;background:#6C6660;opacity:.6"></div></div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);margin-top:6px">kilitli</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="dv-rowhd"><span>Oyunun kalbi — Emir Editörü</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1c"><div class="dv-olabel"><a class="dv-oid" href="#1c">1c</a>Emir Editörü — 4.4</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="padding:0 20px 12px;flex:none;border-bottom:1px solid rgba(214,208,194,.08);background:rgba(27,38,45,.6);backdrop-filter:blur(12px)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Okçu</div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65);font-variant-numeric:tabular-nums">3 / 6 pusula</div>
+</div>
+<div style="display:flex;gap:20px;margin-top:12px">
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Mızrakçı</div>
+<div style="font:500 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;padding-bottom:5px;border-bottom:2px solid #9A7B3F">Okçu</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Süvari</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Kalkan</div>
+</div>
+</div>
+
+<div style="flex:1;padding:22px 20px 0;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,#0F161B,#131B21)">
+<div style="position:relative;background:#D6D0C2;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.035) 0 1px,transparent 1px 4px);border-radius:2px;padding:14px 16px 15px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 10px 18px rgba(0,0,0,.35)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">düşman <span style="border-bottom:1.5px dotted rgba(42,38,34,.55);padding:0 2px;font-variant-numeric:tabular-nums">3</span> kareden yakınsa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">GERİ ÇEKİL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3.5px;flex:none;margin-top:6px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span></div>
+</div>
+</div>
+
+<div style="position:relative;background:#D6D0C2;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.035) 0 1px,transparent 1px 4px);border-radius:2px;padding:14px 16px 15px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 10px 18px rgba(0,0,0,.35)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">2</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">canım <span style="border-bottom:1.5px dotted rgba(42,38,34,.55);padding:0 2px;font-variant-numeric:tabular-nums">%35</span>'in altındaysa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">SİPER AL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3.5px;flex:none;margin-top:6px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.42);display:block"></span></div>
+</div>
+</div>
+
+<div style="position:relative;border:1.5px dashed rgba(214,208,194,.26);border-radius:2px;padding:14px 16px 15px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.32);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);flex:none;font-variant-numeric:tabular-nums;margin-top:2px">3</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.5)">başka durumda</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(214,208,194,.66);margin-top:3px">İLERLE</div></div>
+</div>
+</div>
+
+<div style="margin-top:2px;font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.4)">Pusulayı yukarı taşımak önceliğini artırır.</div>
+</div>
+
+<div style="flex:none;padding:14px 20px 0">
+<div style="display:flex;align-items:center;gap:12px;background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:8px;padding:11px 12px 11px 14px">
+<svg width="13" height="19" viewBox="0 0 13 19" fill="none" style="display:block;flex:none"><rect x="4" y="1" width="5" height="9" rx="2.5" stroke="rgba(214,208,194,.6)" stroke-width="1.4"/><path d="M1.5 8.5a5 5 0 0010 0M6.5 13.5V18" stroke="rgba(214,208,194,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>
+<div style="flex:1;font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.42)">Emri söyle ya da yaz</div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#9A7B3F;border:1px solid rgba(154,123,63,.5);border-radius:6px;padding:4px 12px;flex:none">Yaz</div>
+</div>
+</div>
+
+<div style="flex:none;padding:14px 20px 34px">
+<div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)">
+<svg width="11" height="13" viewBox="0 0 11 13" style="display:block"><path d="M1 1L10 6.5L1 12V1Z" fill="#0F161B"/></svg>
+<div style="font:600 17px/1 'Archivo',sans-serif;letter-spacing:.01em;color:#0F161B">Savaşı Başlat</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1d"><div class="dv-olabel"><a class="dv-oid" href="#1d">1d</a>ParametreKadranı — pusula üstünde açılır</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="padding:0 20px 12px;flex:none;border-bottom:1px solid rgba(214,208,194,.08);background:rgba(27,38,45,.6)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Okçu</div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65);font-variant-numeric:tabular-nums">3 / 6 pusula</div>
+</div>
+<div style="display:flex;gap:20px;margin-top:12px">
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Mızrakçı</div>
+<div style="font:500 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;padding-bottom:5px;border-bottom:2px solid #9A7B3F">Okçu</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Süvari</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Kalkan</div>
+</div>
+</div>
+
+<div style="flex:1;padding:22px 20px 0;display:flex;flex-direction:column;gap:14px;background:linear-gradient(180deg,#0F161B,#131B21);position:relative">
+<div style="position:absolute;inset:0;background:rgba(15,22,27,.55)"></div>
+
+<div style="position:relative;background:#D6D0C2;border-radius:2px;padding:14px 16px 15px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 14px 30px rgba(0,0,0,.55);z-index:2">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">düşman <span style="background:rgba(154,123,63,.28);border-bottom:1.5px solid #9A7B3F;padding:1px 5px;font-variant-numeric:tabular-nums">4</span> kareden yakınsa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">GERİ ÇEKİL</div></div>
+</div>
+<div style="position:absolute;left:14px;right:14px;top:calc(100% + 12px);background:#24323A;border:1px solid rgba(214,208,194,.14);border-radius:14px;padding:14px 16px 16px;box-shadow:0 18px 40px rgba(0,0,0,.6);z-index:3">
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65)">Mesafe</div>
+<div style="display:flex;align-items:flex-end;justify-content:center;gap:16px;margin-top:8px">
+<div style="font:400 20px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.3);font-variant-numeric:tabular-nums">2</div>
+<div style="font:400 24px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">3</div>
+<div style="font:600 38px/1 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">4</div>
+<div style="font:400 24px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.5);font-variant-numeric:tabular-nums">5</div>
+<div style="font:400 20px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.3);font-variant-numeric:tabular-nums">6</div>
+</div>
+<div style="height:2px;background:rgba(214,208,194,.14);margin-top:12px;position:relative"><div style="position:absolute;left:50%;top:-4px;width:2px;height:10px;background:#9A7B3F;transform:translateX(-50%)"></div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.5);text-align:center;margin-top:8px">kare</div>
+<div style="position:absolute;left:50%;top:-7px;width:14px;height:14px;background:#24323A;border-left:1px solid rgba(214,208,194,.14);border-top:1px solid rgba(214,208,194,.14);transform:translateX(-50%) rotate(45deg)"></div>
+</div>
+</div>
+
+<div style="position:relative;background:#D6D0C2;border-radius:2px;padding:14px 16px 15px;box-shadow:0 2px 0 rgba(0,0,0,.4);opacity:.5">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #9A7B3F;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;margin-top:2px">2</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">canım %35'in altındaysa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">SİPER AL</div></div>
+</div>
+</div>
+<div style="position:relative;border:1.5px dashed rgba(214,208,194,.18);border-radius:2px;padding:14px 16px 15px;opacity:.5">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.3);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);flex:none;margin-top:2px">3</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.5)">başka durumda</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(214,208,194,.66);margin-top:3px">İLERLE</div></div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;padding:14px 20px 0;opacity:.45">
+<div style="display:flex;align-items:center;gap:12px;background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:8px;padding:11px 12px 11px 14px">
+<svg width="13" height="19" viewBox="0 0 13 19" fill="none" style="display:block;flex:none"><rect x="4" y="1" width="5" height="9" rx="2.5" stroke="rgba(214,208,194,.6)" stroke-width="1.4"/><path d="M1.5 8.5a5 5 0 0010 0M6.5 13.5V18" stroke="rgba(214,208,194,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>
+<div style="flex:1;font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.42)">Emri söyle ya da yaz</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 34px;opacity:.45">
+<div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center"><div style="font:600 17px/1 'Archivo',sans-serif;color:#0F161B">Savaşı Başlat</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1e"><div class="dv-olabel"><a class="dv-oid" href="#1e">1e</a>Emir Editörü — boş durum</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="padding:0 20px 12px;flex:none;border-bottom:1px solid rgba(214,208,194,.08);background:rgba(27,38,45,.6)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Mızrakçı</div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.65);font-variant-numeric:tabular-nums">0 / 6 pusula</div>
+</div>
+<div style="display:flex;gap:20px;margin-top:12px">
+<div style="font:500 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;padding-bottom:5px;border-bottom:2px solid #9A7B3F">Mızrakçı</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Okçu</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Süvari</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);padding-bottom:5px">Kalkan</div>
+</div>
+</div>
+
+<div style="flex:1;padding:46px 28px 0;display:flex;flex-direction:column;background:linear-gradient(180deg,#0F161B,#131B21)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Henüz emir yok.</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.72);margin-top:14px;max-width:34ch">Askerlerin emir almazsa düşmana doğru yürür ve öldürülene kadar dövüşür.</div>
+<div style="display:inline-flex;align-self:flex-start;margin-top:26px;border:1px solid rgba(154,123,63,.55);border-radius:8px;padding:11px 18px"><div style="font:500 15px/1 'Public Sans',sans-serif;color:#C2A05C">Hazır emir setlerini gör</div></div>
+
+<div style="margin-top:44px;border:1.5px dashed rgba(214,208,194,.14);border-radius:2px;padding:14px 16px 15px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.22);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.35);flex:none;margin-top:2px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.35)">başka durumda</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(214,208,194,.45);margin-top:3px">İLERLE</div></div>
+</div>
+</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.38);margin-top:10px">Varsayılan emir her zaman yığının sonundadır.</div>
+</div>
+
+<div style="flex:none;padding:14px 20px 0">
+<div style="display:flex;align-items:center;gap:12px;background:#1B262D;border:1px solid rgba(154,123,63,.35);border-radius:8px;padding:11px 12px 11px 14px">
+<svg width="13" height="19" viewBox="0 0 13 19" fill="none" style="display:block;flex:none"><rect x="4" y="1" width="5" height="9" rx="2.5" stroke="#C2A05C" stroke-width="1.4"/><path d="M1.5 8.5a5 5 0 0010 0M6.5 13.5V18" stroke="#C2A05C" stroke-width="1.4" stroke-linecap="round"/></svg>
+<div style="flex:1;font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.55)">Emri söyle ya da yaz</div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#9A7B3F;border:1px solid rgba(154,123,63,.5);border-radius:6px;padding:4px 12px;flex:none">Yaz</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 34px">
+<div style="height:52px;border-radius:8px;background:rgba(214,208,194,.08);display:flex;align-items:center;justify-content:center;gap:9px"><div style="font:600 17px/1 'Archivo',sans-serif;color:rgba(214,208,194,.32)">Savaşı Başlat</div></div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="dv-rowhd"><span>Savaş ve sonuç</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1f"><div class="dv-olabel"><a class="dv-oid" href="#1f">1f</a>Savaş Ekranı — 4.5</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="padding:0 20px 12px;flex:none;display:flex;align-items:center;justify-content:space-between;background:rgba(27,38,45,.55);backdrop-filter:blur(12px);border-bottom:1px solid rgba(214,208,194,.08)">
+<div style="font:500 22px/26px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">00:23</div>
+<div style="display:flex;align-items:center;gap:16px">
+<svg width="11" height="14" viewBox="0 0 11 14" style="display:block"><rect x="0" y="0" width="3.4" height="14" fill="rgba(214,208,194,.75)"/><rect x="7.2" y="0" width="3.4" height="14" fill="rgba(214,208,194,.75)"/></svg>
+<div style="display:flex;gap:2px;background:rgba(214,208,194,.08);border-radius:6px;padding:2px">
+<div style="font:500 13px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);padding:6px 9px;font-variant-numeric:tabular-nums">1×</div>
+<div style="font:500 13px/1 'Archivo',sans-serif;color:#0F161B;background:#9A7B3F;border-radius:4px;padding:6px 9px;font-variant-numeric:tabular-nums">2×</div>
+<div style="font:500 13px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);padding:6px 9px;font-variant-numeric:tabular-nums">4×</div>
+</div>
+</div>
+</div>
+
+<div style="flex:1;position:relative;background:radial-gradient(ellipse 78% 52% at 50% 34%,#7A8780 0%,#66726B 42%,#5E6A63 66%,#454E49 100%);overflow:hidden">
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(15,22,27,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.07) 1px,transparent 1px);background-size:33px 33px;opacity:.8"></div>
+<div style="position:absolute;left:-6%;top:22%;width:62%;height:16%;background:rgba(15,22,27,.1);border-radius:50%;filter:blur(9px)"></div>
+<div style="position:absolute;right:-10%;bottom:16%;width:58%;height:20%;background:rgba(15,22,27,.12);border-radius:50%;filter:blur(11px)"></div>
+
+<div style="position:absolute;left:62px;top:230px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;left:96px;top:214px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;left:130px;top:236px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;left:74px;top:272px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;left:112px;top:296px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.45);outline:2px solid rgba(111,227,245,.9);outline-offset:3px"></div>
+
+<div style="position:absolute;left:118px;top:330px;background:rgba(15,22,27,.88);border-radius:6px;padding:6px 10px;box-shadow:0 6px 14px rgba(0,0,0,.4)">
+<div style="font:400 11px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.6)">şu an uyguluyor</div>
+<div style="display:flex;align-items:center;gap:6px;margin-top:2px"><span style="font:500 11px/1 'Archivo',sans-serif;color:#6FE3F5;font-variant-numeric:tabular-nums">2</span><span style="font:700 12px/1 'Public Sans',sans-serif;letter-spacing:.05em;color:#D6D0C2">SİPER AL</span></div>
+</div>
+
+<div style="position:absolute;left:136px;top:288px;display:flex;align-items:center;gap:4px">
+<svg width="16" height="20" viewBox="0 0 16 20" style="display:block;filter:drop-shadow(0 0 8px rgba(111,227,245,.9))"><path d="M9 0L1 11h5l-2 9 10-12H8.5L9 0z" fill="#6FE3F5"/></svg>
+</div>
+
+<div style="position:absolute;right:66px;top:150px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;right:100px;top:168px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;right:132px;top:148px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;right:82px;top:196px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;right:118px;top:210px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+<div style="position:absolute;right:60px;top:238px;width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 5px rgba(0,0,0,.45)"></div>
+</div>
+
+<div style="flex:none;background:#1B262D;border-top:1px solid rgba(214,208,194,.1);padding:16px 20px 34px">
+<div style="display:flex;flex-direction:column;gap:13px">
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:20px;height:20px;border-radius:50%;border:1.5px solid rgba(154,123,63,.7);display:flex;align-items:center;justify-content:center;font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.8);flex:none;font-variant-numeric:tabular-nums">1</div>
+<div style="flex:1"><div style="font:400 13px/16px 'Public Sans',sans-serif;color:rgba(214,208,194,.7)">düşman 3 kareden yakınsa <b style="letter-spacing:.04em;color:#D6D0C2">GERİ ÇEKİL</b></div><div style="height:5px;background:rgba(214,208,194,.1);margin-top:6px"><div style="width:58%;height:100%;background:#9A7B3F"></div></div></div>
+<div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.8);width:24px;text-align:right;flex:none;font-variant-numeric:tabular-nums">9</div>
+</div>
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:20px;height:20px;border-radius:50%;border:1.5px solid #6FE3F5;display:flex;align-items:center;justify-content:center;font:500 11px/1 'Archivo',sans-serif;color:#6FE3F5;flex:none;font-variant-numeric:tabular-nums;box-shadow:0 0 12px rgba(111,227,245,.5)">2</div>
+<div style="flex:1"><div style="font:400 13px/16px 'Public Sans',sans-serif;color:rgba(214,208,194,.7)">canım %35'in altındaysa <b style="letter-spacing:.04em;color:#D6D0C2">SİPER AL</b></div><div style="height:5px;background:rgba(214,208,194,.1);margin-top:6px"><div style="width:34%;height:100%;background:#6FE3F5;box-shadow:0 0 14px rgba(111,227,245,.9)"></div></div></div>
+<div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#6FE3F5;width:24px;text-align:right;flex:none;font-variant-numeric:tabular-nums">5</div>
+</div>
+<div style="display:flex;align-items:center;gap:11px">
+<div style="width:20px;height:20px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.25);display:flex;align-items:center;justify-content:center;font:500 11px/1 'Archivo',sans-serif;color:rgba(214,208,194,.4);flex:none;font-variant-numeric:tabular-nums">3</div>
+<div style="flex:1"><div style="font:400 13px/16px 'Public Sans',sans-serif;color:rgba(214,208,194,.4)">başka durumda <b style="letter-spacing:.04em">İLERLE</b></div><div style="height:5px;background:rgba(214,208,194,.1);margin-top:6px"></div></div>
+<div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.4);width:24px;text-align:right;flex:none;font-variant-numeric:tabular-nums">0</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1g"><div class="dv-olabel"><a class="dv-oid" href="#1g">1g</a>Savaş Sonrası Analiz — 4.6</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="flex:1;overflow:hidden;display:flex;flex-direction:column">
+<div style="padding:22px 24px 26px;background:linear-gradient(180deg,rgba(179,74,58,.13),transparent)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Cephe Yarıldı</div>
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.82);margin-top:12px;max-width:32ch">Okçularının %70'i 12. saniyede aynı anda öldü.</div>
+</div>
+<div style="height:1px;background:rgba(214,208,194,.1)"></div>
+<div style="padding:22px 24px 0;flex:1">
+<div style="font:500 13px/18px 'Archivo',sans-serif;color:rgba(214,208,194,.55);letter-spacing:.03em">Emirlerin</div>
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:20px">
+
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid rgba(154,123,63,.75);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#D6D0C2;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">1</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">düşman 3 kareden yakınsa</div>
+<div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#D6D0C2">GERİ ÇEKİL</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(214,208,194,.1)"><div style="width:100%;height:100%;background:#6FE3F5"></div></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;flex:none;font-variant-numeric:tabular-nums">14 kez</div></div>
+</div>
+</div>
+
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid rgba(154,123,63,.75);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#D6D0C2;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">2</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.8)">canım %35'in altındaysa</div>
+<div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#D6D0C2">SİPER AL</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(214,208,194,.1)"><div style="width:21%;height:100%;background:#6FE3F5"></div></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;flex:none;font-variant-numeric:tabular-nums">3 kez</div></div>
+</div>
+</div>
+
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(214,208,194,.3);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(214,208,194,.5);flex:none;font-variant-numeric:tabular-nums;margin-top:2px">3</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(214,208,194,.55)">başka durumda <b style="font-weight:700;letter-spacing:.06em;color:rgba(214,208,194,.7)">İLERLE</b></div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(214,208,194,.1)"></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.55);flex:none;font-variant-numeric:tabular-nums">0 kez</div></div>
+<div style="display:flex;gap:9px;align-items:flex-start;margin-top:12px;border-left:2px solid #B34A3A;padding:2px 0 2px 11px">
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:#D6D0C2">Bu emir hiç çalışmadı. Okçular hep birinci emri uyguladı.</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div style="flex:none;padding:18px 20px 34px;display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(214,208,194,.08);background:#12191E">
+<div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)"><div style="font:600 17px/1 'Archivo',sans-serif;color:#0F161B">Emirleri Düzelt</div></div>
+<div style="height:52px;border-radius:8px;border:1px solid rgba(214,208,194,.2);display:flex;align-items:center;justify-content:center"><div style="font:500 17px/1 'Archivo',sans-serif;color:rgba(214,208,194,.85)">Klibi Paylaş</div></div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="dv-rowhd"><span>Hazırlık akışı</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1h"><div class="dv-olabel"><a class="dv-oid" href="#1h">1h</a>Ordu Kurulumu — 4.3</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="flex:none;padding:0 20px 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(214,208,194,.08);background:rgba(27,38,45,.6)">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Konuşlan</div></div>
+<div style="text-align:right"><div style="font:400 11px/14px 'Public Sans',sans-serif;color:rgba(214,208,194,.55)">Bütçe</div><div style="font:500 18px/20px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">248 / 310</div></div>
+</div>
+
+<div style="flex:1;position:relative;background:radial-gradient(ellipse 70% 46% at 32% 40%,#7A8780 0%,#69756E 44%,#5E6A63 68%,#464F4A 100%);overflow:hidden">
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(15,22,27,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.07) 1px,transparent 1px);background-size:33px 33px"></div>
+<div style="position:absolute;left:0;top:0;bottom:0;width:62%;border-right:1px dashed rgba(154,123,63,.5)"></div>
+<div style="position:absolute;left:20px;top:16px;font:400 11px/14px 'Public Sans',sans-serif;color:#0F161B">senin konuşlanma bölgen</div>
+
+<div style="position:absolute;left:34px;top:120px;display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(4,52px);gap:8px">
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"></div>
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 7px rgba(0,0,0,.45)"></div></div>
+<div style="border:1px solid rgba(15,22,27,.22)"></div>
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 0 0 2px #C2A05C,0 4px 7px rgba(0,0,0,.45)"></div></div>
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 7px rgba(0,0,0,.45)"></div></div>
+<div style="border:1px solid rgba(15,22,27,.22)"></div>
+<div style="border:1px solid rgba(15,22,27,.22)"></div>
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 7px rgba(0,0,0,.45)"></div></div>
+<div style="border:1px solid rgba(15,22,27,.22);display:flex;align-items:center;justify-content:center"><div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 7px rgba(0,0,0,.45)"></div></div>
+<div style="border:1px dashed rgba(194,160,92,.7);background:rgba(194,160,92,.1)"></div>
+<div style="border:1px solid rgba(15,22,27,.22)"></div>
+<div style="border:1px solid rgba(15,22,27,.22)"></div>
+</div>
+<div style="position:absolute;right:22px;top:150px;text-align:right;max-width:110px"><div style="font:400 13px/18px 'Public Sans',sans-serif;color:#0F161B">Sis — düşman kompozisyonu gizli</div></div>
+</div>
+
+<div style="flex:none;background:#1B262D;border-top:1px solid rgba(214,208,194,.1);padding:16px 20px 0">
+<div style="display:flex;justify-content:space-between;gap:10px">
+<div style="flex:1;text-align:center"><div style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 8px rgba(0,0,0,.5);margin:0 auto"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:#D6D0C2;margin-top:9px">Mızrakçı</div><div style="font:500 13px/16px 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.6);font-variant-numeric:tabular-nums">40p</div></div>
+<div style="flex:1;text-align:center"><div style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 0 0 2px #C2A05C,0 4px 8px rgba(0,0,0,.5);margin:0 auto"></div><div style="font:500 13px/18px 'Public Sans',sans-serif;color:#D6D0C2;margin-top:9px">Okçu</div><div style="font:500 13px/16px 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.6);font-variant-numeric:tabular-nums">55p</div></div>
+<div style="flex:1;text-align:center"><div style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 8px rgba(0,0,0,.5);margin:0 auto"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:#D6D0C2;margin-top:9px">Süvari</div><div style="font:500 13px/16px 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.6);font-variant-numeric:tabular-nums">80p</div></div>
+<div style="flex:1;text-align:center"><div style="width:44px;height:44px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 4px 8px rgba(0,0,0,.5);margin:0 auto"></div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:#D6D0C2;margin-top:9px">Kalkan</div><div style="font:500 13px/16px 'Archivo Narrow','Archivo',sans-serif;color:rgba(214,208,194,.6);font-variant-numeric:tabular-nums">35p</div></div>
+</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.45);margin-top:14px">Tepsiden masaya sürükle.</div>
+<div style="padding:14px 0 34px">
+<div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)"><div style="font:600 17px/1 'Archivo',sans-serif;color:#0F161B">Emirleri Yaz</div><svg width="14" height="11" viewBox="0 0 14 11" fill="none" style="display:block"><path d="M1 5.5h11M8 1.5l4 4-4 4" stroke="#0F161B" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1i"><div class="dv-olabel"><a class="dv-oid" href="#1i">1i</a>Seviye Haritası + sheet — 4.2</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 22%,#7A8780 0%,#69756E 40%,#5E6A63 62%,#434B47 100%)"></div>
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(15,22,27,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.06) 1px,transparent 1px);background-size:33px 33px"></div>
+
+<svg width="393" height="520" viewBox="0 0 393 520" style="position:absolute;left:0;top:70px;display:block"><path d="M300 30 C240 70 250 110 190 140 C130 170 140 210 230 250 C310 286 250 330 180 360 C120 386 130 430 210 460" stroke="rgba(15,22,27,.3)" stroke-width="2" stroke-dasharray="5 7" fill="none"/></svg>
+
+<div style="position:absolute;left:286px;top:76px;width:26px;height:44px"><div style="position:absolute;left:11px;top:0;width:2px;height:44px;background:#9A7B3F"></div><div style="position:absolute;left:13px;top:3px;width:13px;height:10px;background:#9A7B3F"></div></div>
+<div style="position:absolute;left:176px;top:186px;width:26px;height:44px"><div style="position:absolute;left:11px;top:0;width:2px;height:44px;background:#9A7B3F"></div><div style="position:absolute;left:13px;top:3px;width:13px;height:10px;background:#9A7B3F"></div></div>
+<div style="position:absolute;left:216px;top:296px;width:26px;height:50px"><div style="position:absolute;left:11px;top:0;width:2px;height:50px;background:#C2A05C"></div><div style="position:absolute;left:13px;top:2px;width:16px;height:12px;background:#C2A05C;box-shadow:0 0 18px rgba(194,160,92,.8)"></div><div style="position:absolute;left:-9px;bottom:-6px;width:40px;height:14px;border-radius:50%;background:rgba(194,160,92,.2);filter:blur(4px)"></div></div>
+<div style="position:absolute;left:222px;top:350px;font:500 13px/16px 'Archivo',sans-serif;color:#0F161B;background:rgba(214,208,194,.85);border-radius:3px;padding:3px 7px;font-variant-numeric:tabular-nums">14</div>
+<div style="position:absolute;left:166px;top:412px;width:26px;height:44px;opacity:.7"><div style="position:absolute;left:11px;top:6px;width:2px;height:38px;background:#6C6660"></div><div style="position:absolute;left:13px;top:9px;width:13px;height:10px;background:#6C6660"></div></div>
+<div style="position:absolute;left:280px;top:456px;width:26px;height:44px;opacity:.7"><div style="position:absolute;left:11px;top:6px;width:2px;height:38px;background:#6C6660"></div><div style="position:absolute;left:13px;top:9px;width:13px;height:10px;background:#6C6660"></div></div>
+
+<div style="position:absolute;left:0;right:0;top:54px;padding:0 24px 14px;display:flex;align-items:center;justify-content:space-between">
+<div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#0F161B">Seferberlik</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:#0F161B;font-variant-numeric:tabular-nums">13 cephe geçildi</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;bottom:0;background:#24323A;border-radius:14px 14px 0 0;border-top:1px solid rgba(214,208,194,.12);box-shadow:0 -20px 50px rgba(0,0,0,.55);padding:12px 24px 34px">
+<div style="width:38px;height:4px;border-radius:2px;background:rgba(214,208,194,.25);margin:0 auto 18px"></div>
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">14. Cephe — Taş Geçit</div>
+
+<div style="margin-top:22px;display:flex;flex-direction:column;gap:14px">
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.72)">Düşman bütçesi</div><div style="font:600 24px/26px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">420 puan</div></div>
+<div style="height:8px;background:rgba(214,208,194,.08);margin-top:7px"><div style="width:100%;height:100%;background:#6C6660"></div></div>
+</div>
+<div>
+<div style="display:flex;align-items:baseline;justify-content:space-between"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.72)">Senin bütçen</div><div style="font:600 24px/26px 'Archivo Narrow','Archivo',sans-serif;color:#C2A05C;font-variant-numeric:tabular-nums">310 puan</div></div>
+<div style="height:8px;background:rgba(214,208,194,.08);margin-top:7px"><div style="width:73.8%;height:100%;background:#9A7B3F"></div></div>
+</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:#B34A3A">110 puan geride başlıyorsun.</div>
+</div>
+
+<div style="height:1px;background:rgba(214,208,194,.1);margin:18px 0"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.72)">Kural hakkın</div><div style="font:500 17px/20px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">6</div></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:20px;margin-top:10px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.72);flex:none">Kısıt</div><div style="font:400 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;text-align:right">Sis — düşman kompozisyonu gizli</div></div>
+
+<div style="margin-top:22px"><div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)"><div style="font:600 17px/1 'Archivo',sans-serif;color:#0F161B">Hazırlan</div></div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1j"><div class="dv-olabel"><a class="dv-oid" href="#1j">1j</a>Ana Menü — 4.1</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;left:0;right:0;top:0;height:474px;background:radial-gradient(ellipse 74% 56% at 52% 40%,#7A8780 0%,#69756E 42%,#5E6A63 64%,#3E4642 100%)"></div>
+<div style="position:absolute;left:0;right:0;top:0;height:474px;background-image:linear-gradient(rgba(15,22,27,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.06) 1px,transparent 1px);background-size:33px 33px"></div>
+<div style="position:absolute;left:0;right:0;top:300px;height:174px;background:linear-gradient(180deg,transparent,#0F161B 88%)"></div>
+
+<div style="position:absolute;left:78px;top:230px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 6px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:116px;top:252px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 6px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:92px;top:280px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(0,0,0,.5);opacity:.8"></div>
+<div style="position:absolute;left:214px;top:196px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:250px;top:222px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:228px;top:256px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(0,0,0,.5)"></div>
+
+<div style="position:relative;padding:60px 24px 0;display:flex;align-items:flex-start;justify-content:space-between">
+<div>
+<div style="font:700 34px/1 'Archivo',sans-serif;letter-spacing:.14em;color:#0F161B">FERMAN</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(15,22,27,.6);margin-top:6px">son savaş · 14. cephe</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;background:rgba(15,22,27,.35);border-radius:8px;padding:6px 10px">
+<div style="width:9px;height:9px;border-radius:50%;background:#C2A05C"></div>
+<div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;font-variant-numeric:tabular-nums">1 240</div>
+</div>
+</div>
+
+<div style="flex:1"></div>
+<div style="position:relative;padding:0 24px 40px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(214,208,194,.1)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Seferberlik</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:#C2A05C">14. cephe</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(214,208,194,.1)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Arena</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.65)">3 maç bekliyor</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(214,208,194,.1)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#D6D0C2">Emir Kütüphanesi</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0">
+<div style="font:500 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:rgba(214,208,194,.7)">Ayarlar</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+
+<div class="dv-rowhd"><span>Arena, kütüphane ve paylaşım</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1k"><div class="dv-olabel"><a class="dv-oid" href="#1k">1k</a>Arena — 4.8</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;overflow:hidden;display:flex;flex-direction:column">
+<div style="height:54px;flex:none"></div>
+<div style="flex:none;padding:0 24px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid rgba(214,208,194,.08)">
+<svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg>
+<div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Arena</div>
+</div>
+<div style="padding:24px 24px 0;flex:1">
+<div style="display:flex;flex-direction:column;gap:18px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:18px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.7);flex:none">Savunma sicilin</div><div style="font:500 17px/22px 'Archivo Narrow','Archivo',sans-serif;color:#D6D0C2;text-align:right;font-variant-numeric:tabular-nums">11 / 14 saldırı püskürtüldü</div></div>
+<div style="height:1px;background:rgba(214,208,194,.08)"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:18px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.7);flex:none">Bu haftaki emrin</div><div style="font:400 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;text-align:right">"Kalkanlar önde, okçular geride"</div></div>
+<div style="height:1px;background:rgba(214,208,194,.08)"></div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:18px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(214,208,194,.7);flex:none">Sıra</div><div style="font:400 15px/22px 'Public Sans',sans-serif;color:#D6D0C2;text-align:right">Bölgende <span style="font-variant-numeric:tabular-nums">47.</span></div></div>
+</div>
+
+<div style="font:500 13px/18px 'Archivo',sans-serif;color:rgba(214,208,194,.55);letter-spacing:.03em;margin:34px 0 14px">Gelen saldırılar</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:8px;padding:14px 14px 14px 16px;display:flex;align-items:center;gap:12px">
+<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);flex:none"></div>
+<div style="flex:1"><div style="font:400 15px/20px 'Public Sans',sans-serif;color:#D6D0C2">Kerem'in Süvari Akını</div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.5)">4 saat önce</div></div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#C2A05C;border:1px solid rgba(154,123,63,.5);border-radius:6px;padding:5px 13px;flex:none">İzle</div>
+</div>
+<div style="background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:8px;padding:14px 14px 14px 16px;display:flex;align-items:center;gap:12px">
+<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);flex:none"></div>
+<div style="flex:1"><div style="font:400 15px/20px 'Public Sans',sans-serif;color:#D6D0C2">Zeynep'in Kuşatması</div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.5)">9 saat önce</div></div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#C2A05C;border:1px solid rgba(154,123,63,.5);border-radius:6px;padding:5px 13px;flex:none">İzle</div>
+</div>
+<div style="background:#1B262D;border:1px solid rgba(214,208,194,.1);border-radius:8px;padding:14px 14px 14px 16px;display:flex;align-items:center;gap:12px">
+<div style="width:30px;height:30px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);flex:none"></div>
+<div style="flex:1"><div style="font:400 15px/20px 'Public Sans',sans-serif;color:#D6D0C2">Mert'in Kalkan Duvarı</div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.5)">dün</div></div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#C2A05C;border:1px solid rgba(154,123,63,.5);border-radius:6px;padding:5px 13px;flex:none">İzle</div>
+</div>
+</div>
+</div>
+<div style="flex:none;padding:18px 24px 34px">
+<div style="height:52px;border-radius:8px;background:linear-gradient(180deg,#A8873F,#8A6C33);display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.14)"><div style="font:600 17px/1 'Archivo',sans-serif;color:#0F161B">Savunma Emrini Değiştir</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1l"><div class="dv-olabel"><a class="dv-oid" href="#1l">1l</a>Emir Kütüphanesi — 4.9, çekmece metaforu</div>
+<div class="dv-card" style="width:393px;height:852px;background:#0F161B;position:relative;overflow:hidden;display:flex;flex-direction:column">
+<div style="height:54px;flex:none"></div>
+<div style="flex:none;padding:0 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(214,208,194,.08)">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#D6D0C2" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#D6D0C2">Emir Kütüphanesi</div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(214,208,194,.6);font-variant-numeric:tabular-nums">7 set</div>
+</div>
+
+<div style="flex:1;padding:22px 20px 0;background:linear-gradient(180deg,#0F161B,#141C22)">
+<div style="position:relative;height:560px">
+
+<div style="position:absolute;left:0;right:0;top:0;background:#CFC9BA;border-radius:2px;padding:0;box-shadow:0 6px 14px rgba(0,0,0,.4);height:104px;overflow:hidden">
+<div style="position:absolute;left:18px;top:-1px;width:96px;height:20px;background:#B9B2A1;border-radius:0 0 3px 3px"></div>
+<div style="position:absolute;left:26px;top:1px;font:500 12px/16px 'Public Sans',sans-serif;color:#2A2622;font-style:italic">kuşatma</div>
+<div style="padding:28px 16px 14px">
+<div style="font:700 17px/22px 'Public Sans',sans-serif;color:#2A2622">Taş Geçit — savunma</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(42,38,34,.7);margin-top:4px">4 birim · 9 pusula · 6 cephede kullanıldı</div>
+<div style="display:flex;gap:6px;margin-top:10px"><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div></div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:120px;background:#C9C3B4;border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.4);height:104px;overflow:hidden">
+<div style="position:absolute;left:130px;top:-1px;width:104px;height:20px;background:#B3AC9B;border-radius:0 0 3px 3px"></div>
+<div style="position:absolute;left:138px;top:1px;font:500 12px/16px 'Public Sans',sans-serif;color:#2A2622;font-style:italic">süvari akını</div>
+<div style="padding:28px 16px 14px">
+<div style="font:700 17px/22px 'Public Sans',sans-serif;color:#2A2622">Hızlı kanat</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(42,38,34,.7);margin-top:4px">2 birim · 5 pusula · 11 cephede kullanıldı</div>
+<div style="display:flex;gap:6px;margin-top:10px"><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div></div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:240px;background:#C2BCAD;border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.4);height:104px;overflow:hidden">
+<div style="position:absolute;left:236px;top:-1px;width:92px;height:20px;background:#ACA594;border-radius:0 0 3px 3px"></div>
+<div style="position:absolute;left:244px;top:1px;font:500 12px/16px 'Public Sans',sans-serif;color:#2A2622;font-style:italic">sabırlı hat</div>
+<div style="padding:28px 16px 14px">
+<div style="font:700 17px/22px 'Public Sans',sans-serif;color:#2A2622">Kalkanlar önde</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(42,38,34,.7);margin-top:4px">3 birim · 7 pusula · arenada aktif</div>
+<div style="display:flex;gap:6px;margin-top:10px"><div style="height:4px;flex:1;background:#9A7B3F"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div><div style="height:4px;flex:1;background:rgba(42,38,34,.18)"></div></div>
+</div>
+</div>
+
+<div style="position:absolute;left:0;right:0;top:360px;background:#BBB5A6;border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.4);height:74px;overflow:hidden;opacity:.9">
+<div style="padding:16px 16px 14px"><div style="font:700 17px/22px 'Public Sans',sans-serif;color:#2A2622">Sisli ilerleyiş</div><div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(42,38,34,.7);margin-top:2px">2 birim · 4 pusula</div></div>
+</div>
+<div style="position:absolute;left:0;right:0;top:446px;background:#B4AEA0;border-radius:2px;box-shadow:0 6px 14px rgba(0,0,0,.4);height:52px;opacity:.8"><div style="padding:14px 16px"><div style="font:700 17px/22px 'Public Sans',sans-serif;color:#2A2622">Dağınık okçu</div></div></div>
+<div style="position:absolute;left:0;right:0;top:510px;background:#ADA79A;border-radius:2px;height:34px;opacity:.6"></div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 34px;background:linear-gradient(180deg,transparent,#0F161B 40%)">
+<div style="height:52px;border-radius:8px;border:1px solid rgba(214,208,194,.2);display:flex;align-items:center;justify-content:center"><div style="font:500 17px/1 'Archivo',sans-serif;color:rgba(214,208,194,.85)">Yeni set kaydet</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1m"><div class="dv-olabel"><a class="dv-oid" href="#1m">1m</a>Paylaşım kartı — Zafer (9:16)</div>
+<div class="dv-card" style="width:300px;height:533px;background:#0F161B;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 76% 50% at 50% 38%,#7A8780 0%,#69756E 42%,#5E6A63 64%,#3E4642 100%)"></div>
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(15,22,27,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.06) 1px,transparent 1px);background-size:26px 26px"></div>
+<div style="position:absolute;left:56px;top:150px;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:84px;top:132px;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:112px;top:154px;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;left:70px;top:182px;width:17px;height:17px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#C2A05C,#9A7B3F 62%,#6B5426);box-shadow:0 3px 5px rgba(0,0,0,.5)"></div>
+<div style="position:absolute;right:62px;top:106px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);opacity:.55"></div>
+<div style="position:absolute;right:92px;top:130px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F);opacity:.45"></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(180deg,transparent,rgba(15,22,27,.88) 52%,#0F161B)"></div>
+
+<div style="position:absolute;left:22px;right:22px;bottom:74px;background:#D6D0C2;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.035) 0 1px,transparent 1px 4px);border-radius:2px;padding:16px 18px 18px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 16px 34px rgba(0,0,0,.5);transform:rotate(-.8deg)">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">"kalkanlar önde dursun,</div>
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">okçular geride kalsın"</div>
+<div style="height:1px;background:rgba(42,38,34,.2);margin:12px 0"></div>
+<div style="font:700 17px/23px 'Public Sans',sans-serif;color:#2A2622">Hat 60 saniye boyunca hiç kırılmadı.</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:30px;text-align:center"><div style="font:700 14px/1 'Archivo',sans-serif;letter-spacing:.22em;color:rgba(214,208,194,.8)">FERMAN · CEPHE 14</div></div>
+</div>
+</div>
+
+<div class="dv-opt" id="1n"><div class="dv-olabel"><a class="dv-oid" href="#1n">1n</a>Paylaşım kartı — En Kötü Yenilgin (9:16)</div>
+<div class="dv-card" style="width:300px;height:533px;background:#0F161B;position:relative;overflow:hidden">
+<div style="position:absolute;inset:0;background:radial-gradient(ellipse 76% 50% at 50% 38%,#6E7A73 0%,#5F6B64 42%,#54605A 64%,#363D3A 100%)"></div>
+<div style="position:absolute;inset:0;background-image:linear-gradient(rgba(15,22,27,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(15,22,27,.06) 1px,transparent 1px);background-size:26px 26px"></div>
+<div style="position:absolute;left:48px;top:206px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#9A7B3F,#6B5426);opacity:.4"></div>
+<div style="position:absolute;left:76px;top:222px;width:15px;height:15px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#9A7B3F,#6B5426);opacity:.3"></div>
+<div style="position:absolute;right:54px;top:128px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F)"></div>
+<div style="position:absolute;right:82px;top:110px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F)"></div>
+<div style="position:absolute;right:112px;top:134px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F)"></div>
+<div style="position:absolute;right:68px;top:160px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F)"></div>
+<div style="position:absolute;right:100px;top:184px;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#837D76,#6C6660 62%,#4A453F)"></div>
+<div style="position:absolute;left:0;right:0;top:80px;text-align:center"><div style="font:500 11px/1 'Archivo',sans-serif;letter-spacing:.18em;color:rgba(214,208,194,.55)">12. SANİYE</div></div>
+<div style="position:absolute;left:0;right:0;bottom:0;height:310px;background:linear-gradient(180deg,transparent,rgba(15,22,27,.9) 50%,#0F161B)"></div>
+
+<div style="position:absolute;left:22px;right:22px;bottom:74px;background:#D6D0C2;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.035) 0 1px,transparent 1px 4px);border-radius:2px;padding:16px 18px 18px;box-shadow:0 2px 0 rgba(0,0,0,.4),0 16px 34px rgba(0,0,0,.5);transform:rotate(1deg)">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">"düşman yaklaşınca</div>
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">geri çekil"</div>
+<div style="height:1px;background:rgba(42,38,34,.2);margin:12px 0"></div>
+<div style="display:flex;gap:9px;align-items:flex-start">
+<svg width="13" height="11" viewBox="0 0 13 11" fill="none" style="display:block;flex:none;margin-top:5px"><path d="M1 5.5h10M8 1.5l3.5 4-3.5 4" stroke="#2A2622" stroke-width="1.6" stroke-linecap="round"/></svg>
+<div style="font:700 17px/23px 'Public Sans',sans-serif;color:#2A2622">40 okçu 12 saniyede yok oldu. Hepsi aynı anda geri çekildi.</div>
+</div>
+</div>
+<div style="position:absolute;left:0;right:0;bottom:30px;text-align:center"><div style="font:700 14px/1 'Archivo',sans-serif;letter-spacing:.22em;color:rgba(214,208,194,.8)">FERMAN · CEPHE 14</div></div>
+</div>
+</div>
+
+</div>
+
+<sc-if value="{{ showLight }}" hint-placeholder-val="{{ true }}">
+<div class="dv-rowhd"><span>Açık mod varyantı — aynı malzeme, gündüz ışığı</span><i></i></div>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1o"><div class="dv-olabel"><a class="dv-oid" href="#1o">1o</a>Açık mod paleti — türetildi</div>
+<div class="dv-card" style="width:420px;background:#F2EFE7;border:1px solid rgba(27,38,45,.12);border-radius:14px;padding:26px 28px 30px">
+<div style="font:500 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#1B262D">Gündüz karargâhı</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(27,38,45,.68);margin-top:6px">Brief açık mod paletini vermiyordu. Aynı malzemeleri gün ışığında tuttum: kâğıt zemine çıkar, mürekkep koyulaşır, pirinç oksitlenmiş kalır.</div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:22px">
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#E4E0D6"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">ink→room</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#E4E0D6</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#F2EFE7"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">surface</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#F2EFE7</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#1B262D"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">text</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#1B262D</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#8A6C33"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">brass</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#8A6C33</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#A8B0A6"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">sand</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#A8B0A6</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#C5CBBF"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">sand-lit</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#C5CBBF</div></div></div>
+<div style="border:1px solid rgba(27,38,45,.12);border-radius:8px;overflow:hidden"><div style="height:46px;background:#FBF8F0"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">paper</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#FBF8F0</div></div></div>
+<div style="border:1px solid rgba(21,159,181,.4);border-radius:8px;overflow:hidden"><div style="height:46px;background:#0E8A9E"></div><div style="padding:7px 9px 9px"><div style="font:500 11px/15px 'Archivo',sans-serif;color:#1B262D">spark</div><div style="font:400 10px/14px 'Public Sans',sans-serif;color:rgba(27,38,45,.55);font-variant-numeric:tabular-nums">#0E8A9E</div></div></div>
+</div>
+<div style="font:400 13px/19px 'Public Sans',sans-serif;color:rgba(27,38,45,.72);margin-top:18px;border-left:2px solid #8A6C33;padding-left:12px">Kıvılcım açık zeminde <span style="font-variant-numeric:tabular-nums">#6FE3F5</span> olarak okunmuyor; aynı hue'nun koyu tonuna indirdim. Kural aynı kalıyor: yalnızca tetiklenme anında görünür.</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1p"><div class="dv-olabel"><a class="dv-oid" href="#1p">1p</a>Emir Editörü — açık mod</div>
+<div class="dv-card" style="width:393px;height:852px;background:#E4E0D6;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="padding:0 20px 12px;flex:none;border-bottom:1px solid rgba(27,38,45,.12);background:rgba(242,239,231,.75)">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:10px"><svg width="9" height="16" viewBox="0 0 9 16" fill="none" style="display:block"><path d="M8 1L1.5 8L8 15" stroke="#1B262D" stroke-width="1.6" stroke-linecap="round"/></svg><div style="font:600 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:#1B262D">Okçu</div></div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(27,38,45,.68);font-variant-numeric:tabular-nums">3 / 6 pusula</div>
+</div>
+<div style="display:flex;gap:20px;margin-top:12px">
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(27,38,45,.5);padding-bottom:5px">Mızrakçı</div>
+<div style="font:500 15px/22px 'Public Sans',sans-serif;color:#1B262D;padding-bottom:5px;border-bottom:2px solid #8A6C33">Okçu</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(27,38,45,.5);padding-bottom:5px">Süvari</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(27,38,45,.5);padding-bottom:5px">Kalkan</div>
+</div>
+</div>
+
+<div style="flex:1;padding:22px 20px 0;display:flex;flex-direction:column;gap:14px">
+<div style="background:#FBF8F0;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.03) 0 1px,transparent 1px 4px);border-radius:2px;padding:14px 16px 15px;box-shadow:0 1px 0 rgba(27,38,45,.12),0 8px 16px rgba(27,38,45,.12)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #8A6C33;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">1</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">düşman <span style="border-bottom:1.5px dotted rgba(42,38,34,.55);padding:0 2px;font-variant-numeric:tabular-nums">3</span> kareden yakınsa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">GERİ ÇEKİL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3.5px;flex:none;margin-top:6px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span></div>
+</div>
+</div>
+<div style="background:#FBF8F0;background-image:repeating-linear-gradient(0deg,rgba(42,38,34,.03) 0 1px,transparent 1px 4px);border-radius:2px;padding:14px 16px 15px;box-shadow:0 1px 0 rgba(27,38,45,.12),0 8px 16px rgba(27,38,45,.12)">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #8A6C33;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#2A2622;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">2</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:#2A2622">canım <span style="border-bottom:1.5px dotted rgba(42,38,34,.55);padding:0 2px;font-variant-numeric:tabular-nums">%35</span>'in altındaysa</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#2A2622;margin-top:3px">SİPER AL</div></div>
+<div style="display:grid;grid-template-columns:repeat(2,3px);gap:3.5px;flex:none;margin-top:6px"><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span><span style="width:3px;height:3px;border-radius:50%;background:rgba(42,38,34,.4);display:block"></span></div>
+</div>
+</div>
+<div style="border:1.5px dashed rgba(27,38,45,.28);border-radius:2px;padding:14px 16px 15px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(27,38,45,.32);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(27,38,45,.55);flex:none;font-variant-numeric:tabular-nums;margin-top:2px">3</div>
+<div style="flex:1"><div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(27,38,45,.55)">başka durumda</div><div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:rgba(27,38,45,.72);margin-top:3px">İLERLE</div></div>
+</div>
+</div>
+<div style="margin-top:2px;font:400 13px/18px 'Public Sans',sans-serif;color:rgba(27,38,45,.5)">Pusulayı yukarı taşımak önceliğini artırır.</div>
+</div>
+
+<div style="flex:none;padding:14px 20px 0">
+<div style="display:flex;align-items:center;gap:12px;background:#F2EFE7;border:1px solid rgba(27,38,45,.14);border-radius:8px;padding:11px 12px 11px 14px">
+<svg width="13" height="19" viewBox="0 0 13 19" fill="none" style="display:block;flex:none"><rect x="4" y="1" width="5" height="9" rx="2.5" stroke="rgba(27,38,45,.6)" stroke-width="1.4"/><path d="M1.5 8.5a5 5 0 0010 0M6.5 13.5V18" stroke="rgba(27,38,45,.6)" stroke-width="1.4" stroke-linecap="round"/></svg>
+<div style="flex:1;font:400 15px/22px 'Public Sans',sans-serif;color:rgba(27,38,45,.5)">Emri söyle ya da yaz</div>
+<div style="font:500 13px/18px 'Public Sans',sans-serif;color:#8A6C33;border:1px solid rgba(138,108,51,.55);border-radius:6px;padding:4px 12px;flex:none">Yaz</div>
+</div>
+</div>
+<div style="flex:none;padding:14px 20px 34px">
+<div style="height:52px;border-radius:8px;background:#1B262D;display:flex;align-items:center;justify-content:center;gap:9px;box-shadow:0 6px 16px rgba(27,38,45,.28)">
+<svg width="11" height="13" viewBox="0 0 11 13" style="display:block"><path d="M1 1L10 6.5L1 12V1Z" fill="#F2EFE7"/></svg>
+<div style="font:600 17px/1 'Archivo',sans-serif;color:#F2EFE7">Savaşı Başlat</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1q"><div class="dv-olabel"><a class="dv-oid" href="#1q">1q</a>Savaş Sonrası Analiz — açık mod</div>
+<div class="dv-card" style="width:393px;height:852px;background:#E4E0D6;position:relative;display:flex;flex-direction:column;overflow:hidden">
+<div style="height:54px;flex:none"></div>
+<div style="flex:1;display:flex;flex-direction:column;overflow:hidden">
+<div style="padding:22px 24px 26px;background:linear-gradient(180deg,rgba(168,65,47,.1),transparent)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#1B262D">Cephe Yarıldı</div>
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(27,38,45,.82);margin-top:12px;max-width:32ch">Okçularının %70'i 12. saniyede aynı anda öldü.</div>
+</div>
+<div style="height:1px;background:rgba(27,38,45,.12)"></div>
+<div style="padding:22px 24px 0;flex:1">
+<div style="font:500 13px/18px 'Archivo',sans-serif;color:rgba(27,38,45,.6);letter-spacing:.03em">Emirlerin</div>
+<div style="display:flex;flex-direction:column;gap:24px;margin-top:20px">
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #8A6C33;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#1B262D;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">1</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(27,38,45,.8)">düşman 3 kareden yakınsa</div>
+<div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#1B262D">GERİ ÇEKİL</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(27,38,45,.1)"><div style="width:100%;height:100%;background:#0E8A9E"></div></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#1B262D;flex:none;font-variant-numeric:tabular-nums">14 kez</div></div>
+</div>
+</div>
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px solid #8A6C33;display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:#1B262D;flex:none;font-variant-numeric:tabular-nums;margin-top:2px">2</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(27,38,45,.8)">canım %35'in altındaysa</div>
+<div style="font:700 17px/24px 'Public Sans',sans-serif;letter-spacing:.06em;color:#1B262D">SİPER AL</div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(27,38,45,.1)"><div style="width:21%;height:100%;background:#0E8A9E"></div></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#1B262D;flex:none;font-variant-numeric:tabular-nums">3 kez</div></div>
+</div>
+</div>
+<div style="display:flex;gap:13px">
+<div style="width:23px;height:23px;border-radius:50%;border:1.5px dashed rgba(27,38,45,.35);display:flex;align-items:center;justify-content:center;font:500 12px/1 'Archivo',sans-serif;color:rgba(27,38,45,.55);flex:none;font-variant-numeric:tabular-nums;margin-top:2px">3</div>
+<div style="flex:1">
+<div style="font:400 17px/24px 'Public Sans',sans-serif;color:rgba(27,38,45,.6)">başka durumda <b style="font-weight:700;letter-spacing:.06em;color:rgba(27,38,45,.75)">İLERLE</b></div>
+<div style="display:flex;align-items:center;gap:12px;margin-top:10px"><div style="flex:1;height:7px;background:rgba(27,38,45,.1)"></div><div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:rgba(27,38,45,.6);flex:none;font-variant-numeric:tabular-nums">0 kez</div></div>
+<div style="margin-top:12px;border-left:2px solid #A8412F;padding:2px 0 2px 11px"><div style="font:400 15px/22px 'Public Sans',sans-serif;color:#1B262D">Bu emir hiç çalışmadı. Okçular hep birinci emri uyguladı.</div></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="flex:none;padding:18px 20px 34px;display:flex;flex-direction:column;gap:10px;border-top:1px solid rgba(27,38,45,.12);background:#EDE9DF">
+<div style="height:52px;border-radius:8px;background:#1B262D;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(27,38,45,.28)"><div style="font:600 17px/1 'Archivo',sans-serif;color:#F2EFE7">Emirleri Düzelt</div></div>
+<div style="height:52px;border-radius:8px;border:1px solid rgba(27,38,45,.25);display:flex;align-items:center;justify-content:center"><div style="font:500 17px/1 'Archivo',sans-serif;color:#1B262D">Klibi Paylaş</div></div>
+</div>
+</div>
+</div>
+
+<div class="dv-opt" id="1r"><div class="dv-olabel"><a class="dv-oid" href="#1r">1r</a>Ana Menü — açık mod</div>
+<div class="dv-card" style="width:393px;height:852px;background:#E4E0D6;position:relative;overflow:hidden;display:flex;flex-direction:column">
+<div style="position:absolute;left:0;right:0;top:0;height:474px;background:radial-gradient(ellipse 74% 56% at 52% 40%,#C5CBBF 0%,#B4BBB1 44%,#A8B0A6 66%,#8E958B 100%)"></div>
+<div style="position:absolute;left:0;right:0;top:0;height:474px;background-image:linear-gradient(rgba(27,38,45,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(27,38,45,.05) 1px,transparent 1px);background-size:33px 33px"></div>
+<div style="position:absolute;left:0;right:0;top:300px;height:174px;background:linear-gradient(180deg,transparent,#E4E0D6 88%)"></div>
+
+<div style="position:absolute;left:78px;top:230px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#B08C42,#8A6C33 62%,#5F4A23);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+<div style="position:absolute;left:116px;top:252px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#B08C42,#8A6C33 62%,#5F4A23);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+<div style="position:absolute;left:92px;top:280px;width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#8D8781,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+<div style="position:absolute;left:214px;top:196px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#8D8781,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+<div style="position:absolute;left:250px;top:222px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#8D8781,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+<div style="position:absolute;left:228px;top:256px;width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 34% 28%,#8D8781,#6C6660 62%,#4A453F);box-shadow:0 3px 6px rgba(27,38,45,.3)"></div>
+
+<div style="position:relative;padding:60px 24px 0;display:flex;align-items:flex-start;justify-content:space-between">
+<div>
+<div style="font:700 34px/1 'Archivo',sans-serif;letter-spacing:.14em;color:#1B262D">FERMAN</div>
+<div style="font:400 13px/18px 'Public Sans',sans-serif;color:rgba(27,38,45,.62);margin-top:6px">son savaş · 14. cephe</div>
+</div>
+<div style="display:flex;align-items:center;gap:8px;background:rgba(242,239,231,.7);border:1px solid rgba(27,38,45,.12);border-radius:8px;padding:6px 10px">
+<div style="width:9px;height:9px;border-radius:50%;background:#8A6C33"></div>
+<div style="font:500 15px/1 'Archivo Narrow','Archivo',sans-serif;color:#1B262D;font-variant-numeric:tabular-nums">1 240</div>
+</div>
+</div>
+
+<div style="flex:1"></div>
+<div style="position:relative;padding:0 24px 40px;display:flex;flex-direction:column">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(27,38,45,.12)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#1B262D">Seferberlik</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:#8A6C33">14. cephe</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(27,38,45,.12)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#1B262D">Arena</div>
+<div style="font:400 15px/22px 'Public Sans',sans-serif;color:rgba(27,38,45,.68)">3 maç bekliyor</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0;border-bottom:1px solid rgba(27,38,45,.12)">
+<div style="font:600 28px/32px 'Archivo',sans-serif;letter-spacing:-.02em;color:#1B262D">Emir Kütüphanesi</div>
+</div>
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding:20px 0">
+<div style="font:500 20px/26px 'Archivo',sans-serif;letter-spacing:-.01em;color:rgba(27,38,45,.7)">Ayarlar</div>
+</div>
+</div>
+</div>
+</div>
+
+</div>
+</sc-if>
+
+<p class="dv-next">Sırada: "<a class="dv-oid" href="#1c">1c</a>'yi çalışan prototipe çevir" · "sürükle-sırala jestini animasyonla göster" · "§3.5'teki savaş başlatma koreografisini üret" · "Dynamic Type XXL varyantı"</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pano&quot;},&quot;showLightMode&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Pano&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showNotes: this.props.showNotes ?? true,
+      showLight: this.props.showLightMode ?? true
+    };
+  }
+}
+</script>
+</body>
+</html>
