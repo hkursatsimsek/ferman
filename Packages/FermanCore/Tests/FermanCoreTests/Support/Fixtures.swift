@@ -28,6 +28,13 @@ enum Fixtures {
         ),
     ]
 
+    static func unitType(_ id: UnitTypeID) -> UnitType {
+        guard let type = catalog.first(where: { $0.id == id }) else {
+            preconditionFailure("Fixtures.catalog has no unit type \(id)")
+        }
+        return type
+    }
+
     static func map() throws -> BattleMap {
         try BattleMap(
             terrainRows: [

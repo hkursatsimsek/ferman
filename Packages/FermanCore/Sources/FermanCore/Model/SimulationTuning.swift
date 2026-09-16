@@ -31,6 +31,24 @@ public struct SimulationTuning: Sendable, Hashable, Codable {
     public var moveSampleIntervalTicks: Int
     public var checksumIntervalTicks: Int
     public var spatialBucketCells: Int
+    /// How close two units must be to push each other apart in `Steering`.
+    public var steeringSeparationRadiusCells: Int
+    /// Relative weights of `Steering`'s five blended terms: order intent, separation, alignment, cohesion, and flow
+    /// following. Each term is a unit vector before weighting, so these compare directly; they need not sum to 100.
+    public var steeringIntentWeightPercent: Int
+    public var steeringSeparationWeightPercent: Int
+    public var steeringAlignmentWeightPercent: Int
+    public var steeringCohesionWeightPercent: Int
+    public var steeringFlowWeightPercent: Int
+    public var abilityCooldownTicks: Int
+    /// How long `spearWall`, `shieldWall` and `charge`'s speed boost hold once activated; `volley` is instantaneous.
+    public var abilityDurationTicks: Int
+    public var spearWallDamageTakenReductionPercent: Int
+    public var spearWallDamageDealtBonusPercent: Int
+    public var shieldWallDamageReductionPercent: Int
+    public var chargeSpeedBonusPercent: Int
+    public var chargeFirstHitDamageBonusPercent: Int
+    public var volleyRadiusCells: Int
 
     public init(
         flowFieldIntervalTicks: Int,
@@ -57,7 +75,21 @@ public struct SimulationTuning: Sendable, Hashable, Codable {
         moraleRecoveredPercent: Int,
         moveSampleIntervalTicks: Int,
         checksumIntervalTicks: Int,
-        spatialBucketCells: Int
+        spatialBucketCells: Int,
+        steeringSeparationRadiusCells: Int,
+        steeringIntentWeightPercent: Int,
+        steeringSeparationWeightPercent: Int,
+        steeringAlignmentWeightPercent: Int,
+        steeringCohesionWeightPercent: Int,
+        steeringFlowWeightPercent: Int,
+        abilityCooldownTicks: Int,
+        abilityDurationTicks: Int,
+        spearWallDamageTakenReductionPercent: Int,
+        spearWallDamageDealtBonusPercent: Int,
+        shieldWallDamageReductionPercent: Int,
+        chargeSpeedBonusPercent: Int,
+        chargeFirstHitDamageBonusPercent: Int,
+        volleyRadiusCells: Int
     ) {
         self.flowFieldIntervalTicks = flowFieldIntervalTicks
         self.terrainMovementCost = terrainMovementCost
@@ -84,6 +116,20 @@ public struct SimulationTuning: Sendable, Hashable, Codable {
         self.moveSampleIntervalTicks = moveSampleIntervalTicks
         self.checksumIntervalTicks = checksumIntervalTicks
         self.spatialBucketCells = spatialBucketCells
+        self.steeringSeparationRadiusCells = steeringSeparationRadiusCells
+        self.steeringIntentWeightPercent = steeringIntentWeightPercent
+        self.steeringSeparationWeightPercent = steeringSeparationWeightPercent
+        self.steeringAlignmentWeightPercent = steeringAlignmentWeightPercent
+        self.steeringCohesionWeightPercent = steeringCohesionWeightPercent
+        self.steeringFlowWeightPercent = steeringFlowWeightPercent
+        self.abilityCooldownTicks = abilityCooldownTicks
+        self.abilityDurationTicks = abilityDurationTicks
+        self.spearWallDamageTakenReductionPercent = spearWallDamageTakenReductionPercent
+        self.spearWallDamageDealtBonusPercent = spearWallDamageDealtBonusPercent
+        self.shieldWallDamageReductionPercent = shieldWallDamageReductionPercent
+        self.chargeSpeedBonusPercent = chargeSpeedBonusPercent
+        self.chargeFirstHitDamageBonusPercent = chargeFirstHitDamageBonusPercent
+        self.volleyRadiusCells = volleyRadiusCells
     }
 
     public static let standard = SimulationTuning(
@@ -111,6 +157,20 @@ public struct SimulationTuning: Sendable, Hashable, Codable {
         moraleRecoveredPercent: 35,
         moveSampleIntervalTicks: 3,
         checksumIntervalTicks: 30,
-        spatialBucketCells: 2
+        spatialBucketCells: 2,
+        steeringSeparationRadiusCells: 1,
+        steeringIntentWeightPercent: 100,
+        steeringSeparationWeightPercent: 40,
+        steeringAlignmentWeightPercent: 15,
+        steeringCohesionWeightPercent: 15,
+        steeringFlowWeightPercent: 60,
+        abilityCooldownTicks: 300,
+        abilityDurationTicks: 45,
+        spearWallDamageTakenReductionPercent: 50,
+        spearWallDamageDealtBonusPercent: 50,
+        shieldWallDamageReductionPercent: 70,
+        chargeSpeedBonusPercent: 50,
+        chargeFirstHitDamageBonusPercent: 100,
+        volleyRadiusCells: 2
     )
 }

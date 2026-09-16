@@ -137,15 +137,19 @@ struct CodingSchemaTests {
 
     @Test func tuningFieldNamesArePinned() throws {
         let expected =
-            #"{"allyDeathMoralePenalty":10,"allyDeathMoraleRadiusCells":3,"checksumIntervalTicks":30,"#
-            + #""commanderDeathMoralePenalty":25,"counterDamagePercent":150,"coverRangedDamageReductionPercent":30,"#
-            + #""coverSearchRadiusCells":5,"decisionIntervalTicks":6,"flankOffsetCells":4,"flankedMemoryTicks":30,"#
-            + #""flankedMoralePenalty":5,"flowFieldIntervalTicks":15,"focusFireExtraRangeCells":2,"#
-            + #""guardCommanderDistanceCells":2,"minimumCommitTicks":15,"moraleBreakPercent":20,"#
-            + #""moraleBrokenTicks":90,"moraleRecoveredPercent":35,"moraleRecoveryEnemyFreeRadiusCells":4,"#
-            + #""moraleRecoveryPerSecond":1,"moveSampleIntervalTicks":3,"proximityRadiusCells":3,"#
-            + #""regroupRadiusCells":6,"spatialBucketCells":2,"#
-            + #""terrainMovementCost":{"forest":30,"hill":20,"open":10,"rubble":20}}"#
+            #"{"abilityCooldownTicks":300,"abilityDurationTicks":45,"allyDeathMoralePenalty":10,"#
+            + #""allyDeathMoraleRadiusCells":3,"chargeFirstHitDamageBonusPercent":100,"chargeSpeedBonusPercent":50,"#
+            + #""checksumIntervalTicks":30,"commanderDeathMoralePenalty":25,"counterDamagePercent":150,"#
+            + #""coverRangedDamageReductionPercent":30,"coverSearchRadiusCells":5,"decisionIntervalTicks":6,"#
+            + #""flankOffsetCells":4,"flankedMemoryTicks":30,"flankedMoralePenalty":5,"flowFieldIntervalTicks":15,"#
+            + #""focusFireExtraRangeCells":2,"guardCommanderDistanceCells":2,"minimumCommitTicks":15,"#
+            + #""moraleBreakPercent":20,"moraleBrokenTicks":90,"moraleRecoveredPercent":35,"#
+            + #""moraleRecoveryEnemyFreeRadiusCells":4,"moraleRecoveryPerSecond":1,"moveSampleIntervalTicks":3,"#
+            + #""proximityRadiusCells":3,"regroupRadiusCells":6,"shieldWallDamageReductionPercent":70,"#
+            + #""spatialBucketCells":2,"spearWallDamageDealtBonusPercent":50,"spearWallDamageTakenReductionPercent":50,"#
+            + #""steeringAlignmentWeightPercent":15,"steeringCohesionWeightPercent":15,"steeringFlowWeightPercent":60,"#
+            + #""steeringIntentWeightPercent":100,"steeringSeparationRadiusCells":1,"steeringSeparationWeightPercent":40,"#
+            + #""terrainMovementCost":{"forest":30,"hill":20,"open":10,"rubble":20},"volleyRadiusCells":2}"#
         #expect(try JSON.encode(SimulationTuning.standard) == expected)
     }
 
@@ -174,7 +178,12 @@ struct CodingSchemaTests {
                 "commanderDeathMoralePenalty": 25, "flankedMoralePenalty": 5, "moraleRecoveryPerSecond": 1,
                 "moraleRecoveryEnemyFreeRadiusCells": 4, "moraleBreakPercent": 20, "moraleBrokenTicks": 90,
                 "moraleRecoveredPercent": 35, "moveSampleIntervalTicks": 3, "checksumIntervalTicks": 30,
-                "spatialBucketCells": 2
+                "spatialBucketCells": 2, "steeringSeparationRadiusCells": 1, "steeringIntentWeightPercent": 100,
+                "steeringSeparationWeightPercent": 40, "steeringAlignmentWeightPercent": 15,
+                "abilityCooldownTicks": 300, "abilityDurationTicks": 45, "spearWallDamageTakenReductionPercent": 50,
+                "spearWallDamageDealtBonusPercent": 50, "shieldWallDamageReductionPercent": 70,
+                "chargeSpeedBonusPercent": 50, "chargeFirstHitDamageBonusPercent": 100, "volleyRadiusCells": 2,
+                "steeringCohesionWeightPercent": 15, "steeringFlowWeightPercent": 60
               },
               "player": {
                 "placements": [{ "type": "okcu", "cell": 0, "isCommander": true }],
