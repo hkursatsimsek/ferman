@@ -758,6 +758,7 @@ H(n)  = min(4, n/8)                   // harita tehlikesi
 | Sabit nokta taşması | Uzun haritada/yüksek hızda trap | `ContentValidator` aralıklarını daralt; `Fixed` aralık testleri |
 | Türkçe ek uyumu hatalı | "%40'in" gibi metinler | `OrderPhraseFormatter` tablo testi 0–100 |
 | GameplayKit stratejist yavaş | Cihazda > 1,5 sn | Rollout sayısını/derinliği azalt, kompozisyon uzayını daralt |
+| `batch --jobs 1` hedefin altında | F0.11'de ölçüldü: 24v24×1800 tick referansı ~40 ms/savaş (10k → ~7 dk, hedef < 60 sn). Kök neden allocation değil — ova haritasının 3 hücrelik bölge tasarımı orduyu sıkışık başlatıyor, bu da `Steering`'in komşu sorgusunu O(n²)'ye yaklaştırıyor | Kısa vadede `--jobs` ile paralelleştir (12 çekirdekte ~3,2 sn / 200 koşum, ölçüldü). Kalıcı çözüm `SpatialGrid`'i birim başına sorgudan kova başına toplu hesaba çevirmek; F0.12 altın dosyaları (regresyon koruması) gelmeden yapılmadı |
 | CloudKit kotası / hile | Public DB istek limitleri, sahte raporlar | Puan bandı sorgu sınırı, yeniden simülasyon doğrulaması, sürüm alanları |
 | Tasarım açıkları geç kapanıyor | F1.7'de ekleme akışı çizimi yok | §10 listesini Faz 1 başında kapat |
 | Kapsam sürüklenmesi | Faz 3 planlanandan uzun sürüyor | Ayna seviyeleri ve kısıt kartları zaten içerik üretiyor. Yeni özellik ekleme |
