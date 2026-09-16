@@ -271,3 +271,13 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
 - **Bağlam:** Tasarımda açık mod yalnızca 3 ekran için çizilmiş; brief karanlık modu asıl kabul ediyor.
 - **Karar:** Renk token'ları Asset Catalog'da Any/Dark çiftli tanımlanır. v1 `UIUserInterfaceStyle = Dark` ile yayımlanır. Açık modun açılıp açılmayacağına F6.7'de karar verilir.
 - **Sonuçlar:** Açık mod ileride altyapı değişikliği gerektirmez; eksik ekran tasarımları tamamlanınca açılabilir.
+
+## D23 — F0.12 CI doğrulaması proje bitimine ertelendi, Faz 1'e geçildi
+
+- **Tarih:** 2026-09-16 · **Durum:** Kabul · **Kaynak:** Kullanıcı
+- **Bağlam:** `docs/FERMAN-PLAN.md` §6: "Fazın kabul kriterleri karşılanmadan sonraki faza geçilmez." F0.12'nin "CI yeşil" alt kriteri (`.github/workflows/core.yml`: Linux x86_64 + macOS, altın dosyaların iki platformda aynı checksum'ı üretmesi) karşılanmamıştı çünkü iş akışı kasıtlı olarak eklenmemişti. Faz 0'ın geri kalan tüm kabul kriterleri (determinizm, altın dosyalar, kapsam > %85, bağımlılık yok, F0.13 denge sorusu) yerelde karşılandı.
+- **Karar:** `.github/workflows/core.yml` kurulumu ve CI'da doğrulama proje bitimine (Faz 7 lansman öncesi) ertelenir. Bu ertelemeyle birlikte Faz 1'e (F1.1) geçilir.
+- **Sonuçlar:**
+  - **Risk:** Determinizm sözleşmesi (CLAUDE.md kural 2) macOS arm64 = Linux x86_64 eşitliğini gerektirir; bu eşitlik CI olmadan doğrulanamaz, çünkü yerel geliştirme yalnızca macOS'tadır (bkz. `Scripts/check-invariants.sh` ve "Linux doğrulaması yerelde yapılmaz" notu). Bu pencerede Linux'a özgü bir determinizm kırılması sessizce birikebilir.
+  - Telafi: `FermanCore`'a dokunan her değişiklikten sonra yerelde (macOS) `fermansim verify --runs 1000` çalıştırmaya devam edilir; bu CI'ın yerini tutmaz ama tek platformlu regresyonu yakalar.
+  - `.github/workflows/core.yml` eklenip yeşil olduğunda F0.12 tam anlamıyla kapanır; bu karar F3.9'daki `balance-nightly.yml` iş akışını etkilemez, o da kendi adımına kadar ertelenmiş sayılır.

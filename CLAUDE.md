@@ -104,14 +104,13 @@ Packages/FermanReplay/    ReplayTimeline + DebriefAnalyzer (D11)
 Packages/FermanAI/        RuleCompiler uygulamaları + EnemyAI/ (GameplayKit)
 Tools/fermansim/          CLI: run / verify / batch / bench / validate-content / gen-tables
 Balance/                  denge matrisleri ve raporları
-App/Ferman/               SwiftUI + SpriteKit (F1.1'de oluşturulur, D3)
+App/Ferman.xcodeproj/     Xcode projesi (F1.1'de oluşturuldu, D3)
+App/Ferman/               SwiftUI + SpriteKit
   Features/             ekran başına klasör: XView + XModel
   Rendering/            SpriteKit replay oynatıcı, ClipRenderer
   Services/             BattleRunner, SwiftData, GameKit, CloudKit, konuşma, monetizasyon
   DesignSystem/         token'lar ve ortak bileşenler
 ```
-
-Kökteki `FERMAN.xcodeproj` Xcode şablonudur; F1.1'e kadar dokunulmaz (D3).
 
 ---
 
@@ -151,7 +150,12 @@ xcrun llvm-cov report Packages/FermanCore/.build/out/Products/Debug/FermanCoreTe
   -instr-profile Packages/FermanCore/.build/out/Products/Debug/codecov/default.profdata -ignore-filename-regex '(Tests|\.build)/'
 
 # Uygulama (F1.1+)
-xcodebuild -project App/Ferman.xcodeproj -scheme Ferman -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test
+# CODE_SIGNING_ALLOWED=NO gerekli: bu makinede macOS 27.0 (26A428) + Xcode 27.0 (27A266a) ikilisinde codesign,
+# içinde "Resources/" alt klasörü olan her bundle'ı (SPM kaynak paketleri dahil) imzalarken ortam hatasıyla düşüyor.
+xcodebuild -project App/Ferman.xcodeproj -scheme Ferman -destination 'platform=iOS Simulator,name=iPhone 18 Pro' test CODE_SIGNING_ALLOWED=NO
+
+# SandTable'ın Metal shader'ı derlenecekse (F1.2+), bu makinede bir kerelik indirme gerekir:
+xcodebuild -downloadComponent MetalToolchain
 ```
 
 ---
@@ -191,13 +195,14 @@ Yeni simülasyon mantığı yazarken önce testi yaz. Altın dosya kırıldığ�
 
 ## Şu anki durum
 
-**Faz:** 0 — Simülasyon çekirdeği (`docs/FERMAN-PLAN.md` §6)
-**Tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama · F0.6 `SpatialGrid` / `FlowField` · F0.7 `RuleEvaluator` / `RuleValidator` · F0.8 `Steering` · F0.9 `Combat` / `Morale` / `Abilities` · F0.10 `BattleSimulator.run` (tick hattı, checksum, `ruleFireCounts`) · F0.11 `fermansim run` / `verify` / `batch` (`--jobs`) / `bench` — hız hedefi kısmen karşılandı, bkz. `docs/FERMAN-PLAN.md` §9 risk satırı
-**Kısmen tamamlanan:** F0.12 — 5 altın dosya eklendi ve yerelde doğrulandı (test, kapsam > %85, `fermansim verify`). `.github/workflows/core.yml` kasıtlı olarak ertelendi (kullanıcı kararı); F0.12'nin "CI yeşil" kabul kriteri bu yüzden henüz karşılanmadı.
-**Tamamlanan:** F0.13 denge sorusu — 6 zıt kural seti × 36 eşleşme × 1000 tohum; en iyi/en kötü set arası 75 puan fark (eşik %20). Rapor: `Balance/phase0-report.md`.
-**Sonraki görev:** `.github/workflows/core.yml` eklenip CI doğrulanınca F0.12 kapanır. Faz 0'ın kalan kabul kriterleri karşılandığında Faz 1'e (F1.1) geçilebilir.
+**Faz:** 1 — Dikey dilim (`docs/FERMAN-PLAN.md` §6)
+**Faz 0 — tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama · F0.6 `SpatialGrid` / `FlowField` · F0.7 `RuleEvaluator` / `RuleValidator` · F0.8 `Steering` · F0.9 `Combat` / `Morale` / `Abilities` · F0.10 `BattleSimulator.run` (tick hattı, checksum, `ruleFireCounts`) · F0.11 `fermansim run` / `verify` / `batch` (`--jobs`) / `bench` — hız hedefi kısmen karşılandı, bkz. `docs/FERMAN-PLAN.md` §9 risk satırı · F0.13 denge sorusu — 6 zıt kural seti × 36 eşleşme × 1000 tohum; en iyi/en kötü set arası 75 puan fark (eşik %20), rapor: `Balance/phase0-report.md`
+**Faz 0 — ertelendi:** F0.12'nin "CI yeşil" alt kriteri. 5 altın dosya eklendi ve yerelde doğrulandı (test, kapsam > %85, `fermansim verify`), ama `.github/workflows/core.yml` henüz yok; bu doğrulama proje bitimine (Faz 7 öncesi) kadar ertelendi — kullanıcı kararı, bkz. [D23](docs/DECISIONS.md). Bu pencerede Linux'a özgü bir determinizm kırılması CI olmadan yakalanamaz; her `FermanCore` değişikliğinden sonra yerelde (macOS) `fermansim verify --runs 1000` çalıştırmaya devam et.
+**Faz 1 — F1.1 tamamlandı** (Xcode Cloud PR iş akışı hariç — App Store Connect'te elle kurulmalı, CLI'dan yapılamaz): Kök `FERMAN.xcodeproj` kaldırıldı, `App/Ferman.xcodeproj` oluşturuldu (D3) — iOS 27, Swift 6 dil modu, `SWIFT_APPROACHABLE_CONCURRENCY` + `SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`, `ExistentialAny` açık, uyarılar hata, `FermanCore`/`FermanContent` yerel paket referansları, bundle id `com.hksimsek.FERMAN` korunuyor, `PrivacyInfo.xcprivacy`, `Localizable.xcstrings` (kaynak dil `tr`), `UIUserInterfaceStyle = Dark`, paylaşılan şema + `Ferman.xctestplan`. iPhone 18 Pro simülatöründe `xcodebuild test` yeşil (bkz. Komutlar — `CODE_SIGNING_ALLOWED=NO` gerekli, bu makineye özgü bir codesign ortam hatası nedeniyle). `Ferman.xctestplan`'a `FermanCoreTests`/`FermanContentTests`'i eklemek denendi, Xcode'un yerel SPM hedef kimliği biçimi bulunamadığı için sessizce düştü — plan yalnızca `FermanTests`/`FermanUITests` içeriyor, paket testleri `swift test --package-path` ile ayrı koşuyor.
+**Faz 1 — F1.2 tamamlandı:** DesignSystem — Asset Catalog'da 11 malzeme rengi (Any/Dark; açık mod değerleri türetilmiş, D22 gereği v1'de kullanılmıyor), Archivo/Archivo Narrow/Public Sans (OFL, statik ağırlıklar halinde paketlendi) `FontRegistrationTests` ile doğrulanıyor, tip ölçeği + 4pt boşluk + malzemeye göre yarıçap + gölge tokenları, ve tasarım brief'i §5'teki 10 bileşenin tamamı: `OrderCard` (6 durum), `OrderStack`, `ParameterDial`, `UnitToken`, `SandTable` (gerçek Metal shader — bu makinede `xcodebuild -downloadComponent MetalToolchain` ile bir kerelik ~840 MB indirme gerektirdi), `TriggerBar`, `BudgetMeter`, `FrontFlag`, `BottomSheet`, `FermanButton` (primary/outline/ghost/chip), `SpeedControl`. Hepsi #Preview (koyu/açık/XXL) ile. `TokenReferenceView` (tek referans sayfası) şimdilik `ContentView` olarak bağlı; gerçek `HomeView` F1.9'da yerini alacak.
+**Sonraki görev:** F1.3 — `FermanReplay` paketi (`ReplayTimeline`, `DebriefAnalyzer`).
 
-Faz 0 bitmeden Xcode projesi açma. UI yazma. Faz 0 kabul kriterleri ve F0.13 denge sorusu karşılanmadan Faz 1'e geçme.
+Faz 1'de UI yazılır; LLM kodu bu fazda repoda bulunmaz (`FoundationModelsCompiler` Faz 2'ye kadar yazılmaz).
 
 ---
 
