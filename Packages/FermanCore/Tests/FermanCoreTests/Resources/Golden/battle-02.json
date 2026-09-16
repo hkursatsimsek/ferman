@@ -1,0 +1,243 @@
+{
+  "constraints" : {
+    "availableActions" : [
+      "advance",
+      "retreat",
+      "hold",
+      "focusFire",
+      "flankLeft",
+      "flankRight",
+      "regroup",
+      "useAbility",
+      "takeCover",
+      "guardCommander",
+      "scatter"
+    ],
+    "availableConditions" : [
+      "enemyWithin",
+      "healthBelow",
+      "allyCountBelow",
+      "isFlanked",
+      "targetInRange",
+      "timeAfter",
+      "nearestEnemyType",
+      "moraleBelow",
+      "terrainIs",
+      "commanderDead",
+      "enemyDensityAbove",
+      "always"
+    ],
+    "maxRules" : 12
+  },
+  "enemy" : {
+    "placements" : [
+      {
+        "cell" : 15,
+        "isCommander" : false,
+        "type" : "suvari"
+      }
+    ],
+    "programs" : [
+      {
+        "rules" : [
+          {
+            "action" : {
+              "kind" : "focusFire",
+              "unitType" : "okcu"
+            },
+            "condition" : {
+              "kind" : "targetInRange",
+              "unitType" : "okcu"
+            }
+          },
+          {
+            "action" : {
+              "kind" : "advance"
+            },
+            "condition" : {
+              "kind" : "always"
+            }
+          }
+        ],
+        "unitType" : "suvari"
+      }
+    ]
+  },
+  "map" : {
+    "terrain" : [
+      "........",
+      "..FF..HH",
+      "..FFWW..",
+      "....RR.."
+    ],
+    "zones" : [
+      "PP....EE",
+      "PP....EE",
+      "PP....EE",
+      "PP....EE"
+    ]
+  },
+  "maxTicks" : 1800,
+  "objective" : "eliminate",
+  "player" : {
+    "placements" : [
+      {
+        "cell" : 8,
+        "isCommander" : false,
+        "type" : "okcu"
+      },
+      {
+        "cell" : 9,
+        "isCommander" : true,
+        "type" : "kalkan"
+      }
+    ],
+    "programs" : [
+      {
+        "rules" : [
+          {
+            "action" : {
+              "kind" : "retreat"
+            },
+            "condition" : {
+              "cells" : 2,
+              "kind" : "enemyWithin"
+            }
+          },
+          {
+            "action" : {
+              "kind" : "hold"
+            },
+            "condition" : {
+              "kind" : "always"
+            }
+          }
+        ],
+        "unitType" : "okcu"
+      },
+      {
+        "rules" : [
+          {
+            "action" : {
+              "kind" : "advance"
+            },
+            "condition" : {
+              "kind" : "always"
+            }
+          }
+        ],
+        "unitType" : "kalkan"
+      }
+    ]
+  },
+  "seed" : 7,
+  "simulationVersion" : 1,
+  "tuning" : {
+    "abilityCooldownTicks" : 300,
+    "abilityDurationTicks" : 45,
+    "allyDeathMoralePenalty" : 10,
+    "allyDeathMoraleRadiusCells" : 3,
+    "chargeFirstHitDamageBonusPercent" : 100,
+    "chargeSpeedBonusPercent" : 50,
+    "checksumIntervalTicks" : 30,
+    "commanderDeathMoralePenalty" : 25,
+    "counterDamagePercent" : 150,
+    "coverRangedDamageReductionPercent" : 30,
+    "coverSearchRadiusCells" : 5,
+    "decisionIntervalTicks" : 6,
+    "flankOffsetCells" : 4,
+    "flankedMemoryTicks" : 30,
+    "flankedMoralePenalty" : 5,
+    "flowFieldIntervalTicks" : 15,
+    "focusFireExtraRangeCells" : 2,
+    "guardCommanderDistanceCells" : 2,
+    "minimumCommitTicks" : 15,
+    "moraleBreakPercent" : 20,
+    "moraleBrokenTicks" : 90,
+    "moraleRecoveredPercent" : 35,
+    "moraleRecoveryEnemyFreeRadiusCells" : 4,
+    "moraleRecoveryPerSecond" : 1,
+    "moveSampleIntervalTicks" : 3,
+    "proximityRadiusCells" : 3,
+    "regroupRadiusCells" : 6,
+    "shieldWallDamageReductionPercent" : 70,
+    "spatialBucketCells" : 2,
+    "spearWallDamageDealtBonusPercent" : 50,
+    "spearWallDamageTakenReductionPercent" : 50,
+    "steeringAlignmentWeightPercent" : 15,
+    "steeringCohesionWeightPercent" : 15,
+    "steeringFlowWeightPercent" : 60,
+    "steeringIntentWeightPercent" : 100,
+    "steeringSeparationRadiusCells" : 1,
+    "steeringSeparationWeightPercent" : 40,
+    "terrainMovementCost" : {
+      "forest" : 30,
+      "hill" : 20,
+      "open" : 10,
+      "rubble" : 20
+    },
+    "volleyRadiusCells" : 2
+  },
+  "unitCatalog" : [
+    {
+      "ability" : "shieldWall",
+      "armor" : 4,
+      "attackIntervalTicks" : 30,
+      "cost" : 30,
+      "counters" : [
+
+      ],
+      "damage" : 8,
+      "id" : "kalkan",
+      "maxHP" : 160,
+      "moraleMax" : 120,
+      "rangeMilliCells" : 1000,
+      "speedMilliCellsPerSecond" : 900
+    },
+    {
+      "ability" : "spearWall",
+      "armor" : 2,
+      "attackIntervalTicks" : 27,
+      "cost" : 25,
+      "counters" : [
+        "suvari"
+      ],
+      "damage" : 12,
+      "id" : "mizrakci",
+      "maxHP" : 110,
+      "moraleMax" : 100,
+      "rangeMilliCells" : 1500,
+      "speedMilliCellsPerSecond" : 1100
+    },
+    {
+      "ability" : "volley",
+      "armor" : 0,
+      "attackIntervalTicks" : 36,
+      "cost" : 30,
+      "counters" : [
+        "mizrakci"
+      ],
+      "damage" : 10,
+      "id" : "okcu",
+      "maxHP" : 70,
+      "moraleMax" : 90,
+      "rangeMilliCells" : 6000,
+      "speedMilliCellsPerSecond" : 1000
+    },
+    {
+      "ability" : "charge",
+      "armor" : 1,
+      "attackIntervalTicks" : 24,
+      "cost" : 40,
+      "counters" : [
+        "okcu"
+      ],
+      "damage" : 14,
+      "id" : "suvari",
+      "maxHP" : 120,
+      "moraleMax" : 110,
+      "rangeMilliCells" : 1000,
+      "speedMilliCellsPerSecond" : 2400
+    }
+  ]
+}

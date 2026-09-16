@@ -1,0 +1,8 @@
+{
+  "checksum" : 11016577596959033783,
+  "endReason" : "timeLimit",
+  "outcome" : "enemyWin",
+  "survivorsEnemy" : 2,
+  "survivorsPlayer" : 1,
+  "tickCount" : 1200
+}

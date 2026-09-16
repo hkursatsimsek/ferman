@@ -20,6 +20,9 @@ let package = Package(
         .testTarget(
             name: "FermanCoreTests",
             dependencies: ["FermanCore"],
+            // Golden battles are read straight off disk by repo-relative path (both from tests, via #filePath, and
+            // from `fermansim verify` in CI), not through a resource bundle, so SwiftPM should leave them alone.
+            exclude: ["Resources/Golden"],
             swiftSettings: strictSettings
         ),
     ]
