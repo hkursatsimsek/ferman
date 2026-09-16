@@ -192,8 +192,9 @@ Yeni simülasyon mantığı yazarken önce testi yaz. Altın dosya kırıldığ�
 ## Şu anki durum
 
 **Faz:** 0 — Simülasyon çekirdeği (`docs/FERMAN-PLAN.md` §6)
-**Tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama · F0.6 `SpatialGrid` / `FlowField` · F0.7 `RuleEvaluator` / `RuleValidator` · F0.8 `Steering` · F0.9 `Combat` / `Morale` / `Abilities` · F0.10 `BattleSimulator.run` (tick hattı, checksum, `ruleFireCounts`) · F0.11 `fermansim run` / `verify` / `batch` (`--jobs`) / `bench` — hız hedefi kısmen karşılandı, bkz. `docs/FERMAN-PLAN.md` §9 risk satırı · F0.12 5 altın dosya + `.github/workflows/core.yml` — yerelde doğrulandı (test, kapsam, `fermansim verify`), CI'da henüz çalıştırılmadı (push edilmedi)
-**Sonraki görev:** F0.13 denge sorusu — 6 zıt kural seti × eşleşmeler × 1000 seed, `Balance/phase0-report.md`.
+**Tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama · F0.6 `SpatialGrid` / `FlowField` · F0.7 `RuleEvaluator` / `RuleValidator` · F0.8 `Steering` · F0.9 `Combat` / `Morale` / `Abilities` · F0.10 `BattleSimulator.run` (tick hattı, checksum, `ruleFireCounts`) · F0.11 `fermansim run` / `verify` / `batch` (`--jobs`) / `bench` — hız hedefi kısmen karşılandı, bkz. `docs/FERMAN-PLAN.md` §9 risk satırı
+**Kısmen tamamlanan:** F0.12 — 5 altın dosya eklendi ve yerelde doğrulandı (test, kapsam > %85, `fermansim verify`). `.github/workflows/core.yml` kasıtlı olarak ertelendi (kullanıcı kararı); F0.12'nin "CI yeşil" kabul kriteri bu yüzden henüz karşılanmadı.
+**Sonraki görev:** `.github/workflows/core.yml` eklenip CI doğrulanınca F0.12 kapanır; ardından F0.13 denge sorusu (6 zıt kural seti × eşleşmeler × 1000 seed, `Balance/phase0-report.md`).
 
 Faz 0 bitmeden Xcode projesi açma. UI yazma. Faz 0 kabul kriterleri ve F0.13 denge sorusu karşılanmadan Faz 1'e geçme.
 
