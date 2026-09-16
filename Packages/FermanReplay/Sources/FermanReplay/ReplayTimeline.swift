@@ -6,6 +6,9 @@ import FermanCore
 /// `frame(at:)` never folds more than one interval's worth of events, but the
 /// answer is defined as "fold every event from tick 0" — a small
 /// `keyframeInterval` only changes speed, never the result.
+///
+/// Requires `result.events` sorted by tick ascending — always true of a real
+/// `BattleSimulator` run, which appends to the stream one tick at a time.
 public struct ReplayTimeline: Sendable {
     public let result: BattleResult
     public let keyframeInterval: Int32
