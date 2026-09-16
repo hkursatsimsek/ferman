@@ -58,6 +58,60 @@ public enum CommandLineTool {
             ],
             flags: []
         ),
+        CommandSpecification(
+            name: "run",
+            summary: "Fight one battle and print its outcome.",
+            options: [
+                .init(name: "config", placeholder: "path", summary: "Battle config JSON.", isRequired: true),
+                .init(
+                    name: "out", placeholder: "path", summary: "Write the full battle result as JSON.",
+                    isRequired: false
+                ),
+            ],
+            flags: []
+        ),
+        CommandSpecification(
+            name: "verify",
+            summary: "Fight the same battle config repeatedly and confirm every checksum matches.",
+            options: [
+                .init(name: "config", placeholder: "path", summary: "Battle config JSON.", isRequired: true),
+                .init(
+                    name: "runs", placeholder: "count",
+                    summary: "Number of runs (default \(VerifyCommand.defaultRuns)).", isRequired: false
+                ),
+            ],
+            flags: []
+        ),
+        CommandSpecification(
+            name: "batch",
+            summary: "Fight every entry of a config matrix across many seeds and write a CSV report.",
+            options: [
+                .init(
+                    name: "matrix", placeholder: "path",
+                    summary: #"Matrix JSON: {"entries":[{"name":..,"config":..}]}."#, isRequired: true
+                ),
+                .init(
+                    name: "count", placeholder: "count", summary: "Seeds 0..<count per entry (default 1).",
+                    isRequired: false),
+                .init(
+                    name: "jobs", placeholder: "count", summary: "Parallel worker count (default 1).", isRequired: false
+                ),
+                .init(name: "out", placeholder: "path", summary: "CSV file to write.", isRequired: true),
+            ],
+            flags: []
+        ),
+        CommandSpecification(
+            name: "bench",
+            summary: "Time repeated fights of a battle config.",
+            options: [
+                .init(name: "config", placeholder: "path", summary: "Battle config JSON.", isRequired: true),
+                .init(
+                    name: "runs", placeholder: "count",
+                    summary: "Number of timed runs (default \(BenchCommand.defaultRuns)).", isRequired: false
+                ),
+            ],
+            flags: []
+        ),
     ]
 
     public static func run(arguments: [String], console: Console) -> Int32 {
@@ -75,6 +129,14 @@ public enum CommandLineTool {
             return generateTables(command, console: console)
         case "validate-content":
             return validateContent(command, console: console)
+        case "run":
+            return RunCommand.execute(command, console: console)
+        case "verify":
+            return VerifyCommand.execute(command, console: console)
+        case "batch":
+            return BatchCommand.execute(command, console: console)
+        case "bench":
+            return BenchCommand.execute(command, console: console)
         default:
             console.standardOutput(ArgumentParser.usage(for: commands, toolName: toolName))
             return ExitCode.success
