@@ -1,19 +1,17 @@
 //
-//  FERMANTests.swift
-//  FERMANTests
+//  FermanTests.swift
+//  FermanTests
 //
 //  Created by Hamza Kürşat Şimşek on 15.09.2026.
 //
 
 import Testing
-@testable import FERMAN
 
-struct FERMANTests {
+@testable import Ferman
 
-    @Test func example() async throws {
-        // Write your test here and use APIs like `#expect(...)` to check expected conditions.
-        // Swift Testing Documentation
-        // https://developer.apple.com/documentation/testing
+struct FermanTests {
+
+    @Test func placeholder() async throws {
     }
 
 }

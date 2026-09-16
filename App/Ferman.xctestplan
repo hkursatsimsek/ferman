@@ -1,0 +1,44 @@
+{
+  "configurations" : [
+    {
+      "id" : "8382CBFB-36AC-4DAE-B457-52C2C173AE58",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : {
+      "targets" : [
+        {
+          "containerPath" : "container:Ferman.xcodeproj",
+          "identifier" : "886A0D9530596A860085EC75",
+          "name" : "Ferman"
+        }
+      ]
+    },
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:Ferman.xcodeproj",
+      "identifier" : "886A0D9530596A860085EC75",
+      "name" : "Ferman"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:Ferman.xcodeproj",
+        "identifier" : "886A0DA430596A870085EC75",
+        "name" : "FermanTests"
+      }
+    },
+    {
+      "target" : {
+        "containerPath" : "container:Ferman.xcodeproj",
+        "identifier" : "886A0DAE30596A870085EC75",
+        "name" : "FermanUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

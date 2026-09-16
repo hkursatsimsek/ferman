@@ -6,43 +6,48 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		028B025E35184255B4E6EAEE /* FermanContent in Frameworks */ = {isa = PBXBuildFile; productRef = E254DED74E734232BC58A9A4 /* FermanContent */; };
+		B259A4F837AA403FB8735DE5 /* FermanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 807A17C2119947A9A0190001 /* FermanCore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		886A0DA630596A870085EC75 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 886A0D8E30596A860085EC75 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 886A0D9530596A860085EC75;
-			remoteInfo = FERMAN;
+			remoteInfo = Ferman;
 		};
 		886A0DB030596A870085EC75 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 886A0D8E30596A860085EC75 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = 886A0D9530596A860085EC75;
-			remoteInfo = FERMAN;
+			remoteInfo = Ferman;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		886A0D9630596A860085EC75 /* FERMAN.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FERMAN.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		886A0DA530596A870085EC75 /* FERMANTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FERMANTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		886A0DAF30596A870085EC75 /* FERMANUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FERMANUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		886A0D9630596A860085EC75 /* Ferman.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ferman.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		886A0DA530596A870085EC75 /* FermanTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FermanTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		886A0DAF30596A870085EC75 /* FermanUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = FermanUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		886A0D9830596A860085EC75 /* FERMAN */ = {
+		886A0D9830596A860085EC75 /* Ferman */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = FERMAN;
+			path = Ferman;
 			sourceTree = "<group>";
 		};
-		886A0DA830596A870085EC75 /* FERMANTests */ = {
+		886A0DA830596A870085EC75 /* FermanTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = FERMANTests;
+			path = FermanTests;
 			sourceTree = "<group>";
 		};
-		886A0DB230596A870085EC75 /* FERMANUITests */ = {
+		886A0DB230596A870085EC75 /* FermanUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = FERMANUITests;
+			path = FermanUITests;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -51,6 +56,8 @@
 		886A0D9330596A860085EC75 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				B259A4F837AA403FB8735DE5 /* FermanCore in Frameworks */,
+				028B025E35184255B4E6EAEE /* FermanContent in Frameworks */,
 			);
 		};
 		886A0DA230596A870085EC75 /* Frameworks */ = {
@@ -69,9 +76,9 @@
 		886A0D8D30596A860085EC75 = {
 			isa = PBXGroup;
 			children = (
-				886A0D9830596A860085EC75 /* FERMAN */,
-				886A0DA830596A870085EC75 /* FERMANTests */,
-				886A0DB230596A870085EC75 /* FERMANUITests */,
+				886A0D9830596A860085EC75 /* Ferman */,
+				886A0DA830596A870085EC75 /* FermanTests */,
+				886A0DB230596A870085EC75 /* FermanUITests */,
 				886A0D9730596A860085EC75 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -79,9 +86,9 @@
 		886A0D9730596A860085EC75 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				886A0D9630596A860085EC75 /* FERMAN.app */,
-				886A0DA530596A870085EC75 /* FERMANTests.xctest */,
-				886A0DAF30596A870085EC75 /* FERMANUITests.xctest */,
+				886A0D9630596A860085EC75 /* Ferman.app */,
+				886A0DA530596A870085EC75 /* FermanTests.xctest */,
+				886A0DAF30596A870085EC75 /* FermanUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -89,9 +96,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		886A0D9530596A860085EC75 /* FERMAN */ = {
+		886A0D9530596A860085EC75 /* Ferman */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 886A0DB730596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMAN" */;
+			buildConfigurationList = 886A0DB730596A870085EC75 /* Build configuration list for PBXNativeTarget "Ferman" */;
 			buildPhases = (
 				886A0D9230596A860085EC75 /* Sources */,
 				886A0D9330596A860085EC75 /* Frameworks */,
@@ -100,16 +107,20 @@
 			buildRules = (
 			);
 			fileSystemSynchronizedGroups = (
-				886A0D9830596A860085EC75 /* FERMAN */,
+				886A0D9830596A860085EC75 /* Ferman */,
 			);
-			name = FERMAN;
-			productName = FERMAN;
-			productReference = 886A0D9630596A860085EC75 /* FERMAN.app */;
+			name = Ferman;
+			packageProductDependencies = (
+				807A17C2119947A9A0190001 /* FermanCore */,
+				E254DED74E734232BC58A9A4 /* FermanContent */,
+			);
+			productName = Ferman;
+			productReference = 886A0D9630596A860085EC75 /* Ferman.app */;
 			productType = "com.apple.product-type.application";
 		};
-		886A0DA430596A870085EC75 /* FERMANTests */ = {
+		886A0DA430596A870085EC75 /* FermanTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 886A0DBA30596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMANTests" */;
+			buildConfigurationList = 886A0DBA30596A870085EC75 /* Build configuration list for PBXNativeTarget "FermanTests" */;
 			buildPhases = (
 				886A0DA130596A870085EC75 /* Sources */,
 				886A0DA230596A870085EC75 /* Frameworks */,
@@ -121,16 +132,16 @@
 				886A0DA730596A870085EC75 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				886A0DA830596A870085EC75 /* FERMANTests */,
+				886A0DA830596A870085EC75 /* FermanTests */,
 			);
-			name = FERMANTests;
-			productName = FERMANTests;
-			productReference = 886A0DA530596A870085EC75 /* FERMANTests.xctest */;
+			name = FermanTests;
+			productName = FermanTests;
+			productReference = 886A0DA530596A870085EC75 /* FermanTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		886A0DAE30596A870085EC75 /* FERMANUITests */ = {
+		886A0DAE30596A870085EC75 /* FermanUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 886A0DBD30596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMANUITests" */;
+			buildConfigurationList = 886A0DBD30596A870085EC75 /* Build configuration list for PBXNativeTarget "FermanUITests" */;
 			buildPhases = (
 				886A0DAB30596A870085EC75 /* Sources */,
 				886A0DAC30596A870085EC75 /* Frameworks */,
@@ -142,11 +153,11 @@
 				886A0DB130596A870085EC75 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				886A0DB230596A870085EC75 /* FERMANUITests */,
+				886A0DB230596A870085EC75 /* FermanUITests */,
 			);
-			name = FERMANUITests;
-			productName = FERMANUITests;
-			productReference = 886A0DAF30596A870085EC75 /* FERMANUITests.xctest */;
+			name = FermanUITests;
+			productName = FermanUITests;
+			productReference = 886A0DAF30596A870085EC75 /* FermanUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 /* End PBXNativeTarget section */
@@ -172,23 +183,27 @@
 					};
 				};
 			};
-			buildConfigurationList = 886A0D9130596A860085EC75 /* Build configuration list for PBXProject "FERMAN" */;
-			developmentRegion = en;
+			buildConfigurationList = 886A0D9130596A860085EC75 /* Build configuration list for PBXProject "Ferman" */;
+			developmentRegion = tr;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				en,
+				tr,
 				Base,
 			);
 			mainGroup = 886A0D8D30596A860085EC75;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E9B102D3DD654BFDA3793407 /* XCLocalSwiftPackageReference "../Packages/FermanCore" */,
+				5E2966CA974A4CAA9FE5B1D6 /* XCLocalSwiftPackageReference "../Packages/FermanContent" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 886A0D9730596A860085EC75 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				886A0D9530596A860085EC75 /* FERMAN */,
-				886A0DA430596A870085EC75 /* FERMANTests */,
-				886A0DAE30596A870085EC75 /* FERMANUITests */,
+				886A0D9530596A860085EC75 /* Ferman */,
+				886A0DA430596A870085EC75 /* FermanTests */,
+				886A0DAE30596A870085EC75 /* FermanUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -232,18 +247,18 @@
 /* Begin PBXTargetDependency section */
 		886A0DA730596A870085EC75 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 886A0D9530596A860085EC75 /* FERMAN */;
+			target = 886A0D9530596A860085EC75 /* Ferman */;
 			targetProxy = 886A0DA630596A870085EC75 /* PBXContainerItemProxy */;
 		};
 		886A0DB130596A870085EC75 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 886A0D9530596A860085EC75 /* FERMAN */;
+			target = 886A0D9530596A860085EC75 /* Ferman */;
 			targetProxy = 886A0DB030596A870085EC75 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		886A0DB530596A870085EC75 /* Debug configuration for PBXProject "FERMAN" */ = {
+		886A0DB530596A870085EC75 /* Debug configuration for PBXProject "Ferman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -290,6 +305,7 @@
 					"DEBUG=1",
 					"$(inherited)",
 				);
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -304,10 +320,12 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
 			};
 			name = Debug;
 		};
-		886A0DB630596A870085EC75 /* Release configuration for PBXProject "FERMAN" */ = {
+		886A0DB630596A870085EC75 /* Release configuration for PBXProject "Ferman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
@@ -348,6 +366,7 @@
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -360,11 +379,13 @@
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_TREAT_WARNINGS_AS_ERRORS = YES;
+				SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
 		};
-		886A0DB830596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMAN" */ = {
+		886A0DB830596A870085EC75 /* Debug configuration for PBXNativeTarget "Ferman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -374,11 +395,13 @@
 				DEVELOPMENT_TEAM = MRWCS276FJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ferman-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -391,12 +414,12 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
-		886A0DB930596A870085EC75 /* Release configuration for PBXNativeTarget "FERMAN" */ = {
+		886A0DB930596A870085EC75 /* Release configuration for PBXNativeTarget "Ferman" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -406,11 +429,13 @@
 				DEVELOPMENT_TEAM = MRWCS276FJ;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Ferman-Info.plist";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -423,12 +448,12 @@
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
-		886A0DBB30596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMANTests" */ = {
+		886A0DBB30596A870085EC75 /* Debug configuration for PBXNativeTarget "FermanTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -438,19 +463,19 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FERMANTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FermanTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FERMAN.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FERMAN";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ferman.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ferman";
 			};
 			name = Debug;
 		};
-		886A0DBC30596A870085EC75 /* Release configuration for PBXNativeTarget "FERMANTests" */ = {
+		886A0DBC30596A870085EC75 /* Release configuration for PBXNativeTarget "FermanTests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
@@ -460,19 +485,19 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 27.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FERMANTests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FermanTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/FERMAN.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/FERMAN";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ferman.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ferman";
 			};
 			name = Release;
 		};
-		886A0DBE30596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMANUITests" */ = {
+		886A0DBE30596A870085EC75 /* Debug configuration for PBXNativeTarget "FermanUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -480,19 +505,19 @@
 				DEVELOPMENT_TEAM = MRWCS276FJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FERMANUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FermanUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = FERMAN;
+				TEST_TARGET_NAME = Ferman;
 			};
 			name = Debug;
 		};
-		886A0DBF30596A870085EC75 /* Release configuration for PBXNativeTarget "FERMANUITests" */ = {
+		886A0DBF30596A870085EC75 /* Release configuration for PBXNativeTarget "FermanUITests" */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
@@ -500,54 +525,76 @@
 				DEVELOPMENT_TEAM = MRWCS276FJ;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FERMANUITests;
+				PRODUCT_BUNDLE_IDENTIFIER = com.hksimsek.FermanUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = FERMAN;
+				TEST_TARGET_NAME = Ferman;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		886A0D9130596A860085EC75 /* Build configuration list for PBXProject "FERMAN" */ = {
+		886A0D9130596A860085EC75 /* Build configuration list for PBXProject "Ferman" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				886A0DB530596A870085EC75 /* Debug configuration for PBXProject "FERMAN" */,
-				886A0DB630596A870085EC75 /* Release configuration for PBXProject "FERMAN" */,
+				886A0DB530596A870085EC75 /* Debug configuration for PBXProject "Ferman" */,
+				886A0DB630596A870085EC75 /* Release configuration for PBXProject "Ferman" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		886A0DB730596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMAN" */ = {
+		886A0DB730596A870085EC75 /* Build configuration list for PBXNativeTarget "Ferman" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				886A0DB830596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMAN" */,
-				886A0DB930596A870085EC75 /* Release configuration for PBXNativeTarget "FERMAN" */,
+				886A0DB830596A870085EC75 /* Debug configuration for PBXNativeTarget "Ferman" */,
+				886A0DB930596A870085EC75 /* Release configuration for PBXNativeTarget "Ferman" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		886A0DBA30596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMANTests" */ = {
+		886A0DBA30596A870085EC75 /* Build configuration list for PBXNativeTarget "FermanTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				886A0DBB30596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMANTests" */,
-				886A0DBC30596A870085EC75 /* Release configuration for PBXNativeTarget "FERMANTests" */,
+				886A0DBB30596A870085EC75 /* Debug configuration for PBXNativeTarget "FermanTests" */,
+				886A0DBC30596A870085EC75 /* Release configuration for PBXNativeTarget "FermanTests" */,
 			);
 			defaultConfigurationName = Release;
 		};
-		886A0DBD30596A870085EC75 /* Build configuration list for PBXNativeTarget "FERMANUITests" */ = {
+		886A0DBD30596A870085EC75 /* Build configuration list for PBXNativeTarget "FermanUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				886A0DBE30596A870085EC75 /* Debug configuration for PBXNativeTarget "FERMANUITests" */,
-				886A0DBF30596A870085EC75 /* Release configuration for PBXNativeTarget "FERMANUITests" */,
+				886A0DBE30596A870085EC75 /* Debug configuration for PBXNativeTarget "FermanUITests" */,
+				886A0DBF30596A870085EC75 /* Release configuration for PBXNativeTarget "FermanUITests" */,
 			);
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		5E2966CA974A4CAA9FE5B1D6 /* XCLocalSwiftPackageReference "../Packages/FermanContent" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/FermanContent;
+		};
+		E9B102D3DD654BFDA3793407 /* XCLocalSwiftPackageReference "../Packages/FermanCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/FermanCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		807A17C2119947A9A0190001 /* FermanCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FermanCore;
+		};
+		E254DED74E734232BC58A9A4 /* FermanContent */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FermanContent;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 886A0D8E30596A860085EC75 /* Project object */;
 	validationLevel = 1;
