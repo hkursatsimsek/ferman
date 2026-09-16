@@ -192,8 +192,8 @@ Yeni simülasyon mantığı yazarken önce testi yaz. Altın dosya kırıldığ�
 ## Şu anki durum
 
 **Faz:** 0 — Simülasyon çekirdeği (`docs/FERMAN-PLAN.md` §6)
-**Tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama
-**Sonraki görev:** F0.6 `SpatialGrid` / `FlowField` → F0.7 `RuleEvaluator` / `RuleValidator`.
+**Tamamlanan:** F0.1 paket iskeleti ve değişmez denetimleri · F0.2 `DeterministicRNG` · F0.3 `Fixed` / `FixedMath` · F0.4 tip sözleşmesi · F0.5 içerik kataloğu ve doğrulama · F0.6 `SpatialGrid` / `FlowField` · F0.7 `RuleEvaluator` / `RuleValidator` · F0.8 `Steering` · F0.9 `Combat` / `Morale` / `Abilities` · F0.10 `BattleSimulator.run` (tick hattı, checksum, `ruleFireCounts`)
+**Sonraki görev:** F0.11 `fermansim run` / `verify` / `batch` (`--jobs`) / `bench`.
 
 Faz 0 bitmeden Xcode projesi açma. UI yazma. Faz 0 kabul kriterleri ve F0.13 denge sorusu karşılanmadan Faz 1'e geçme.
 
