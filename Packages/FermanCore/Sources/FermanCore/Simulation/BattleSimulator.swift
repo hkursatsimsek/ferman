@@ -158,7 +158,16 @@ extension BattleSimulator {
         let proximityRadius = Fixed(config.tuning.proximityRadiusCells)
 
         let nearestEnemy = Self.nearestLivingUnit(from: ownPosition, team: unit.team.opponent, state: state)
-        let nearbyEntries = state.spatialGrid.entries(within: proximityRadius, of: ownPosition)
+        var nearbyLivingAllyCount = 0
+        var nearbyLivingEnemyCount = 0
+        state.spatialGrid.forEach(within: proximityRadius, of: ownPosition) { entry in
+            guard entry.id != unit.id else { return }
+            if state.units[Int(entry.id.rawValue)].team == unit.team {
+                nearbyLivingAllyCount += 1
+            } else {
+                nearbyLivingEnemyCount += 1
+            }
+        }
 
         return RuleEvaluationContext(
             ownHP: unit.hp, ownMaxHP: unitType.maxHP, ownMorale: unit.morale.morale, ownMoraleMax: unitType.moraleMax,
@@ -168,11 +177,8 @@ extension BattleSimulator {
             nearestEnemyType: nearestEnemy.map { state.units[Int($0.id.rawValue)].type },
             enemyTypesInRange: Self.livingEnemyTypes(
                 within: rangeCells, of: ownPosition, enemyTeam: unit.team.opponent, state: state),
-            nearbyLivingAllyCount: nearbyEntries.filter {
-                $0.id != unit.id && state.units[Int($0.id.rawValue)].team == unit.team
-            }
-            .count,
-            nearbyLivingEnemyCount: nearbyEntries.filter { state.units[Int($0.id.rawValue)].team != unit.team }.count
+            nearbyLivingAllyCount: nearbyLivingAllyCount,
+            nearbyLivingEnemyCount: nearbyLivingEnemyCount
         )
     }
 
@@ -190,9 +196,9 @@ extension BattleSimulator {
         -> [UnitTypeID]
     {
         var types: [UnitTypeID] = []
-        for entry in state.spatialGrid.entries(within: radius, of: position) {
+        state.spatialGrid.forEach(within: radius, of: position) { entry in
             let candidate = state.units[Int(entry.id.rawValue)]
-            guard candidate.team == enemyTeam, candidate.isAlive, !types.contains(candidate.type) else { continue }
+            guard candidate.team == enemyTeam, candidate.isAlive, !types.contains(candidate.type) else { return }
             types.append(candidate.type)
         }
         return types
@@ -462,13 +468,13 @@ extension BattleSimulator {
         -> UnitID?
     {
         var best: (id: UnitID, hp: Int, distanceSquared: FixedSquared)?
-        for entry in state.spatialGrid.entries(within: radius, of: position) {
+        state.spatialGrid.forEach(within: radius, of: position) { entry in
             let candidate = state.units[Int(entry.id.rawValue)]
-            guard candidate.team == enemyTeam, candidate.isAlive else { continue }
+            guard candidate.team == enemyTeam, candidate.isAlive else { return }
             let distance = position.distanceSquared(to: entry.position)
             guard let current = best else {
                 best = (candidate.id, candidate.hp, distance)
-                continue
+                return
             }
             let isBetter =
                 candidate.hp < current.hp
@@ -485,12 +491,14 @@ extension BattleSimulator {
         type: UnitTypeID, excluding selfID: UnitID, team: Team, within radius: Fixed, of position: FixedVector2,
         state: BattleState
     ) -> [FixedVector2] {
-        state.spatialGrid.entries(within: radius, of: position).compactMap { entry -> FixedVector2? in
-            guard entry.id != selfID else { return nil }
+        var positions: [FixedVector2] = []
+        state.spatialGrid.forEach(within: radius, of: position) { entry in
+            guard entry.id != selfID else { return }
             let candidate = state.units[Int(entry.id.rawValue)]
-            guard candidate.team == team, candidate.isAlive, candidate.type == type else { return nil }
-            return entry.position
+            guard candidate.team == team, candidate.isAlive, candidate.type == type else { return }
+            positions.append(entry.position)
         }
+        return positions
     }
 
     private static func nearestCoverCell(from position: FixedVector2, withinCells radius: Int, map: BattleMap) -> Int? {
@@ -534,19 +542,27 @@ extension BattleSimulator {
     private static func runSteeringPhase(
         state: inout BattleState, config: BattleConfig, resolutions: [ActionResolution]
     ) {
+        // Read from the tick's *previous* kinematics: otherwise a unit processed earlier this tick would already
+        // have moved by the time a later unit samples it, making the result depend on iteration order (D10).
         let previousKinematics = state.units.map(\.kinematics)
         let proximityRadius = Fixed(config.tuning.proximityRadiusCells)
+        // Reused across every unit this tick instead of allocating a fresh array each time: cleared, then refilled
+        // by `forEach`, its buffer only grows on the rare tick some unit has more neighbors than any before it.
+        var neighborScratch: [SteeringNeighbor] = []
 
         for index in state.units.indices where state.units[index].isAlive {
             let unit = state.units[index]
             let unitType = config.unitType(unit.type)
-            let neighbors = Self.steeringNeighbors(
-                around: unit.kinematics.position, selfID: unit.id, team: unit.team, radius: proximityRadius,
-                state: state,
-                previousKinematics: previousKinematics)
+            neighborScratch.removeAll(keepingCapacity: true)
+            state.spatialGrid.forEach(within: proximityRadius, of: unit.kinematics.position) { entry in
+                guard entry.id != unit.id, state.units[Int(entry.id.rawValue)].team == unit.team else { return }
+                let kinematics = previousKinematics[Int(entry.id.rawValue)]
+                neighborScratch.append(SteeringNeighbor(position: kinematics.position, velocity: kinematics.velocity))
+            }
             let speed = Self.effectiveSpeed(of: unit, unitType: unitType, tuning: config.tuning)
             let inputs = SteeringInputs(
-                intent: resolutions[index].intent, neighbors: neighbors, flowDirection: resolutions[index].flowDirection
+                intent: resolutions[index].intent, neighbors: neighborScratch,
+                flowDirection: resolutions[index].flowDirection
             )
 
             let newKinematics = Steering.step(
@@ -556,20 +572,6 @@ extension BattleSimulator {
             if newKinematics.velocity != .zero {
                 state.units[index].facing = newKinematics.velocity.normalized()
             }
-        }
-    }
-
-    /// Same-team units within the general "nearby" radius, read from the tick's *previous* kinematics (D10):
-    /// otherwise a unit processed earlier this tick would already have moved by the time a later unit samples it,
-    /// making the result depend on iteration order.
-    private static func steeringNeighbors(
-        around position: FixedVector2, selfID: UnitID, team: Team, radius: Fixed, state: BattleState,
-        previousKinematics: [UnitKinematics]
-    ) -> [SteeringNeighbor] {
-        state.spatialGrid.entries(within: radius, of: position).compactMap { entry -> SteeringNeighbor? in
-            guard entry.id != selfID, state.units[Int(entry.id.rawValue)].team == team else { return nil }
-            let kinematics = previousKinematics[Int(entry.id.rawValue)]
-            return SteeringNeighbor(position: kinematics.position, velocity: kinematics.velocity)
         }
     }
 
@@ -753,9 +755,14 @@ extension BattleSimulator {
                 }
             }
 
-            let noEnemyNearby = !state.spatialGrid.entries(
+            var enemyNearby = false
+            state.spatialGrid.forEach(
                 within: Fixed(config.tuning.moraleRecoveryEnemyFreeRadiusCells), of: unit.kinematics.position
-            ).contains { state.units[Int($0.id.rawValue)].team != unit.team }
+            ) { entry in
+                guard !enemyNearby, state.units[Int(entry.id.rawValue)].team != unit.team else { return }
+                enemyNearby = true
+            }
+            let noEnemyNearby = !enemyNearby
 
             let unitType = config.unitType(unit.type)
             let (newMorale, broke, recovered) = Morale.step(

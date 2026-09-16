@@ -64,9 +64,10 @@ struct SpatialGrid: Sendable, Hashable {
         return sortedEntries[bucketOffsets[bucket]..<bucketOffsets[bucket + 1]]
     }
 
-    /// Units within `radiusCells` of `position`, by exact circular distance. Only the buckets overlapping the
-    /// query's bounding box are scanned, so cost tracks local density rather than army size.
-    func entries(within radiusCells: Fixed, of position: FixedVector2) -> [Entry] {
+    /// Visits every unit within `radiusCells` of `position`, by exact circular distance, without allocating: only
+    /// the buckets overlapping the query's bounding box are scanned, so cost tracks local density rather than army
+    /// size, and callers that just count or fold — most of them, once per unit per tick — never pay for an array.
+    func forEach(within radiusCells: Fixed, of position: FixedVector2, _ body: (Entry) -> Void) {
         precondition(radiusCells >= .zero, "SpatialGrid query radius must not be negative")
         let radiusSquared = radiusCells.squared
         let minColumn = clampToGrid((position.x - radiusCells).roundedDown() / bucketSizeCells, upperBound: columns - 1)
@@ -74,20 +75,28 @@ struct SpatialGrid: Sendable, Hashable {
         let minRow = clampToGrid((position.y - radiusCells).roundedDown() / bucketSizeCells, upperBound: rows - 1)
         let maxRow = clampToGrid((position.y + radiusCells).roundedDown() / bucketSizeCells, upperBound: rows - 1)
 
-        var found: [Entry] = []
         for row in minRow...maxRow {
             for column in minColumn...maxColumn {
                 for entry in entries(inBucketColumn: column, row: row)
                 where entry.position.distanceSquared(to: position) <= radiusSquared {
-                    found.append(entry)
+                    body(entry)
                 }
             }
         }
+    }
+
+    /// Units within `radiusCells` of `position`. Prefer `forEach` in a hot loop; this exists for callers that
+    /// genuinely need the collected list (and for the table tests that pin this query's behavior).
+    func entries(within radiusCells: Fixed, of position: FixedVector2) -> [Entry] {
+        var found: [Entry] = []
+        forEach(within: radiusCells, of: position) { found.append($0) }
         return found
     }
 
     func count(within radiusCells: Fixed, of position: FixedVector2) -> Int {
-        entries(within: radiusCells, of: position).count
+        var total = 0
+        forEach(within: radiusCells, of: position) { _ in total += 1 }
+        return total
     }
 }
 
