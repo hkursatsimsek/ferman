@@ -10,6 +10,7 @@
 		028B025E35184255B4E6EAEE /* FermanContent in Frameworks */ = {isa = PBXBuildFile; productRef = E254DED74E734232BC58A9A4 /* FermanContent */; };
 		185079ECEA794AD8B02BA055 /* FermanReplay in Frameworks */ = {isa = PBXBuildFile; productRef = EB76864D2BD64B709D82560E /* FermanReplay */; };
 		B259A4F837AA403FB8735DE5 /* FermanCore in Frameworks */ = {isa = PBXBuildFile; productRef = 807A17C2119947A9A0190001 /* FermanCore */; };
+		B5F2CCD96DD9462AB49C5729 /* FermanAI in Frameworks */ = {isa = PBXBuildFile; productRef = 99A3B0A300B44299A48AE289 /* FermanAI */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -60,6 +61,7 @@
 				B259A4F837AA403FB8735DE5 /* FermanCore in Frameworks */,
 				028B025E35184255B4E6EAEE /* FermanContent in Frameworks */,
 				185079ECEA794AD8B02BA055 /* FermanReplay in Frameworks */,
+				B5F2CCD96DD9462AB49C5729 /* FermanAI in Frameworks */,
 			);
 		};
 		886A0DA230596A870085EC75 /* Frameworks */ = {
@@ -116,6 +118,7 @@
 				807A17C2119947A9A0190001 /* FermanCore */,
 				E254DED74E734232BC58A9A4 /* FermanContent */,
 				EB76864D2BD64B709D82560E /* FermanReplay */,
+				99A3B0A300B44299A48AE289 /* FermanAI */,
 			);
 			productName = Ferman;
 			productReference = 886A0D9630596A860085EC75 /* Ferman.app */;
@@ -199,6 +202,7 @@
 				E9B102D3DD654BFDA3793407 /* XCLocalSwiftPackageReference "../Packages/FermanCore" */,
 				5E2966CA974A4CAA9FE5B1D6 /* XCLocalSwiftPackageReference "../Packages/FermanContent" */,
 				57B74AC98D4C43F0B749752D /* XCLocalSwiftPackageReference "../Packages/FermanReplay" */,
+				15EB656F119144938EEABA03 /* XCLocalSwiftPackageReference "../Packages/FermanAI" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 886A0D9730596A860085EC75 /* Products */;
@@ -579,6 +583,10 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
+		15EB656F119144938EEABA03 /* XCLocalSwiftPackageReference "../Packages/FermanAI" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Packages/FermanAI;
+		};
 		57B74AC98D4C43F0B749752D /* XCLocalSwiftPackageReference "../Packages/FermanReplay" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = ../Packages/FermanReplay;
@@ -597,6 +605,10 @@
 		807A17C2119947A9A0190001 /* FermanCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = FermanCore;
+		};
+		99A3B0A300B44299A48AE289 /* FermanAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FermanAI;
 		};
 		E254DED74E734232BC58A9A4 /* FermanContent */ = {
 			isa = XCSwiftPackageProductDependency;

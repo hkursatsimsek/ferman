@@ -1,7 +1,50 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
-
+    "unit.kalkan" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalkanlı"
+          }
+        }
+      }
+    },
+    "unit.mizrakci" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mızrakçı"
+          }
+        }
+      }
+    },
+    "unit.okcu" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okçu"
+          }
+        }
+      }
+    },
+    "unit.suvari" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süvari"
+          }
+        }
+      }
+    }
   },
   "version" : "1.0"
 }

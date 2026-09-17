@@ -59,6 +59,7 @@ struct ParameterDial: View {
         Text(range.contains(candidate) ? "\(candidate)" : " ")
             .font(FermanFont.counter(size: size, weight: weight))
             .foregroundStyle(Color.paper.opacity(opacity))
+            .accessibilityIdentifier("parameterDial.candidate.\(candidate)")
             .onTapGesture {
                 if range.contains(candidate) { value = candidate }
             }
