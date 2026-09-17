@@ -5,18 +5,68 @@
 //  Created by Hamza Kürşat Şimşek on 15.09.2026.
 //
 
+import FermanContent
 import FermanCore
 import SwiftUI
+import os
 
 struct ContentView: View {
+    private static let logger = Logger(subsystem: "com.hksimsek.FERMAN", category: "Content")
+
+    @State private var router = AppRouter()
+    private let catalog: ContentCatalog?
+
+    init() {
+        do {
+            catalog = try ContentCatalog.bundled()
+        } catch {
+            Self.logger.critical("Failed to load bundled content: \(error, privacy: .public)")
+            catalog = nil
+        }
+    }
+
     var body: some View {
-        // No AppRouter/navigation exists yet (F1.9); FermanUITests reaches RuleEditorView through
-        // this launch argument until real navigation supersedes it.
+        // FermanUITests still reaches RuleEditorView directly through this launch argument — it
+        // isn't a stop on the real navigation graph below (RuleEditor needs an army's unit types,
+        // which only exist once ArmySetup has placements; that hop isn't wired yet).
         if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
+        } else if let catalog {
+            NavigationStack(path: $router.path) {
+                HomeView(model: HomeModel(nextFront: CampaignFront.placeholders.first { $0.state == .open }))
+                    .navigationDestination(for: Route.self) { route in
+                        destination(for: route, catalog: catalog)
+                    }
+            }
+            .environment(router)
         } else {
-            TokenReferenceView()
+            contentLoadFailed
         }
+    }
+
+    @ViewBuilder
+    private func destination(for route: Route, catalog: ContentCatalog) -> some View {
+        switch route {
+        case .campaign:
+            CampaignView(model: CampaignModel())
+        case .armySetup(let front):
+            if let map = catalog.map(front.map) {
+                ArmySetupView(
+                    model: ArmySetupModel(
+                        map: map, catalog: catalog.units, totalBudget: front.playerBudget,
+                        constraintBadge: front.constraintBadge))
+            } else {
+                contentLoadFailed
+            }
+        }
+    }
+
+    private var contentLoadFailed: some View {
+        Text(String(localized: "İçerik yüklenemedi."))
+            .font(FermanFont.body())
+            .foregroundStyle(Color.paper)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(Color.ink)
     }
 
     private static func ruleEditorFixture() -> RuleEditorModel {

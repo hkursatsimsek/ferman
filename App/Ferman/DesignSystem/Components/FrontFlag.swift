@@ -1,6 +1,6 @@
 import SwiftUI
 
-enum FrontFlagState {
+enum FrontFlagState: Hashable {
     case cleared
     case open
     case locked
