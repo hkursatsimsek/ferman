@@ -12,6 +12,17 @@
         }
       }
     },
+    "unit.kalkan.pluralPossessiveGenitive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Kalkanlılarının"
+          }
+        }
+      }
+    },
     "unit.mizrakci" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19,6 +30,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Mızrakçı"
+          }
+        }
+      }
+    },
+    "unit.mizrakci.pluralPossessiveGenitive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mızrakçılarının"
           }
         }
       }
@@ -34,6 +56,17 @@
         }
       }
     },
+    "unit.okcu.pluralPossessiveGenitive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Okçularının"
+          }
+        }
+      }
+    },
     "unit.suvari" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41,6 +74,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Süvari"
+          }
+        }
+      }
+    },
+    "unit.suvari.pluralPossessiveGenitive" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Süvarilerinin"
           }
         }
       }

@@ -96,4 +96,14 @@ nonisolated enum OrderPhraseFormatter {
         let key = "unit.\(unitType.rawValue)"
         return Bundle.main.localizedString(forKey: key, value: key, table: nil)
     }
+
+    /// `unit.<id>.pluralPossessiveGenitive` (design brief §4.6 — "Okçularının %70'i ..."): plural +
+    /// 3rd-person possessive + genitive, e.g. "Okçu" → "Okçularının" (of the/your/their archers).
+    /// Turkish's 2nd- and 3rd-person possessive-genitive chains converge on this same surface form,
+    /// so `DebriefInsightFormatter` reuses it both for the player's own army (implicit "your") and,
+    /// prefixed with "Düşman ", for the enemy's ("of the enemy's archers").
+    static func pluralPossessiveGenitiveUnitName(_ unitType: UnitTypeID) -> String {
+        let key = "unit.\(unitType.rawValue).pluralPossessiveGenitive"
+        return Bundle.main.localizedString(forKey: key, value: key, table: nil)
+    }
 }

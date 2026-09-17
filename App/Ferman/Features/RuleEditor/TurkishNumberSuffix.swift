@@ -80,4 +80,19 @@ nonisolated enum TurkishNumberSuffix {
             }
         return "\(n)'\(consonant)\(vowel)n"
     }
+
+    /// The 3rd-person possessive used for "N percent of it/them" (design brief §4.6 — "%70'i"):
+    /// "70" → "70'i", "2" → "2'si" (a vowel-final word needs a buffer "s", not genitive's "n").
+    static func possessive(_ n: Int) -> String {
+        let terminal = terminal(for: n)
+        let buffer = terminal.endsInVowel ? "s" : ""
+        let vowel =
+            switch terminal.vowel {
+            case .frontUnrounded: "i"
+            case .frontRounded: "ü"
+            case .backUnrounded: "ı"
+            case .backRounded: "u"
+            }
+        return "\(n)'\(buffer)\(vowel)"
+    }
 }

@@ -20,6 +20,12 @@ struct TurkishNumberSuffixTests {
         50: "50'den", 60: "60'tan", 70: "70'ten", 80: "80'den", 90: "90'dan", 100: "100'den",
     ]
 
+    private static let possessiveTerminals: [Int: String] = [
+        0: "0'ı", 1: "1'i", 2: "2'si", 3: "3'ü", 4: "4'ü", 5: "5'i", 6: "6'sı", 7: "7'si",
+        8: "8'i", 9: "9'u", 10: "10'u", 20: "20'si", 30: "30'u", 40: "40'ı", 50: "50'si",
+        60: "60'ı", 70: "70'i", 80: "80'i", 90: "90'ı", 100: "100'ü",
+    ]
+
     @Test(arguments: Array(genitiveTerminals.keys))
     func genitiveMatchesHandVerifiedTerminals(n: Int) {
         #expect(TurkishNumberSuffix.genitive(n) == Self.genitiveTerminals[n])
@@ -42,6 +48,18 @@ struct TurkishNumberSuffixTests {
         let terminalDigit = terminalKey(for: n)
         let expectedSuffix = Self.ablativeTerminals[terminalDigit]!.drop { $0 != "'" }
         #expect(TurkishNumberSuffix.ablative(n).hasSuffix(expectedSuffix))
+    }
+
+    @Test(arguments: Array(possessiveTerminals.keys))
+    func possessiveMatchesHandVerifiedTerminals(n: Int) {
+        #expect(TurkishNumberSuffix.possessive(n) == Self.possessiveTerminals[n])
+    }
+
+    @Test(arguments: 0...100)
+    func possessiveSharesItsTerminalsSuffixWithItsLastDigit(n: Int) {
+        let terminalDigit = terminalKey(for: n)
+        let expectedSuffix = Self.possessiveTerminals[terminalDigit]!.drop { $0 != "'" }
+        #expect(TurkishNumberSuffix.possessive(n).hasSuffix(expectedSuffix))
     }
 
     /// Which of the 20 hand-verified table entries a number shares its spoken terminal with.
