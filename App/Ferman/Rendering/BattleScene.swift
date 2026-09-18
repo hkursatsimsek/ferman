@@ -34,9 +34,15 @@ final class BattleScene: SKScene {
         )
         super.init(size: sceneSize)
 
-        anchorPoint = .zero
+        // `.aspectFit`: the sand table (design brief §4.5 — "Tam ekran kum masası") must show the
+        // whole battlefield at once. Most maps are wider than a portrait phone screen (e.g. 24x14
+        // cells = 768x448pt); `.aspectFill` cropped that down to a sliver, hiding most of the battle
+        // off-screen. `anchorPoint` stays `.zero` — it places the scene's origin (not its center) at
+        // that point in the view, so every node position in this file stays a bottom-left-relative
+        // coordinate; `BattleSceneView` centers the letterboxed result via SwiftUI's own
+        // `aspectRatio(_:contentMode:)` instead of fighting SpriteKit's anchor semantics for it.
         backgroundColor = SKColor(red: 0x0F / 255, green: 0x16 / 255, blue: 0x1B / 255, alpha: 1)
-        scaleMode = .aspectFill
+        scaleMode = .aspectFit
         isUserInteractionEnabled = true
 
         addChild(Self.makeSandTable(size: sceneSize))
