@@ -1,0 +1,1394 @@
+{
+  "levels": [
+    {
+      "id": 1,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 0,
+        "availableConditions": [
+          "always"
+        ],
+        "availableActions": [
+          "advance"
+        ]
+      },
+      "playerBudget": 100,
+      "seed": 1,
+      "maxTicks": 1800,
+      "enemy": {
+        "placements": [
+          {
+            "type": "suvari",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 71,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "suvari",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "mizrakci",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 72,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "mizrakci",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 1,
+        "availableConditions": [
+          "always",
+          "enemyWithin"
+        ],
+        "availableActions": [
+          "advance",
+          "hold",
+          "retreat"
+        ]
+      },
+      "playerBudget": 90,
+      "seed": 1,
+      "maxTicks": 1800,
+      "enemy": {
+        "placements": [
+          {
+            "type": "kalkan",
+            "cell": 18,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 42,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "okcu",
+            "cell": 5,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 29,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 53,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 3,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 2,
+        "availableConditions": [
+          "always",
+          "enemyWithin",
+          "healthBelow"
+        ],
+        "availableActions": [
+          "advance",
+          "hold",
+          "retreat",
+          "takeCover"
+        ]
+      },
+      "playerBudget": 90,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "kalkan",
+            "cell": 18,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 42,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 66,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "okcu",
+            "cell": 5,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 29,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 53,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "healthBelow",
+                  "percent": 40
+                },
+                "action": {
+                  "kind": "takeCover"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 4,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 3,
+        "availableConditions": [
+          "enemyWithin",
+          "healthBelow",
+          "allyCountBelow",
+          "isFlanked",
+          "targetInRange",
+          "timeAfter",
+          "nearestEnemyType",
+          "moraleBelow",
+          "terrainIs",
+          "commanderDead",
+          "enemyDensityAbove",
+          "always"
+        ],
+        "availableActions": [
+          "advance",
+          "retreat",
+          "hold",
+          "focusFire",
+          "flankLeft",
+          "flankRight",
+          "regroup",
+          "useAbility",
+          "takeCover",
+          "guardCommander",
+          "scatter"
+        ]
+      },
+      "playerBudget": 150,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "kalkan",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 71,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 95,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "kalkan",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 72,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 96,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 5,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 4,
+        "availableConditions": [
+          "enemyWithin",
+          "healthBelow",
+          "allyCountBelow",
+          "isFlanked",
+          "targetInRange",
+          "timeAfter",
+          "nearestEnemyType",
+          "moraleBelow",
+          "terrainIs",
+          "commanderDead",
+          "enemyDensityAbove",
+          "always"
+        ],
+        "availableActions": [
+          "advance",
+          "retreat",
+          "hold",
+          "focusFire",
+          "flankLeft",
+          "flankRight",
+          "regroup",
+          "useAbility",
+          "takeCover",
+          "guardCommander",
+          "scatter"
+        ]
+      },
+      "playerBudget": 170,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "suvari",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 71,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 95,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 119,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 143,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 167,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "suvari",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "mizrakci",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 72,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 96,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 120,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "mizrakci",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "healthBelow",
+                  "percent": 40
+                },
+                "action": {
+                  "kind": "takeCover"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 6,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 4,
+        "availableConditions": [
+          "enemyWithin",
+          "healthBelow",
+          "allyCountBelow",
+          "isFlanked",
+          "targetInRange",
+          "timeAfter",
+          "nearestEnemyType",
+          "moraleBelow",
+          "terrainIs",
+          "commanderDead",
+          "enemyDensityAbove",
+          "always"
+        ],
+        "availableActions": [
+          "advance",
+          "retreat",
+          "hold",
+          "focusFire",
+          "flankLeft",
+          "flankRight",
+          "regroup",
+          "useAbility",
+          "takeCover",
+          "guardCommander",
+          "scatter"
+        ]
+      },
+      "playerBudget": 225,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "suvari",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 71,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 95,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 119,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 143,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 167,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 191,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 215,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 239,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "suvari",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "mizrakci",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 72,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 96,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 120,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 144,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 168,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "mizrakci",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "healthBelow",
+                  "percent": 40
+                },
+                "action": {
+                  "kind": "takeCover"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 7,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 4,
+        "availableConditions": [
+          "enemyWithin",
+          "healthBelow",
+          "allyCountBelow",
+          "isFlanked",
+          "targetInRange",
+          "timeAfter",
+          "nearestEnemyType",
+          "moraleBelow",
+          "terrainIs",
+          "commanderDead",
+          "enemyDensityAbove",
+          "always"
+        ],
+        "availableActions": [
+          "advance",
+          "retreat",
+          "hold",
+          "focusFire",
+          "flankLeft",
+          "flankRight",
+          "regroup",
+          "useAbility",
+          "takeCover",
+          "guardCommander",
+          "scatter"
+        ]
+      },
+      "playerBudget": 280,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "suvari",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 71,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 95,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 119,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 143,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 167,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 191,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 215,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 239,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 263,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 287,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 311,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "suvari",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "mizrakci",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 72,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 96,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 120,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 144,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 168,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 192,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 216,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "mizrakci",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "healthBelow",
+                  "percent": 40
+                },
+                "action": {
+                  "kind": "takeCover"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": 8,
+      "map": "alan",
+      "objective": "eliminate",
+      "constraints": {
+        "maxRules": 4,
+        "availableConditions": [
+          "enemyWithin",
+          "healthBelow",
+          "allyCountBelow",
+          "isFlanked",
+          "targetInRange",
+          "timeAfter",
+          "nearestEnemyType",
+          "moraleBelow",
+          "terrainIs",
+          "commanderDead",
+          "enemyDensityAbove",
+          "always"
+        ],
+        "availableActions": [
+          "advance",
+          "retreat",
+          "hold",
+          "focusFire",
+          "flankLeft",
+          "flankRight",
+          "regroup",
+          "useAbility",
+          "takeCover",
+          "guardCommander",
+          "scatter"
+        ]
+      },
+      "playerBudget": 390,
+      "seed": 1,
+      "maxTicks": 3600,
+      "enemy": {
+        "placements": [
+          {
+            "type": "suvari",
+            "cell": 23,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 47,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 71,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 95,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 119,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 143,
+            "isCommander": false
+          },
+          {
+            "type": "suvari",
+            "cell": 167,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 191,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 215,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 239,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 263,
+            "isCommander": false
+          },
+          {
+            "type": "kalkan",
+            "cell": 287,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 311,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 335,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 22,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 46,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 70,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "suvari",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "kalkan",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "referenceSolution": {
+        "placements": [
+          {
+            "type": "mizrakci",
+            "cell": 0,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 24,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 48,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 72,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 96,
+            "isCommander": false
+          },
+          {
+            "type": "mizrakci",
+            "cell": 120,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 144,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 168,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 192,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 216,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 240,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 264,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 288,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 312,
+            "isCommander": false
+          }
+        ],
+        "programs": [
+          {
+            "unitType": "mizrakci",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "advance"
+                }
+              }
+            ]
+          },
+          {
+            "unitType": "okcu",
+            "rules": [
+              {
+                "condition": {
+                  "kind": "healthBelow",
+                  "percent": 40
+                },
+                "action": {
+                  "kind": "takeCover"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "enemyWithin",
+                  "cells": 3
+                },
+                "action": {
+                  "kind": "retreat"
+                }
+              },
+              {
+                "condition": {
+                  "kind": "always"
+                },
+                "action": {
+                  "kind": "hold"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

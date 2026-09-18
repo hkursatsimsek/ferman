@@ -9,11 +9,12 @@ struct BundledContentTests {
     @Test func loadsAndValidates() throws {
         let catalog = try ContentCatalog.bundled()
         #expect(catalog.units.map(\.id) == ["kalkan", "mizrakci", "okcu", "suvari"])
-        #expect(catalog.maps.map(\.id) == ["gecit", "ova"])
+        #expect(catalog.maps.map(\.id) == ["alan", "gecit", "ova"])
         #expect(catalog.unitType("okcu")?.ability == .volley)
         #expect(catalog.unitType("fil") == nil)
         #expect(catalog.map("ova")?.width == 24)
         #expect(catalog.map("yok") == nil)
+        #expect(catalog.levels.map(\.id) == Array(1...8))
     }
 
     /// Both teams must face the same battlefield, or balance runs would measure the map instead of the orders.
@@ -193,6 +194,7 @@ struct ContentValidationTests {
             .invalidMap("ova", .empty),
             .duplicateMap("ova"),
             .noMaps,
+            .invalidLevelCatalog(.duplicateIdentifier(1)),
         ]
         #expect(Set(errors.map(\.description)).count == errors.count)
     }

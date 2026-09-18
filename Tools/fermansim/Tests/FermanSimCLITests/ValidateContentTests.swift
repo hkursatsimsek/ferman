@@ -15,7 +15,8 @@ struct ValidateContentTests {
         #expect(exitCode == ExitCode.success, "\(errors)")
         #expect(
             output == [
-                "content is valid (version 1): 4 unit types [kalkan, mizrakci, okcu, suvari], 2 maps [gecit, ova]"
+                "content is valid (version 1): 4 unit types [kalkan, mizrakci, okcu, suvari], "
+                    + "3 maps [alan, gecit, ova], 8 levels"
             ])
     }
 

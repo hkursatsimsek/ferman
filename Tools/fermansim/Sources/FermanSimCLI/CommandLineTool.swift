@@ -160,7 +160,8 @@ public enum CommandLineTool {
         let mapList = catalog.maps.map(\.id.rawValue).joined(separator: ", ")
         console.standardOutput(
             "content is valid (version \(ContentVersion.current)): "
-                + "\(catalog.units.count) unit types [\(unitList)], \(catalog.maps.count) maps [\(mapList)]"
+                + "\(catalog.units.count) unit types [\(unitList)], \(catalog.maps.count) maps [\(mapList)], "
+                + "\(catalog.levels.count) levels"
         )
         return ExitCode.success
     }

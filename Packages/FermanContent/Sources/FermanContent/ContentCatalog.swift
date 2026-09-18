@@ -42,20 +42,23 @@ public struct NamedMap: Sendable, Hashable {
     }
 }
 
-/// The validated game content: unit types and maps. Levels join in F1.12.
+/// The validated game content: unit types, maps and levels.
 ///
-/// On disk the content is a directory holding `units.json` and `maps/<id>.json`; the app ships it as this package's
-/// resource bundle and `fermansim validate-content` can point at a working copy.
+/// On disk the content is a directory holding `units.json`, `maps/<id>.json` and an optional `levels.json`; the app
+/// ships it as this package's resource bundle and `fermansim validate-content` can point at a working copy.
 public struct ContentCatalog: Sendable, Hashable {
     public static let unitsFileName = "units.json"
     public static let mapsDirectoryName = "maps"
+    public static let levelsFileName = "levels.json"
 
     /// Ordered by `id`, ready to become `BattleConfig.unitCatalog`.
     public let units: [UnitType]
     /// Ordered by `id`.
     public let maps: [NamedMap]
+    /// Ordered by `id`. Empty when the content has no `levels.json` (F0.5's fixtures, for instance).
+    public let levels: [LevelDefinition]
 
-    public init(units: [UnitType], maps: [NamedMap]) throws(ContentError) {
+    public init(units: [UnitType], maps: [NamedMap], levels: [LevelDefinition] = []) throws(ContentError) {
         let sortedUnits = units.sorted { $0.id < $1.id }
         do {
             try UnitType.validateCatalog(sortedUnits)
@@ -76,8 +79,18 @@ public struct ContentCatalog: Sendable, Hashable {
             }
         }
 
+        let sortedLevels = levels.sorted { $0.id < $1.id }
+        if !sortedLevels.isEmpty {
+            do {
+                try LevelDefinition.validateCatalog(sortedLevels, units: sortedUnits, maps: sortedMaps)
+            } catch {
+                throw .invalidLevelCatalog(error)
+            }
+        }
+
         self.units = sortedUnits
         self.maps = sortedMaps
+        self.levels = sortedLevels
     }
 
     /// The content shipped inside this package.
@@ -116,7 +129,15 @@ public struct ContentCatalog: Sendable, Hashable {
             }
         }
 
-        return try ContentCatalog(units: units, maps: maps)
+        let levelsURL = root.appendingPathComponent(levelsFileName)
+        let levels: [LevelDefinition]
+        if FileManager.default.fileExists(atPath: levelsURL.path) {
+            levels = try decode(LevelsFile.self, at: levelsURL).levels
+        } else {
+            levels = []
+        }
+
+        return try ContentCatalog(units: units, maps: maps, levels: levels)
     }
 
     public func unitType(_ id: UnitTypeID) -> UnitType? {
@@ -125,6 +146,10 @@ public struct ContentCatalog: Sendable, Hashable {
 
     public func map(_ id: MapID) -> BattleMap? {
         maps.first { $0.id == id }?.map
+    }
+
+    public func level(_ id: Int) -> LevelDefinition? {
+        levels.first { $0.id == id }
     }
 
     private static func decode<Value: Decodable>(_ type: Value.Type, at url: URL) throws(ContentError) -> Value {
@@ -146,6 +171,10 @@ private struct UnitsFile: Decodable {
     let units: [UnitType]
 }
 
+private struct LevelsFile: Decodable {
+    let levels: [LevelDefinition]
+}
+
 /// Map rows are decoded separately from `BattleMap` so structural problems surface as a typed `BattleMapError`.
 private struct MapFile: Decodable {
     let terrain: [String]
@@ -160,6 +189,7 @@ public enum ContentError: Error, Equatable, Sendable {
     case invalidMap(MapID, BattleMapError)
     case duplicateMap(MapID)
     case noMaps
+    case invalidLevelCatalog(LevelError)
 }
 
 extension ContentError: CustomStringConvertible {
@@ -179,6 +209,8 @@ extension ContentError: CustomStringConvertible {
             "map '\(id.rawValue)' is defined more than once"
         case .noMaps:
             "content has no maps"
+        case .invalidLevelCatalog(let error):
+            "invalid level catalog: \(error)"
         }
     }
 }
