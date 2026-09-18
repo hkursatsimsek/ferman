@@ -1,6 +1,546 @@
 {
   "sourceLanguage" : "tr",
   "strings" : {
+    " " : {
+
+    },
+    "%@ %%%@ %@ aynı anda morali bozuldu." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %%%2$@ %3$@ aynı anda morali bozuldu."
+          }
+        }
+      }
+    },
+    "%@ %%%@ %@ aynı anda öldü." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %%%2$@ %3$@ aynı anda öldü."
+          }
+        }
+      }
+    },
+    "%@ YÜKLEN" : {
+
+    },
+    "%@, %lld puan" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, %2$lld puan"
+          }
+        }
+      }
+    },
+    "%@, komutan" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld / %lld" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld / %2$lld"
+          }
+        }
+      }
+    },
+    "%lld kez" : {
+
+    },
+    "%lld kez tetiklendi" : {
+
+    },
+    "%lld puan" : {
+
+    },
+    "%lld. cephe" : {
+
+    },
+    "%lld. Cephe" : {
+
+    },
+    "%lld. Cephe — %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld. Cephe — %2$@"
+          }
+        }
+      }
+    },
+    "%lld. Cephe, %@, %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld. Cephe, %2$@, %3$@"
+          }
+        }
+      }
+    },
+    "%lld. emir" : {
+
+    },
+    "%lld. saniyede" : {
+
+    },
+    "%lld. saniyeden sonra" : {
+
+    },
+    "%lld×" : {
+
+    },
+    "%lldp" : {
+
+    },
+    "⚠ Bu emir hiç çalışmadı." : {
+
+    },
+    "3 maç bekliyor" : {
+
+    },
+    "14. Cephe — Taş Geçit" : {
+
+    },
+    "açık" : {
+
+    },
+    "Açık" : {
+
+    },
+    "açık arazideysem" : {
+
+    },
+    "adet" : {
+
+    },
+    "Arazi" : {
+
+    },
+    "Arena" : {
+
+    },
+    "Aşağı taşı" : {
+
+    },
+    "Askerlerin emir almazsa düşmana doğru yürür ve öldürülene kadar dövüşür." : {
+
+    },
+    "Askerlerin emir almazsa düşmana doğru yürür." : {
+
+    },
+    "Ayarlar" : {
+
+    },
+    "Başa sar" : {
+
+    },
+    "başka durumda" : {
+
+    },
+    "Başka durumda" : {
+
+    },
+    "Belirli bir andan sonra" : {
+
+    },
+    "Birim türü" : {
+
+    },
+    "Birimlerini aşağıdaki tepsiden buraya sürükle." : {
+
+    },
+    "Boş hücre" : {
+
+    },
+    "Bu emrin bir parametresi eksik kaldı. Tekrar dene." : {
+
+    },
+    "Bulunduğum arazi" : {
+
+    },
+    "Bütçe" : {
+
+    },
+    "buton 8pt" : {
+
+    },
+    "canım %%%@ altındaysa" : {
+
+    },
+    "Canım azaldığında" : {
+
+    },
+    "Cephe" : {
+
+    },
+    "Cephe Yarıldı" : {
+
+    },
+    "Cephe yarıldı." : {
+
+    },
+    "DAĞIL" : {
+
+    },
+    "Dağıl" : {
+
+    },
+    "Değer" : {
+
+    },
+    "Demir Kapı" : {
+
+    },
+    "Dengeli" : {
+
+    },
+    "Dostlarım azaldığında" : {
+
+    },
+    "Duraklat" : {
+
+    },
+    "Düşman " : {
+
+    },
+    "düşman %lld kareden yakınsa" : {
+
+    },
+    "düşman 3 kareden yakınsa" : {
+
+    },
+    "Düşman bütçesi" : {
+
+    },
+    "düşman kompozisyonu gizli" : {
+
+    },
+    "Düşman ordusu dağıldı." : {
+
+    },
+    "Düşman ordusu yok edildi." : {
+
+    },
+    "Düşman yakınlığı" : {
+
+    },
+    "Düşman yoğunluğu" : {
+
+    },
+    "Düzenle" : {
+
+    },
+    "Ekle" : {
+
+    },
+    "Emir ekle" : {
+
+    },
+    "Emir Kütüphanesi" : {
+
+    },
+    "Emir tamamlanmadı" : {
+
+    },
+    "Emirleri Düzelt" : {
+
+    },
+    "Emirleri Yaz" : {
+
+    },
+    "Emirlerin" : {
+
+    },
+    "Emri Düzenle" : {
+
+    },
+    "En yakın / en zayıf" : {
+
+    },
+    "en yakın düşman %@ ise" : {
+
+    },
+    "En yakın düşman türü" : {
+
+    },
+    "Eşik" : {
+
+    },
+    "Eylem" : {
+
+    },
+    "geçildi" : {
+
+    },
+    "Geri çekil" : {
+
+    },
+    "GERİ ÇEKİL" : {
+
+    },
+    "Hat tutuldu." : {
+
+    },
+    "Hat, süre sonunda tutuldu." : {
+
+    },
+    "Hat, süre sonunda yarıldı." : {
+
+    },
+    "Hazır emir setleri" : {
+
+    },
+    "Hazır emir setlerini gör" : {
+
+    },
+    "Hazırlan" : {
+
+    },
+    "Hedef" : {
+
+    },
+    "Henüz emir yok." : {
+
+    },
+    "HÜCUM" : {
+
+    },
+    "İçerik yüklenemedi." : {
+
+    },
+    "İlerle" : {
+
+    },
+    "İLERLE" : {
+
+    },
+    "İlk Tepe" : {
+
+    },
+    "İzle" : {
+
+    },
+    "jeton" : {
+
+    },
+    "Kaldır" : {
+
+    },
+    "KALKAN DUVARI" : {
+
+    },
+    "Kara Boğaz" : {
+
+    },
+    "kare" : {
+
+    },
+    "Kaydet" : {
+
+    },
+    "kilitli" : {
+
+    },
+    "Kısıt" : {
+
+    },
+    "Kızıl Yamaç" : {
+
+    },
+    "Klibi Paylaş" : {
+
+    },
+    "komutan düştüyse" : {
+
+    },
+    "Komutan Yap" : {
+
+    },
+    "KOMUTANI KORU" : {
+
+    },
+    "Komutanı koru" : {
+
+    },
+    "Komutanım öldüğünde" : {
+
+    },
+    "Komutanlığı Kaldır" : {
+
+    },
+    "Koşul" : {
+
+    },
+    "Kum Masası" : {
+
+    },
+    "Kum Sırtı" : {
+
+    },
+    "Kural hakkın" : {
+
+    },
+    "Kuru Vadi" : {
+
+    },
+    "Kuşatıldığımda" : {
+
+    },
+    "kuşatıldıysam" : {
+
+    },
+    "Malzeme tokenları. Marka rengi yok: soğuk kum, ham kâğıt, oksitlenmiş pirinç, çiğ demir." : {
+
+    },
+    "menzilimde %@ varsa" : {
+
+    },
+    "Menzilimde belirli bir birim" : {
+
+    },
+    "Mesafe" : {
+
+    },
+    "MIZRAK DUVARI" : {
+
+    },
+    "Moloz" : {
+
+    },
+    "molozdaysam" : {
+
+    },
+    "moralim %%%@ altındaysa" : {
+
+    },
+    "Moralim azaldığında" : {
+
+    },
+    "Ordun dağıldı." : {
+
+    },
+    "Ordun yok edildi." : {
+
+    },
+    "ordusunun" : {
+
+    },
+    "Orman" : {
+
+    },
+    "ormandaysam" : {
+
+    },
+    "Oynat" : {
+
+    },
+    "panel 14pt" : {
+
+    },
+    "pusula 2pt" : {
+
+    },
+    "Sağdan kuşat" : {
+
+    },
+    "SAĞDAN KUŞAT" : {
+
+    },
+    "Saldırgan" : {
+
+    },
+    "Savaş berabere bitti." : {
+
+    },
+    "Savaşa Başla" : {
+
+    },
+    "Savaşı Başlat" : {
+
+    },
+    "Sayı" : {
+
+    },
+    "Seferberlik" : {
+
+    },
+    "Senin bütçen" : {
+
+    },
+    "Sil" : {
+
+    },
+    "Siper al" : {
+
+    },
+    "SİPER AL" : {
+
+    },
+    "Sis" : {
+
+    },
+    "Sis — düşman kompozisyonu gizli" : {
+
+    },
+    "sn" : {
+
+    },
+    "Soldan kuşat" : {
+
+    },
+    "SOLDAN KUŞAT" : {
+
+    },
+    "Son Hat" : {
+
+    },
+    "Sonuç" : {
+
+    },
+    "Su" : {
+
+    },
+    "sudaysam" : {
+
+    },
+    "Süre" : {
+
+    },
+    "Tamam" : {
+
+    },
+    "Taş Geçit" : {
+
+    },
+    "Temkinli" : {
+
+    },
+    "Tepe" : {
+
+    },
+    "tepedeysem" : {
+
+    },
+    "Toplan" : {
+
+    },
+    "TOPLAN" : {
+
+    },
+    "Tüm cepheler geçildi" : {
+
+    },
     "unit.kalkan" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -88,6 +628,48 @@
           }
         }
       }
+    },
+    "Varsayılan Emri Düzenle" : {
+
+    },
+    "Vazgeç" : {
+
+    },
+    "yakınımda %@ fazla düşman varsa" : {
+
+    },
+    "yanımda %@ az dost varsa" : {
+
+    },
+    "YAYLIM" : {
+
+    },
+    "Yaz" : {
+
+    },
+    "Yeni Emir" : {
+
+    },
+    "Yerinde kal" : {
+
+    },
+    "YERİNDE KAL" : {
+
+    },
+    "Yeteneğini kullan" : {
+
+    },
+    "YETENEĞİNİ KULLAN" : {
+
+    },
+    "Yukarı taşı" : {
+
+    },
+    "Yüklen" : {
+
+    },
+    "YÜKLEN" : {
+
     }
   },
   "version" : "1.0"
