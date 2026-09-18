@@ -10,6 +10,9 @@ private struct ActionResolution: Sendable {
     /// Set only on the tick `useAbility` actually fires a `volley`; its radius is a tuning constant the combat
     /// phase already has, so only the center needs to travel here.
     var volleyCenter: FixedVector2?
+    /// A `spearWall`, `shieldWall` or `charge` that started this tick — only so the event stream can say so
+    /// (D27). `volley` records its own event once its hits are known, in the combat phase.
+    var startedAbility: Ability?
 }
 
 /// The tick pipeline (FERMAN-PLAN §5.2): the only place `FermanCore` turns a `BattleConfig` into a `BattleResult`.
@@ -37,6 +40,9 @@ public enum BattleSimulator {
             var resolutions = [ActionResolution](repeating: ActionResolution(), count: state.units.count)
             for index in state.units.indices where state.units[index].isAlive {
                 resolutions[index] = Self.resolveAction(unitIndex: index, state: &state, config: config)
+                if options.recordEvents, let ability = resolutions[index].startedAbility {
+                    events.append(BattleEvent(tick: Int32(tick), kind: .abilityUsed(state.units[index].id, ability)))
+                }
             }
 
             Self.runSteeringPhase(state: &state, config: config, resolutions: resolutions)
@@ -380,7 +386,8 @@ extension BattleSimulator {
         return ActionResolution(
             intent: .hold,
             attackTargetID: volleyFired ? nil : attackTarget,
-            volleyCenter: volleyFired ? attackTarget.map { state.units[Int($0.rawValue)].kinematics.position } : nil
+            volleyCenter: volleyFired ? attackTarget.map { state.units[Int($0.rawValue)].kinematics.position } : nil,
+            startedAbility: wasReady && unitType.ability != .volley ? unitType.ability : nil
         )
     }
 

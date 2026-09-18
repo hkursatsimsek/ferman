@@ -15,6 +15,8 @@ public struct BattleEvent: Sendable, Hashable {
         /// The unit switched to a different order; this is what `ruleFireCounts` counts (D9).
         case ruleActivated(UnitID, ruleIndex: Int)
         case attack(UnitID, target: UnitID, damage: Int)
+        /// An ability started: a `volley` after its hits (same tick), a wall or charge when `useAbility` finds it
+        /// off cooldown. Recorded for the replay only (D27); the simulation state is the same without it.
         case abilityUsed(UnitID, Ability)
         case death(UnitID)
         case moraleBroken(UnitID)

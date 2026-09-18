@@ -243,6 +243,36 @@ struct BattleSimulatorTests {
         #expect(tickZeroPlayerEvents.contains { $0.kind == .abilityUsed(UnitID(rawValue: 0), .volley) })
     }
 
+    /// The renderer shows a spear wall, shield wall or charge only if the event stream says one started
+    /// (D27): exactly one `abilityUsed` per activation, none while the cooldown runs — and none at all
+    /// when events aren't recorded, since emitting it must not touch the simulation (checksum unchanged).
+    @Test(arguments: [
+        (Fixtures.spearman, Ability.spearWall), (Fixtures.shield, .shieldWall), (Fixtures.cavalry, .charge),
+    ])
+    func useAbilityRecordsEachActivationOnce(unitType: UnitTypeID, ability: Ability) throws {
+        let map = try BattleMap(terrainRows: [String(repeating: ".", count: 12)], zoneRows: ["P..........E"])
+        let config = BattleConfig(
+            map: map, unitCatalog: Fixtures.catalog.sorted { $0.id < $1.id },
+            player: TeamSetup(
+                placements: [UnitPlacement(type: unitType, cell: 0)],
+                programs: [RuleProgram(unitType: unitType, rules: [Rule(condition: .always, action: .useAbility)])]),
+            enemy: TeamSetup(
+                placements: [UnitPlacement(type: Fixtures.shield, cell: 11)],
+                programs: [RuleProgram(unitType: Fixtures.shield, rules: [Rule(condition: .always, action: .hold)])]),
+            objective: .eliminate, constraints: .unrestricted, seed: 1, maxTicks: 200
+        )
+
+        let result = BattleSimulator.run(config)
+        let activations = result.events.filter { $0.kind == .abilityUsed(UnitID(rawValue: 0), ability) }
+        #expect(activations.count == 1)
+        let firstOrder = try #require(
+            result.events.first { $0.kind == .ruleActivated(UnitID(rawValue: 0), ruleIndex: 0) })
+        #expect(activations.first?.tick == firstOrder.tick)
+
+        let unrecorded = BattleSimulator.run(config, options: SimulationOptions(recordEvents: false))
+        #expect(unrecorded.checksum == result.checksum)
+    }
+
     @Test func focusFirePicksTheWeakestEnemyInReachWhenNoTypeIsPreferred() throws {
         let config = try Self.focusFireConfig(preferredType: nil)
         let result = BattleSimulator.run(config)
