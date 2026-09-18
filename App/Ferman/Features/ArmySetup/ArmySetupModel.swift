@@ -1,3 +1,4 @@
+import CoreGraphics
 import FermanCore
 import Foundation
 import Observation
@@ -42,6 +43,10 @@ final class ArmySetupModel {
     let gridColumns: ClosedRange<Int>
     let gridRows: ClosedRange<Int>
 
+    /// The deployment zone's patch of the baked sand table (`TerrainBaker`) — the same picture the
+    /// battle draws under these cells, so the ground a unit is placed on is the ground it fights on.
+    let zoneTableImage: CGImage?
+
     private(set) var placements: [ArmyPlacement]
     var selectedPlacementID: ArmyPlacement.ID?
 
@@ -65,6 +70,20 @@ final class ArmySetupModel {
         let rows = coordinates.map(\.row)
         self.gridColumns = (columns.min() ?? 0)...(columns.max() ?? 0)
         self.gridRows = (rows.min() ?? 0)...(rows.max() ?? 0)
+        self.zoneTableImage = Self.zoneImage(map: map, columns: gridColumns, rows: gridRows)
+    }
+
+    private static func zoneImage(map: BattleMap, columns: ClosedRange<Int>, rows: ClosedRange<Int>) -> CGImage? {
+        let projection = BoardProjection.table(for: map)
+        let scale = TerrainBaker.battlePixelsPerPoint
+        guard let table = TerrainBaker.bake(map: map, projection: projection, pixelsPerPoint: scale) else {
+            return nil
+        }
+        let corner = projection.viewRect(column: columns.upperBound, row: rows.lowerBound)
+        let opposite = projection.viewRect(column: columns.lowerBound, row: rows.upperBound)
+        let zone = corner.union(opposite)
+        return table.cropping(
+            to: CGRect(x: zone.minX * scale, y: zone.minY * scale, width: zone.width * scale, height: zone.height * scale))
     }
 
     // MARK: - Derived state

@@ -27,7 +27,7 @@ final class BattleScene: SKScene {
     init(map: BattleMap, timeline: ReplayTimeline, clock: ReplayClock) {
         self.timeline = timeline
         self.clock = clock
-        self.projection = BoardProjection(map: map)
+        self.projection = BoardProjection.table(for: map)
         tappedUnitLabel = Self.makeTappedUnitLabel()
 
         // Upright (D26): the landscape map is drawn a quarter turn counter-clockwise, player at the
@@ -43,7 +43,7 @@ final class BattleScene: SKScene {
         scaleMode = .aspectFit
         isUserInteractionEnabled = true
 
-        addChild(Self.makeSandTable(size: sceneSize))
+        addChild(Self.makeSandTable(map: map, projection: projection))
         addChild(tappedUnitLabel)
         buildEventIndex()
         buildUnitPool()
@@ -57,17 +57,21 @@ final class BattleScene: SKScene {
 
     // MARK: - Setup
 
-    private static func makeSandTable(size: CGSize) -> SKShapeNode {
-        let node = SKShapeNode(rect: CGRect(origin: .zero, size: size))
-        node.strokeColor = .clear
+    /// The whole table — rim, lamp-lit sand, terrain, grid — is one pre-baked texture (`TerrainBaker`),
+    /// drawn once per frame as a single sprite.
+    private static func makeSandTable(map: BattleMap, projection: BoardProjection) -> SKSpriteNode {
+        let size = projection.boardSize
+        let node: SKSpriteNode
+        if let image = TerrainBaker.bake(
+            map: map, projection: projection, pixelsPerPoint: TerrainBaker.battlePixelsPerPoint)
+        {
+            node = SKSpriteNode(texture: SKTexture(cgImage: image), size: size)
+        } else {
+            node = SKSpriteNode(color: SKColor(red: 0x5E / 255, green: 0x6A / 255, blue: 0x63 / 255, alpha: 1), size: size)
+        }
+        node.anchorPoint = .zero
+        node.position = .zero
         node.zPosition = -1
-        node.fillColor = .white
-        let shader = SKShader(fileNamed: "SandLight.fsh")
-        shader.uniforms = [
-            SKUniform(name: "u_lit_color", vectorFloat4: vector_float4(0x7A / 255, 0x87 / 255, 0x80 / 255, 1)),
-            SKUniform(name: "u_shadow_color", vectorFloat4: vector_float4(0x5E / 255, 0x6A / 255, 0x63 / 255, 1)),
-        ]
-        node.fillShader = shader
         return node
     }
 

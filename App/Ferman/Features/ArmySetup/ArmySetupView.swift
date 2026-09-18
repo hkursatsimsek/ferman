@@ -61,6 +61,11 @@ struct ArmySetupView: View {
                 proxy.size.width / CGFloat(columnCount), proxy.size.height / CGFloat(max(screenRows.count, 1)))
             ZStack {
                 SandTable()
+                if let zoneTableImage = model.zoneTableImage {
+                    Image(decorative: zoneTableImage, scale: TerrainBaker.battlePixelsPerPoint)
+                        .resizable()
+                        .frame(width: cellSize * CGFloat(columnCount), height: cellSize * CGFloat(screenRows.count))
+                }
                 VStack(spacing: 0) {
                     ForEach(screenRows.indices, id: \.self) { screenRow in
                         HStack(spacing: 0) {

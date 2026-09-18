@@ -19,54 +19,75 @@ nonisolated struct BoardProjection: Sendable, Equatable {
     /// The map's row count — sim y, which runs left to right on screen.
     let mapHeight: Int
     let pointsPerCell: CGFloat
+    /// The table's rim around the playing field, in cells: room for a figure on an edge cell to show
+    /// its whole base and weapon instead of being cut by the view's edge.
+    let rimCells: CGFloat
 
-    init(mapWidth: Int, mapHeight: Int, pointsPerCell: CGFloat = Self.scenePointsPerCell) {
+    init(mapWidth: Int, mapHeight: Int, pointsPerCell: CGFloat = Self.scenePointsPerCell, rimCells: CGFloat = 0) {
         self.mapWidth = mapWidth
         self.mapHeight = mapHeight
         self.pointsPerCell = pointsPerCell
+        self.rimCells = rimCells
     }
 
-    init(map: BattleMap, pointsPerCell: CGFloat = Self.scenePointsPerCell) {
-        self.init(mapWidth: map.width, mapHeight: map.height, pointsPerCell: pointsPerCell)
+    init(map: BattleMap, pointsPerCell: CGFloat = Self.scenePointsPerCell, rimCells: CGFloat = 0) {
+        self.init(mapWidth: map.width, mapHeight: map.height, pointsPerCell: pointsPerCell, rimCells: rimCells)
+    }
+
+    /// The sand table as the battle and army setup draw it: scene scale, with a rim.
+    static func table(for map: BattleMap) -> BoardProjection {
+        BoardProjection(map: map, rimCells: 0.75)
     }
 
     /// The same board at another scale — e.g. a SwiftUI grid sized to its container.
     func scaled(toPointsPerCell pointsPerCell: CGFloat) -> BoardProjection {
-        BoardProjection(mapWidth: mapWidth, mapHeight: mapHeight, pointsPerCell: pointsPerCell)
+        BoardProjection(mapWidth: mapWidth, mapHeight: mapHeight, pointsPerCell: pointsPerCell, rimCells: rimCells)
     }
 
-    /// On-screen size: the map's rows across, its columns up.
+    private var rim: CGFloat { rimCells * pointsPerCell }
+
+    /// On-screen size, rim included: the map's rows across, its columns up.
     var boardSize: CGSize {
-        CGSize(width: CGFloat(mapHeight) * pointsPerCell, height: CGFloat(mapWidth) * pointsPerCell)
+        CGSize(
+            width: CGFloat(mapHeight) * pointsPerCell + 2 * rim, height: CGFloat(mapWidth) * pointsPerCell + 2 * rim)
+    }
+
+    /// The playing field inside the rim, in SwiftUI coordinates (identical in SpriteKit's: it's centred).
+    var fieldRect: CGRect {
+        CGRect(
+            x: rim, y: rim, width: CGFloat(mapHeight) * pointsPerCell, height: CGFloat(mapWidth) * pointsPerCell)
     }
 
     /// Width over height, for `aspectRatio(_:contentMode:)`.
     var aspectRatio: CGFloat {
-        CGFloat(mapHeight) / CGFloat(mapWidth)
+        boardSize.width / boardSize.height
     }
 
     // MARK: - SpriteKit (origin bottom-left, y up)
 
     func scenePoint(_ position: FixedVector2) -> CGPoint {
-        CGPoint(x: position.y.cells * pointsPerCell, y: position.x.cells * pointsPerCell)
+        CGPoint(x: rim + position.y.cells * pointsPerCell, y: rim + position.x.cells * pointsPerCell)
     }
 
     // MARK: - SwiftUI (origin top-left, y down)
 
     func viewPoint(_ position: FixedVector2) -> CGPoint {
-        CGPoint(x: position.y.cells * pointsPerCell, y: (CGFloat(mapWidth) - position.x.cells) * pointsPerCell)
+        CGPoint(
+            x: rim + position.y.cells * pointsPerCell,
+            y: rim + (CGFloat(mapWidth) - position.x.cells) * pointsPerCell)
     }
 
     func viewRect(column: Int, row: Int) -> CGRect {
         CGRect(
-            x: CGFloat(row) * pointsPerCell, y: CGFloat(mapWidth - 1 - column) * pointsPerCell,
+            x: rim + CGFloat(row) * pointsPerCell, y: rim + CGFloat(mapWidth - 1 - column) * pointsPerCell,
             width: pointsPerCell, height: pointsPerCell)
     }
 
     func cell(atViewPoint point: CGPoint) -> (column: Int, row: Int)? {
-        guard point.x >= 0, point.y >= 0 else { return nil }
-        let row = Int(point.x / pointsPerCell)
-        let column = mapWidth - 1 - Int(point.y / pointsPerCell)
+        let local = CGPoint(x: point.x - rim, y: point.y - rim)
+        guard local.x >= 0, local.y >= 0 else { return nil }
+        let row = Int(local.x / pointsPerCell)
+        let column = mapWidth - 1 - Int(local.y / pointsPerCell)
         guard (0..<mapWidth).contains(column), (0..<mapHeight).contains(row) else { return nil }
         return (column, row)
     }

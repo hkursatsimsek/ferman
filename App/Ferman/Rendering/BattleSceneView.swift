@@ -28,7 +28,7 @@ struct BattleSceneView: View {
         // place the scene's origin at.
         SpriteView(scene: scene, options: [.ignoresSiblingOrder])
             .onAppear { scene.onUnitTapped = onUnitTapped }
-            .aspectRatio(BoardProjection(map: map).aspectRatio, contentMode: .fit)
+            .aspectRatio(BoardProjection.table(for: map).aspectRatio, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

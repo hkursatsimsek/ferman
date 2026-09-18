@@ -95,6 +95,22 @@ struct BoardProjectionTests {
     }
 
     @Test
+    func aRimOffsetsTheFieldAndGrowsTheBoard() {
+        let rimmed = BoardProjection(mapWidth: 24, mapHeight: 14, pointsPerCell: 32, rimCells: 0.5)
+
+        #expect(rimmed.boardSize == CGSize(width: 14 * 32 + 32, height: 24 * 32 + 32))
+        #expect(rimmed.fieldRect == CGRect(x: 16, y: 16, width: 14 * 32, height: 24 * 32))
+        let cornerCell = center(column: 23, row: 0)
+        #expect(rimmed.scenePoint(cornerCell) == CGPoint(x: 16 + 16, y: 16 + 23.5 * 32))
+        #expect(rimmed.viewPoint(cornerCell) == CGPoint(x: 16 + 16, y: 16 + 16))
+        // The rim itself belongs to no cell.
+        #expect(rimmed.cell(atViewPoint: CGPoint(x: 8, y: 100)) == nil)
+        let rect = rimmed.viewRect(column: 4, row: 9)
+        let cell = rimmed.cell(atViewPoint: CGPoint(x: rect.midX, y: rect.midY))
+        #expect(cell?.column == 4 && cell?.row == 9)
+    }
+
+    @Test
     func scalingKeepsTheShape() {
         let small = projection.scaled(toPointsPerCell: 16)
         #expect(small.boardSize == CGSize(width: 14 * 16, height: 24 * 16))
