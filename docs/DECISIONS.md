@@ -281,3 +281,45 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
   - **Risk:** Determinizm sözleşmesi (CLAUDE.md kural 2) macOS arm64 = Linux x86_64 eşitliğini gerektirir; bu eşitlik CI olmadan doğrulanamaz, çünkü yerel geliştirme yalnızca macOS'tadır (bkz. `Scripts/check-invariants.sh` ve "Linux doğrulaması yerelde yapılmaz" notu). Bu pencerede Linux'a özgü bir determinizm kırılması sessizce birikebilir.
   - Telafi: `FermanCore`'a dokunan her değişiklikten sonra yerelde (macOS) `fermansim verify --runs 1000` çalıştırmaya devam edilir; bu CI'ın yerini tutmaz ama tek platformlu regresyonu yakalar.
   - `.github/workflows/core.yml` eklenip yeşil olduğunda F0.12 tam anlamıyla kapanır; bu karar F3.9'daki `balance-nightly.yml` iş akışını etkilemez, o da kendi adımına kadar ertelenmiş sayılır.
+
+## D24 — Birimler: üstten görülen döküm minyatürler
+
+- **Tarih:** 2026-09-18 · **Durum:** Kabul · **Kaynak:** Kullanıcı
+- **Bağlam:** Faz 1 sonunda savaşta her birim 10 pt'lik düz bir daireydi; dört birim tipi her ekranda (tepsi, ızgara, editör sekmeleri, savaş) birebir aynı görünüyordu. Tasarım teslimi de tipe özgü figür çizmemişti. Palet kum üstünde neredeyse eşit parlaklıkta: demir/kum 1,00:1, pirinç/aydınlık kum 1,06:1, pirinç/demir 1,42:1 (WCAG göreli parlaklık). Renk tek başına ne tipi ne takımı ayırabiliyor.
+- **Karar:**
+  - Kamera kum masasına tam yukarıdan bakar (brief §4.5 "üstten görünüm" korunur). Her birim, döküm altlık üstünde duran bir minyatürün üstten görünüşüdür.
+  - Tip kimliği silüetle verilir, silahlar abartılır: mızrakçının mızrağı gövdenin 1,5–1,7 katı ileri uzanır; okçu önde yay kavisi + sırtta sadak; süvarinin at gövdesi yaya figürün ~1,8 katı; kalkanlı önünün ~%60'ını kaplayan kavisli kalkan.
+  - Tek poz seti `zRotation` ile döndürülür (yön sürekli ve kesin görünür). Pozlar: `base`, `strike`, `brace`, `fallen` (+ süvari dörtnal karesi). Yürüme döngüsü yok.
+  - Pirinç (oyuncu) ve demir (düşman) ayrı render edilmiş doku setleridir; çalışma zamanında renklendirme yok.
+  - Takım renk dışı bir işaretle de kodlanır: oyuncu **yuvarlak**, düşman **sekizgen** altlık. Her figürde mürekkep rengi kontak gölgesi ve koyu kenar vardır.
+- **Sonuçlar:** `UnitToken` ve `UnitNode` birim tipi ve poz alır; SwiftUI ve SpriteKit aynı görselleri kullanır (`UnitArt`). Brief §3.4 "birim jetonu tam yuvarlak" yalnızca oyuncu altlığı için geçerli kalır. Eğik "lamba görünümü" (profil figürler) bu kararın dışındadır, F4.7 ile düşünülür.
+
+## D25 — Sanat üretimi: betikli Blender, çıktılar commit edilir
+
+- **Tarih:** 2026-09-18 · **Durum:** Kabul · **Kaynak:** Kullanıcı
+- **Bağlam:** Projede sanatçı yok; hiçbir görsel varlık yoktu. Seçenekler: betikli Blender, sanatçıya model ısmarlamak, yalnızca kodla çizim, yapay zekâ ile görsel üretimi.
+- **Karar:**
+  - Figürler, arazi objeleri, ok/toz/mühür dokuları ve uygulama ikonu `Tools/figures/` altındaki bir Python betiğiyle Blender'da ilkel şekillerden modellenir ve başsız (`blender -b`) render edilir. İkili `.blend` dosyası repoda tutulmaz; model tamamen betiktedir. Blender sürümü betikte sabitlenir.
+  - Çıktı PNG'leri `App/Ferman/Assets.xcassets` içine yazılır ve **commit edilir**; normal derleme Blender gerektirmez. Blender yalnızca geliştirme aracıdır, uygulamaya girmez (kural 6 korunur).
+  - Blender gelmeden önce aynı dosya adlarıyla Core Graphics yer tutucular kullanılır; Blender çıktısı bunların üstüne yazılır, kod değişmez.
+  - Yalnızca özgün ya da CC0 varlık kullanılır. CC-BY/CC-BY-SA (App Store DRM çelişkisi) ve GPL sanat kullanılmaz. **Yapay zekâ ile üretilmiş sanat gönderilmez** (telif koruması yok, mevcut stillere kayma riski, varyantlar arası tutarsızlık); yalnızca özel ruh hali panolarında kabul edilebilir.
+- **Sonuçlar:** Yeni poz ya da birim eklemek betiği yeniden çalıştırmaktır. Görsel kaynak ve lisans kaydı `docs/design/ART-DIRECTION.md`'dedir. Modeller ileride USD ile RealityKit'e taşınabilir.
+
+## D26 — Dikey masa: harita ekranda 90° döndürülür
+
+- **Tarih:** 2026-09-18 · **Durum:** Kabul · **Kaynak:** Kullanıcı
+- **Bağlam:** Haritalar 24×14 (oyuncu solda, düşman sağda). Dikey telefonda `.aspectFit` ile masa 393×229 pt'lik bir şeride iniyor, hücre ≈ 16 pt, birim ≈ 10 pt ≈ 31 px. Ayrıca Ordu Kurulumu ASCII 0. satırı üstte, `BattleScene` altta çiziyordu; yerleşim savaşta dikey aynalanıyordu.
+- **Karar:** Masa ekranda 90° döndürülerek çizilir: oyuncu bölgesi altta, düşman üstte. Simülasyon, harita dosyaları, seviyeler ve altın dosyalar değişmez; dönüşüm yalnızca çizimdedir. Sim koordinatı ile görünüm noktası arasındaki **tek** dönüşüm noktası `App/Ferman/Rendering/BoardProjection.swift`'tir; SpriteKit (y yukarı) ve SwiftUI (y aşağı) ikisi de onu kullanır.
+- **Sonuçlar:** Hücre ~23–28 pt'ye çıkar (figürler ~2,3× büyür). Brief §4.3 "sol üçte bir" → "alt bölge". 9:16 klip (D15) dikey masaya doğal olarak oturur.
+
+## D27 — Replay canlandırması replay zamanının saf fonksiyonudur
+
+- **Tarih:** 2026-09-18 · **Durum:** Kabul · **Kaynak:** Teknik
+- **Bağlam:** Görsel geçişte savaş canlandırılıyor (zıplama, hamle, ok, devrilme, moral çöküşü, yetenek pozları). Replay ileri/geri sarılabiliyor, 1×/2×/4× oynuyor ve `ClipRenderer` (D15) aynı sahneyi `SKRenderer` ile offscreen çiziyor. Durum tutan `SKAction`'lar ve tohumsuz parçacık rastgeleliği bunlarla tutarsız sonuç verir.
+- **Karar:**
+  - Her figürün pozu (konum, yön, zıplama, poz karesi, parlama) `pose(unit, t)` biçiminde replay zamanının saf fonksiyonudur. Birim başına olay indeksi `FermanReplay`'de (`UnitTrack`, Linux'ta testli) tutulur; çizim tarafı yalnızca okur.
+  - Ölen figür devrilir ve masada `fallen` pozuyla kalır (ARCHITECTURE §8'deki "ölümde gizlenir" yerine).
+  - Vuruş parlaması kâğıt rengine (`#D6D0C2`) gider; **kıvılcım rengi yalnızca kural tetiklenmesindedir** (brief §3.2) ve yalnızca oyuncu birimlerinde çakar.
+  - Okçu okları, replay geleceği bildiği için uçuş süresi kadar önceden fırlatılır ve `attack` tick'inde iner.
+  - `spearWall`/`shieldWall`/`charge` etkinleşmesi `FermanCore`'da mevcut `.abilityUsed` olayıyla yalnızca `recordEvents` açıkken yayımlanır. Durum ve RNG değişmez, checksum değişmez, `simulationVersion` artmaz.
+- **Sonuçlar:** Geri sarma, hız ve klip birebir aynı kareyi üretir. Titreme gibi "rastgele" görünen hareketler birim kimliği + tick hash'inden türetilir.

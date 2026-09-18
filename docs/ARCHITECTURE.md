@@ -116,6 +116,8 @@ Sources/FermanCore/
   - `frame(at tick: Double) -> ReplayFrame` konumları iki örnek arasında interpole eder.
   - Seek işlemi en yakın keyframe'den ileri katlamadır. Doğruluk testi: seek sonucu, baştan katlamayla aynı olmalı.
 - **`ReplayFrame`:** Birim başına konum, yön, hp oranı, moral durumu, aktif kural indeksi ve o anki kıvılcım olayları. Yalnızca çizim için gerekenleri taşır.
+  - *Faz 1'deki gerçek durum:* `frame(at: Int32)` tamsayı tick'te çalışır; yön ve hp oranı taşınmaz, interpolasyon uygulamadadır. Faz 1.5 (G2) `frame(at:)`'in yalnızca anahtar kare aralığındaki olayları katlamasını sağlar.
+- **`UnitTrack`** (Faz 1.5, G7 — D27): Birim başına tick sıralı olay indeksi — saldırılar (saldıran/hedef/hasar), ölüm tick'i, moral pencereleri, yetenek pencereleri, birikimli hp. İkili aramayla sorgulanır; çizim tarafı pozları (`FigurePose`) bundan replay zamanının saf fonksiyonu olarak türetir.
 - **`DebriefAnalyzer`:** `BattleResult` + `BattleConfig` alır, öncelik sırasına dizilmiş `[DebriefInsight]` döndürür.
   - Tip bazında ölüm kümeleri: "Okçularının %70'i 12. saniyede aynı anda öldü."
   - Hiç çalışmayan kurallar ve baskın kural: "Okçular hep birinci emri uyguladı."
@@ -179,7 +181,7 @@ App/Ferman/
 │   ├── Arena/       ArenaView · ArenaModel · DuelView · DuelModel
 │   ├── Library/     LibraryView · LibraryModel
 │   └── Settings/    SettingsView · SettingsModel
-├── Rendering/       BattleScene · UnitNode · ReplayClock · ClipRenderer · SceneTextures
+├── Rendering/       BattleScene · UnitNode · ReplayClock · ClipRenderer · BoardProjection (D26) · TerrainBaker · FigurePose (D27)
 ├── Services/
 │   ├── BattleRunner.swift        @concurrent simülasyon koşucusu
 │   ├── ProgressStore.swift       SwiftData (VersionedSchema, MigrationPlan)
@@ -189,7 +191,7 @@ App/Ferman/
 │   ├── SpeechInputService.swift  SpeechAnalyzer
 │   ├── AudioService.swift        SFX, AVAudioSession.ambient
 │   └── Monetization/             EntitlementStore · RewardedAdProvider · NoopAdProvider · AdMobProvider (Faz 5)
-├── DesignSystem/    Tokens (Color/Font/Spacing/Radius/Shadow) · Components · Shaders (.metal)
+├── DesignSystem/    Tokens (Color/Font/Spacing/Radius/Shadow) · Components · Shaders (.metal) · UnitArt (D24)
 └── Resources/       Assets.xcassets · Localizable.xcstrings · Fonts/ · PrivacyInfo.xcprivacy · Sounds/
 ```
 
@@ -234,9 +236,11 @@ struct RuleEditorView: View {
   - Yeniden başlatma yalnızca `tick = 0` yapar, simülasyon tekrar koşmaz (< 100 ms).
 - **`BattleScene: SKScene`**
   - Her karede `timeline.frame(at: clock.tick)` okur ve UnitID ile eşlenmiş node havuzunu günceller.
-  - Kare başına tahsis yoktur; node'lar spawn'da oluşturulur, ölümde gizlenir.
-  - Kum masası ışığı `SKShader` (radyal düşüş), ızgara ve arazi katmanları statik texture'lardır.
-  - Kıvılcım: `ruleActivated` olayında önceden yüklenmiş `SKEmitterNode` tetiklenir.
+  - Kare başına tahsis yoktur; node'lar spawn'da oluşturulur. Ölen figür devrilir ve `fallen` pozuyla masada kalır (D27).
+  - Kum masası ışığı `SKShader` (radyal düşüş); ızgara ve arazi `TerrainBaker`'ın harita başına bir kez pişirdiği texture'dır (SwiftUI Ordu Kurulumu da aynı görüntüyü kullanır).
+  - Masa dikey çizilir, oyuncu altta (D26). Sim koordinatı ↔ görünüm noktası dönüşümü yalnızca `BoardProjection`'dadır.
+  - Figürler `SKSpriteNode`, dokular tek atlastan (`UnitArt`, D24/D25). Pozlar `FigurePose` ile replay zamanından hesaplanır; durum tutan `SKAction` ve tohumsuz rastgelelik kullanılmaz, böylece seek, hız ve `ClipRenderer` aynı kareyi üretir (D27).
+  - Kıvılcım: `ruleActivated` olayında önceden yüklenmiş `SKEmitterNode` tetiklenir — yalnızca oyuncu birimleri için (D27). Vuruş parlaması kâğıt rengidir, kıvılcım rengi değil.
   - Dokunma: hit-test ile birim bulunur, `BattleModel`'e bildirilir, SwiftUI etiketi gösterilir ("şu an uyguluyor").
 - **SwiftUI köprüsü**
   - `SpriteView(scene:preferredFramesPerSecond: 60)`.

@@ -142,7 +142,7 @@ Tek bir yarıçapı her şeye uygulama. Malzeme ne ise yarıçap odur:
 Emir pusulası     2pt      kâğıt keskin kesilir
 Panel / sheet    14pt      ahşap / metal muhafaza
 Buton             8pt
-Birim jetonu    tam yuvarlak   döküm figür
+Birim jetonu    tam yuvarlak   döküm figür (düşman: sekizgen altlık — D24)
 Kum masası        0pt      masanın kendisi, kenarı yok
 ```
 
@@ -201,7 +201,7 @@ Bütçe farkı (420'ye karşı 310) görsel olarak vurgulanmalı — bu kasıtl�
 
 ### 4.3 Ordu Kurulumu
 
-Kum masasının sol üçte biri görünür (senin konuşlanma bölgen). Altta birim tepsisi.
+Kum masası dikey durur (D26): senin konuşlanma bölgen masanın alt kısmında, düşman bölgesi üstte (Sis varsa toz perdesiyle örtülü). Altta birim tepsisi.
 
 ```
 ┌────────────────────────────────┐
@@ -221,6 +221,8 @@ Kum masasının sol üçte biri görünür (senin konuşlanma bölgen). Altta bi
 ```
 
 Birimler döküm metal figür gibi: silüet okunaklı, detay az, altlarında hafif gölge. Seçili birim pirinç bir halka ile çevrelenir.
+
+> **Güncelleme (Faz 1.5, D24):** Figürler üstten görülen döküm minyatürlerdir ve tipleri silüetten okunur — mızrakçının mızrağı gövdesinden uzun, okçunun önünde yay kavisi ve sırtında sadak, süvarinin at gövdesi, kalkanlının geniş kavisli kalkanı. Oyuncu figürleri yuvarlak, düşman figürleri sekizgen altlıkta durur; gölge mürekkep rengindedir, çünkü pirinç ve demir kum üstünde neredeyse aynı parlaklıktadır. Ayrıntı: `docs/design/ART-DIRECTION.md`.
 
 ### 4.4 Emir Editörü — **oyunun kalbi**
 
@@ -285,6 +287,8 @@ yürür ve öldürülene kadar dövüşür.
 ### 4.5 Savaş Ekranı
 
 Tam ekran kum masası, üstten görünüm. Kontrol yok, sadece izleme.
+
+> **Güncelleme (Faz 1.5, D26/D27):** Masa dikey durur — senin ordun altta, düşman üstte, savaş aşağıdan yukarı akar. Figürler komutanın eliyle oynatılıyormuş gibi hareket eder (zıplama, hamle, uçan oklar); ölen figür devrilir ve masada kalır. Vuruş parlaması kâğıt rengindedir; kıvılcım yalnızca senin emrin tetiklendiğinde çakar.
 
 ```
 ┌────────────────────────────────┐

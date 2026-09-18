@@ -557,7 +557,7 @@ Xcode projesi, SwiftUI, SpriteKit. **LLM kodu bu fazda repoda bulunmaz.**
 | F1.11 | `ProgressStore`: SwiftData v1 (`LevelProgress` + kazanan program, `SavedOrderSet`, `BattleRecord`), `SchemaMigrationPlan`, CloudKit uyumlu şema | In-memory container testleri |
 | F1.12 | 8 seviye: 1–3 öğretici (varsayılan emir → tek koşul → sıralama); her seviyeye referans çözüm | `LevelSolvabilityTests` (Linux): referans kazanır; seviye ≥ 2'de yalnız varsayılan emirle kazanılmaz |
 | F1.13 | Yerelleştirme ve erişilebilirlik temeli: tüm metinler katalogda, `BannedWordsTests` (xcstrings), VoiceOver çekirdek akış, XXL, Reduce Motion, SFX (`AVAudioSession.ambient`) | `performAccessibilityAudit()` yeşil |
-| F1.14 | Kabul ve **KARAR NOKTASI**: Instruments ölçümü, `Package.resolved` boş, en az 5 kişiyle 10 dakikalık playtest | `docs/playtests/phase1.md` ve devam/dur kararı |
+| F1.14 | Kabul ve **KARAR NOKTASI**: Instruments ölçümü, `Package.resolved` boş, en az 5 kişiyle 10 dakikalık playtest — playtest Faz 1.5 sonuna (G17) alındı | `docs/playtests/phase1.md` ve devam/dur kararı |
 
 **Kabul kriterleri**
 
@@ -575,6 +575,39 @@ Xcode projesi, SwiftUI, SpriteKit. **LLM kodu bu fazda repoda bulunmaz.**
 > Bu fazın sonunda dikey dilim **LLM olmadan, sadece seçicilerle 10 dakika eğlenceli olmalı.**
 >
 > Eğlenceli değilse doğal dil katmanı bunu kurtarmaz — sadece kural yazmayı hızlandırır. Projenin üzerinde durduğu tek varsayım budur. Burada durup mekanik değiştirmek, devam etmekten çok daha ucuzdur.
+
+---
+
+### FAZ 1.5 — Görsel ve kullanım geçişi · **~9–12 hafta**
+
+F1.14'ün mekanik kabul kriterleri yeşilken ürün sahibinin kararıyla araya girdi (2026-09-18): Faz 2'den önce oyun görsel olarak ve kullanım kolaylığı açısından olabildiğince mükemmelleştirilir, **F1.14 playtest'i bu fazın sonunda (G17) yapılır.** Kararlar: D24 (üstten döküm figürler), D25 (betikli Blender), D26 (dikey masa), D27 (replay zamanının saf fonksiyonu olarak canlandırma). Sanat yönü ve kopyalama sınırları: `docs/design/ART-DIRECTION.md`.
+
+Öncelik: **[Z]** zorunlu · **[Ö]** güçlü öneri · **[İ]** isteğe bağlı (kapsam daralırsa ilk kesilecekler).
+
+| Adım | Çıktı | Bitti tanımı |
+|---|---|---|
+| G0 [Z] | D24–D27, bu tablo, brief §3.4/§4.3/§4.5, ARCHITECTURE §5/§8, `docs/design/ART-DIRECTION.md` (figür anatomisi, kopyalama kontrol listesi, referans günlüğü) | Belgeler tutarlı |
+| G1 [Z] | Playtest'i bozan kullanım hataları: 1. seviyede "Emir ekle", seçicide düşman tipleri, ordu bütçesi uygulaması, doğrulama hatası açıklaması, damga sesi, tüm tiplerin damgalanması, `hasShownResult`, savaşta sistem geri butonu, "Savaşı Başlat" | Model testleri + mevcut testler yeşil |
+| G2 [Z] | `BoardProjection` (dikey masa, oyuncu altta; Ordu Kurulumu aynalama hatası kapanır), savaş düzeni, `ReplayTimeline.frame(at:)` yalnızca anahtar kare aralığını katlar | `BoardProjectionTests`; FermanReplay testleri (seek = baştan katlama) |
+| G3 [Z] | `UnitArt` (tip × takım × poz adları), Core Graphics yer tutucu PNG'ler nihai adlarla, `UnitToken(type:team:size:pose:)`, `UnitNode` → `SKSpriteNode`, en yakın birim dokunma seçimi | `UnitArtTests` |
+| G4 [Z] | `TerrainBaker`: harita başına pişirilmiş masa dokusu (tarama çizgili tepe, orman, reçine su, moloz, silik ızgara, kenar/vinyet) SpriteKit ve SwiftUI'de ortak. [Ö] 5–8'den en az iki seviye arazili haritaya | `TerrainBakerTests`; `LevelSolvabilityTests` yeşil |
+| G5 [Z] | `Tools/figures/`: betikli Blender modelleri + render (figürler, pozlar, gölgeler, ok/toz, arazi objeleri, mühür dokusu, uygulama ikonu), çıktılar commit'li | Gri tonlamalı okunabilirlik kontrolü; `.showsDrawCount` ile toplu çizim |
+| G6 [Z] | `spearWall`/`shieldWall`/`charge` için `.abilityUsed` yayımı (yalnızca `recordEvents`) | Altın dosyalar değişmeden yeşil; `fermansim verify --runs 1000` |
+| G7 [Z] | `UnitTrack` (FermanReplay) + `FigurePose`: zıplama/eğilme, hamle, önceden fırlatılan oklar, kâğıt renkli vuruş parlaması, devrilip masada kalan ölüler, moral çöküşü, yetenek pozları; kıvılcım yalnızca oyuncu birimlerinde; Reduce Motion | `UnitTrackTests`, `FigurePoseTests` |
+| G8 [Z] | Savaş ekranı: emir metinli şerit, figürü izleyen "şu an uyguluyor" balonu, görünür açılış koreografisi (`SKCameraNode`), masada sonuç kartı. [Ö] kontroller başparmak bölgesine | Model testleri; simülatör görsel doğrulama |
+| G9 [Z] | Emir Editörü: kâğıt dokuları (tırtıklı kenar, katlanma, mühür izi), sürüklenebilir kadran kartın altında, kâğıt formu seçici (piktogramlı koşul kartları), figürlü sekmeler. [Ö] katlanmış pusula (`RuleReachability`). [İ] parametre önizlemesi | Tablo testleri; UI testi |
+| G10 [Z] | Ordu Kurulumu: dikey masa + arazi, seç-dokun + sürükle, hayalet önizleme + yapışma, taşıma, birim bilgi kartı, düşman tarafı / Sis perdesi | `ArmySetupModelTests` |
+| G11 [Z] | Muhasebe: kıvılcım çubukları, içgörüye dokununca replay'de o ana atlama, donmuş sonuç tablosu, sonraki cephe + `recordBattle`. [Ö] 60 sn kadastro şeridi, "neden çalışmadı" hakem notu (`.nearMiss`) | Model + FermanReplay testleri |
+| G12 [Z] | `ProgressStore` bağlantısı (kilit/geçildi), Sefer (kum üstünde bayrak yolu), seviye sheet'i (bütçe farkı, düşman kompozisyonu, brifing), Ev (kelime markası, donmuş son savaş), minimal Ayarlar. [Ö] mühürlü emir mektubu | Model testleri; `AppNavigationUITests` |
+| G13 [Ö] | Öğretici akış (1–3. cephe kalem notları), değerlendirme kalemi | UI testi |
+| G14 [Z] | Eylem başına ses seti (yalnızca CC0/sentez, `Sounds/SOURCES.md`), haptik sınıflandırması, ortam döngüsü | `AudioServiceTests` |
+| G15 [Z] | Uygulama ikonu, açılış ekranı, geçişler, tipografi, VoiceOver/Reduce Motion/XXL; `AccessibilityAuditUITests`'e Savaş ve Muhasebe; silüet testi | `performAccessibilityAudit()` yeşil |
+| G16 [Z] | 150 birimlik stres girişi, çizim çağrısı/fps ölçümü; gerçek cihaz Instruments (kullanıcı) | Ölçüm `docs/playtests/phase1.md`'de |
+| G17 [Z] | F1.14 playtest'i (≥ 5 kişi × 10 dk) ve karar | `docs/playtests/phase1.md` Sonuçlar/Karar dolu |
+
+**Bağımlılıklar:** G0 → G1, G2 → G3 → G4 → G5 · G6 → G7 (G3'e de bağlı) → G8 · G2+G3+G4 → G10 · G9 (G3 sekmeleri için) · G7 → G11 · G1 → G12 → G13 · G5 → G14, G15 · hepsi → G16 → G17. G5 Blender kurulumunu bekler; o sırada G6–G9 yer tutucu figürlerle ilerler.
+
+**Kapsam dışı:** pusula başına 2 koşul, tek pusulayı değiştirip savaşı yeniden koşma, doktrin kütüphanesi (F4.8), rakip emirlerinin karbon kopyası (F4.5), eğik "lamba görünümü" profil figürleri (F4.7 ile), RealityKit'e geçiş.
 
 ---
 
@@ -763,6 +796,10 @@ H(n)  = min(4, n/8)                   // harita tehlikesi
 | CloudKit kotası / hile | Public DB istek limitleri, sahte raporlar | Puan bandı sorgu sınırı, yeniden simülasyon doğrulaması, sürüm alanları |
 | Tasarım açıkları geç kapanıyor | F1.7'de ekleme akışı çizimi yok | §10 listesini Faz 1 başında kapat |
 | Kapsam sürüklenmesi | Faz 3 planlanandan uzun sürüyor | Ayna seviyeleri ve kısıt kartları zaten içerik üretiyor. Yeni özellik ekleme |
+| SpriteKit yeni özellik almıyor; iOS 26.x kare hızı gerilemesi (FB22038921) | Faz 1.5'te gerçek cihazda 150 birim < 60 fps | Renderer ince kalır (`ReplayFrame`/`UnitTrack` → çizim); Blender modelleri USD ile RealityKit'e taşınabilir (D25) |
+| Asset catalog `.spriteatlas` toplu çizmiyor | `.showsDrawCount` birim sayısıyla artıyor | `SKTextureAtlas(dictionary:)` bir kez kurulur |
+| Faz 1.5 kapsamı şişiyor | G-adımları tahminin 1,5 katını aşıyor | [İ] sonra [Ö] adımlar kesilir; asgari set Dalga A+B + G8/G10/G12 |
+| Playtest'in Faz 1.5 sonuna alınması | Playtest mekanik değişikliği isterse görsel emek boşa gider | Sanat ve canlandırma birim/olay tabanlı, mekanikten bağımsız; kabul edilmiş risk (D24–D27) |
 
 ---
 
@@ -770,14 +807,14 @@ H(n)  = min(4, n/8)                   // harita tehlikesi
 
 `docs/design/project/FERMAN Ekran Panosu.dc.html` teslimi ile `FERMAN-Design-Brief.md` karşılaştırması. Faz 1 ilgili adımından önce kapatılmalıdır.
 
-**Brief'te olup tasarımda olmayan dokular (brief §3.0):** mühür/damga, tırtıklı kenar, katlanma çizgisi, kurşun altlık.
+**Brief'te olup tasarımda olmayan dokular (brief §3.0):** mühür/damga, tırtıklı kenar, katlanma çizgisi, kurşun altlık. → G5 (mühür dokusu, altlıklar) ve G9 (kâğıt dokuları) kapatır.
 
 **Eksik ekran ve durumlar**
 - **Seçicilerle yeni pusula ekleme akışı** (koşul → parametre → eylem) — F1.7 için kritik.
-- Ayarlar ekranı.
+- Ayarlar ekranı. → G12 (minimal: ses, dokunsal, varsayılan hız, öğreticiyi sıfırla).
 - Zafer analizi ("Hat tutuldu").
-- Savaş başlatma koreografisi (brief §3.5).
-- Kaydırmalı cephe haritası.
+- Savaş başlatma koreografisi (brief §3.5). → F1.5'te yazıldı; "kamera iner" adımının görünmemesi G8'de düzeltilir.
+- Kaydırmalı cephe haritası. → G12.
 - Dynamic Type XXL, iPad ve açık mod varyantları.
 
 **Tanımsız ya da düzeltilecek kavramlar**
