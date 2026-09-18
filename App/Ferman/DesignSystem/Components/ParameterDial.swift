@@ -56,13 +56,25 @@ struct ParameterDial: View {
         let weight: FermanFont.CounterWeight = distance == 0 ? .semibold : .medium
         let opacity: Double = distance == 0 ? 1 : distance == 1 ? 0.5 : 0.3
 
-        Text(range.contains(candidate) ? "\(candidate)" : " ")
-            .font(FermanFont.counter(size: size, weight: weight))
-            .foregroundStyle(Color.paper.opacity(opacity))
-            .accessibilityIdentifier("parameterDial.candidate.\(candidate)")
-            .onTapGesture {
-                if range.contains(candidate) { value = candidate }
+        let isInRange = range.contains(candidate)
+
+        Group {
+            if isInRange {
+                Text("\(candidate)")
+                    .onTapGesture { value = candidate }
+            } else {
+                // Must not carry any gesture, not even a no-op one: a gesture here still
+                // swallows the touch, so it'd never fall through to close the dial
+                // (`RuleEditorView`'s card-tap toggle) — and a freshly added rule always
+                // starts at `range.lowerBound`, putting this dead zone right in the dial's
+                // most visible, most-tapped band the moment it's first opened.
+                Text(" ")
+                    .allowsHitTesting(false)
             }
+        }
+        .font(FermanFont.counter(size: size, weight: weight))
+        .foregroundStyle(Color.paper.opacity(opacity))
+        .accessibilityIdentifier("parameterDial.candidate.\(candidate)")
     }
 }
 
