@@ -8,6 +8,7 @@ struct BattleHUD: View {
     let isPlaying: Bool
     @Binding var speed: BattleSpeed
     let triggerRows: [BattleModel.TriggerRow]
+    var onBack: () -> Void
     var onTogglePlayPause: () -> Void
     var onRestart: () -> Void
     var onShowResult: () -> Void
@@ -24,6 +25,12 @@ struct BattleHUD: View {
 
     private var topBar: some View {
         HStack(spacing: FermanSpacing.md) {
+            Button(action: onBack) {
+                Image(systemName: "chevron.backward")
+                    .foregroundStyle(Color.paper.opacity(0.85))
+            }
+            .accessibilityLabel(String(localized: "Geri"))
+
             Text(timeText)
                 .font(FermanFont.counter(size: 17, weight: .medium))
                 .monospacedDigit()
@@ -90,6 +97,7 @@ struct BattleHUD: View {
                     .init(id: 1, priority: 2, fraction: 1, count: 19, isSpark: true),
                     .init(id: 2, priority: 3, fraction: 0, count: 0, isSpark: false),
                 ],
+                onBack: {},
                 onTogglePlayPause: {},
                 onRestart: {},
                 onShowResult: {}

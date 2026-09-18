@@ -57,9 +57,21 @@ enum RulePreset: CaseIterable {
 @Observable
 @MainActor
 final class RuleEditorModel {
+    /// Why "Savaşı Başlat" is off — the first validation error, in terms a player can act on. The
+    /// view turns it into a sentence (String Catalog), this model only decides which one it is.
+    enum BattleBlocker: Equatable {
+        case budgetExceeded(used: Int, budget: Int)
+        /// `priority` is 1-based, the number printed on the card.
+        case invalidOrder(unitType: UnitTypeID, priority: Int)
+    }
+
     let unitTypes: [UnitTypeID]
     let catalog: [UnitType]
     let constraints: RuleConstraints
+    /// What the unit-type pickers (`targetInRange`, `nearestEnemyType`, `focusFire`) offer: these
+    /// conditions and actions are about the *enemy's* units, so listing the player's own army (as F1.7
+    /// did) let a player target a type the enemy didn't even field.
+    let enemyUnitTypes: [UnitTypeID]
 
     private(set) var ordersByUnitType: [UnitTypeID: [EditableRule]]
     private(set) var defaultRuleByUnitType: [UnitTypeID: EditableRule]
@@ -74,6 +86,7 @@ final class RuleEditorModel {
         unitTypes: [UnitTypeID],
         catalog: [UnitType],
         constraints: RuleConstraints,
+        enemyUnitTypes: [UnitTypeID]? = nil,
         initialPrograms: [RuleProgram] = [],
         compiler: any RuleCompiler<RuleDraft> = ManualCompiler(),
         audio: any AudioPlaying = SilentAudioPlaying()
@@ -82,6 +95,9 @@ final class RuleEditorModel {
         self.unitTypes = unitTypes
         self.catalog = catalog
         self.constraints = constraints
+        // No list means nothing is known about the enemy (the standalone UI-test fixture today, a
+        // Sis front later — F3.2): every type in the catalog is a possible target.
+        self.enemyUnitTypes = enemyUnitTypes ?? catalog.map(\.id)
         self.compiler = compiler
         self.audio = audio
         self.selectedUnitType = unitTypes[0]
@@ -119,6 +135,46 @@ final class RuleEditorModel {
         ordersByUnitType[selectedUnitType, default: []]
     }
 
+    /// Whether this level lets the player write any order at all. Level 1 doesn't (`maxRules == 0`,
+    /// only `.always` available — F1.12): the lesson there is that the default order is enough, and an
+    /// "Emir ekle" button would only produce an order the validator then rejects.
+    var canWriteOrders: Bool {
+        constraints.maxRules > 0 && constraints.availableConditions.contains { $0 != .always }
+    }
+
+    var canAddRule: Bool {
+        canWriteOrders && usedBudget < constraints.maxRules
+    }
+
+    var battleBlocker: BattleBlocker? {
+        if let budget = validationErrors.lazy.compactMap(Self.budgetBlocker).first {
+            return budget
+        }
+        return validationErrors.lazy.compactMap(Self.orderBlocker).first
+    }
+
+    private static func budgetBlocker(_ error: RuleValidationError) -> BattleBlocker? {
+        if case .ruleBudgetExceeded(let used, let budget) = error { return .budgetExceeded(used: used, budget: budget) }
+        return nil
+    }
+
+    private static func orderBlocker(_ error: RuleValidationError) -> BattleBlocker? {
+        guard let location = Self.location(of: error) else { return nil }
+        return .invalidOrder(unitType: location.unitType, priority: location.ruleIndex + 1)
+    }
+
+    private static func location(of error: RuleValidationError) -> (unitType: UnitTypeID, ruleIndex: Int)? {
+        switch error {
+        case .conditionNotAvailable(let unitType, let ruleIndex, _),
+            .actionNotAvailable(let unitType, let ruleIndex, _),
+            .conditionParameterOutOfRange(let unitType, let ruleIndex, _, _, _),
+            .alwaysRuleIsNotLast(let unitType, let ruleIndex):
+            (unitType, ruleIndex)
+        case .ruleBudgetExceeded:
+            nil
+        }
+    }
+
     var defaultRule: EditableRule {
         defaultRuleByUnitType[selectedUnitType] ?? EditableRule(rule: Rule(condition: .always, action: .advance))
     }
@@ -129,15 +185,9 @@ final class RuleEditorModel {
 
     func state(for editableRule: EditableRule) -> OrderCardState {
         let index = orders.firstIndex(of: editableRule) ?? 0
-        let isInvalid = validationErrors.contains {
-            switch $0 {
-            case .conditionNotAvailable(let unitType, let ruleIndex, _),
-                .actionNotAvailable(let unitType, let ruleIndex, _),
-                .conditionParameterOutOfRange(let unitType, let ruleIndex, _, _, _):
-                unitType == selectedUnitType && ruleIndex == index
-            default:
-                false
-            }
+        let isInvalid = validationErrors.contains { error in
+            guard let location = Self.location(of: error) else { return false }
+            return location.unitType == selectedUnitType && location.ruleIndex == index
         }
         return isInvalid ? .disabled : .normal
     }

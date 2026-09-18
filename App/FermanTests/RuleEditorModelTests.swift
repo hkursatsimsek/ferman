@@ -12,11 +12,12 @@ struct RuleEditorModelTests {
 
     private static func makeModel(
         initialPrograms: [RuleProgram] = [],
-        constraints: RuleConstraints = .unrestricted
+        constraints: RuleConstraints = .unrestricted,
+        enemyUnitTypes: [UnitTypeID]? = nil
     ) -> RuleEditorModel {
         RuleEditorModel(
             unitTypes: [archer, shield], catalog: Fixture.catalog, constraints: constraints,
-            initialPrograms: initialPrograms)
+            enemyUnitTypes: enemyUnitTypes, initialPrograms: initialPrograms)
     }
 
     @Test
@@ -181,6 +182,77 @@ struct RuleEditorModelTests {
 
         // .cautious is [enemyWithin (locked out), healthBelow (allowed, spends the only budget slot)].
         #expect(model.orders.map(\.rule) == [Rule(condition: .healthBelow(percent: 30), action: .takeCover)])
+    }
+
+    // MARK: - Faz 1.5 G1
+
+    @Test
+    func aLevelWithNoRuleBudgetAllowsNoNewOrders() {
+        // Level 1's shape: only the default order exists (F1.12).
+        let constraints = RuleConstraints(maxRules: 0, availableConditions: [.always], availableActions: [.advance])
+        let model = Self.makeModel(constraints: constraints)
+
+        #expect(model.canWriteOrders == false)
+        #expect(model.canAddRule == false)
+        #expect(model.battleBlocker == nil)
+    }
+
+    @Test
+    func aLevelWithBudgetButOnlyTheAlwaysConditionAllowsNoNewOrders() {
+        let constraints = RuleConstraints(maxRules: 2, availableConditions: [.always], availableActions: [.advance])
+
+        #expect(Self.makeModel(constraints: constraints).canWriteOrders == false)
+    }
+
+    @Test
+    func addingStopsOnceTheArmyWideBudgetIsSpent() async {
+        let constraints = RuleConstraints(
+            maxRules: 1, availableConditions: [.enemyWithin, .always], availableActions: ActionKind.allCases)
+        let model = Self.makeModel(constraints: constraints)
+        #expect(model.canAddRule == true)
+
+        await model.addRule(RuleDraft(conditionKind: .enemyWithin, conditionNumericValue: 3, actionKind: .retreat))
+
+        #expect(model.canWriteOrders == true)
+        #expect(model.canAddRule == false)
+    }
+
+    @Test
+    func enemyUnitTypesDefaultToTheWholeCatalog() {
+        #expect(Self.makeModel().enemyUnitTypes == ["okcu", "kalkan"])
+        #expect(Self.makeModel(enemyUnitTypes: ["kalkan"]).enemyUnitTypes == ["kalkan"])
+    }
+
+    @Test
+    func anOverBudgetArmyNamesTheBudgetAsTheBlocker() {
+        let constraints = RuleConstraints(
+            maxRules: 1, availableConditions: ConditionKind.allCases, availableActions: ActionKind.allCases)
+        let program = RuleProgram(
+            unitType: Self.archer,
+            rules: [
+                Rule(condition: .enemyWithin(cells: 3), action: .retreat),
+                Rule(condition: .healthBelow(percent: 30), action: .takeCover),
+                Rule(condition: .always, action: .advance),
+            ])
+        let model = Self.makeModel(initialPrograms: [program], constraints: constraints)
+
+        #expect(model.battleBlocker == .budgetExceeded(used: 2, budget: 1))
+    }
+
+    @Test
+    func aLockedOrderNamesItsUnitTypeAndPriorityAsTheBlocker() {
+        let constraints = RuleConstraints(
+            maxRules: 6, availableConditions: [.healthBelow, .always], availableActions: ActionKind.allCases)
+        let program = RuleProgram(
+            unitType: Self.shield,
+            rules: [
+                Rule(condition: .healthBelow(percent: 30), action: .takeCover),
+                Rule(condition: .enemyWithin(cells: 3), action: .retreat),
+                Rule(condition: .always, action: .advance),
+            ])
+        let model = Self.makeModel(initialPrograms: [program], constraints: constraints)
+
+        #expect(model.battleBlocker == .invalidOrder(unitType: Self.shield, priority: 2))
     }
 }
 

@@ -90,10 +90,32 @@ struct ArmySetupModelTests {
     }
 
     @Test
-    func exceedingTheBudgetIsFlaggedButNotBlocked() throws {
+    func placingPastTheBudgetIsRefused() throws {
         let model = try Self.makeModel(totalBudget: 50)
-        model.place(Self.archer, at: 0)
-        model.place(Self.shield, at: 4)
+
+        #expect(model.place(Self.archer, at: 0) == true)
+        #expect(model.canAfford(Self.shield) == false)
+        #expect(model.place(Self.shield, at: 4) == false)
+
+        #expect(model.placements.map(\.unitType) == [Self.archer])
+        #expect(model.usedBudget == 30)
+        #expect(model.isOverBudget == false)
+    }
+
+    @Test
+    func aPlacementThatExactlySpendsTheBudgetIsAllowed() throws {
+        let model = try Self.makeModel(totalBudget: 70)
+
+        #expect(model.place(Self.archer, at: 0) == true)
+        #expect(model.place(Self.shield, at: 4) == true)
+        #expect(model.canAfford(Self.archer) == false)
+    }
+
+    @Test
+    func initialPlacementsOverTheBudgetAreStillFlagged() throws {
+        let model = try Self.makeModel(
+            totalBudget: 50,
+            initialPlacements: [UnitPlacement(type: Self.archer, cell: 0), UnitPlacement(type: Self.shield, cell: 4)])
 
         #expect(model.usedBudget == 70)
         #expect(model.isOverBudget == true)

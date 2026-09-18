@@ -81,6 +81,13 @@ final class ArmySetupModel {
 
     var isOverBudget: Bool { usedBudget > totalBudget }
 
+    /// Whether one more unit of this type still fits the budget. Placing is refused past it (the
+    /// F1.8 version only turned the meter red, which let an over-budget army reach battle).
+    func canAfford(_ unitTypeID: UnitTypeID) -> Bool {
+        guard let cost = unitType(unitTypeID)?.cost else { return false }
+        return usedBudget + cost <= totalBudget
+    }
+
     func isPlayerZone(_ cell: Int) -> Bool {
         map.zone(for: .player).contains(cell)
     }
@@ -105,9 +112,13 @@ final class ArmySetupModel {
 
     // MARK: - Intents
 
-    func place(_ unitType: UnitTypeID, at cell: Int) {
-        guard canPlace(at: cell) else { return }
+    /// Returns whether the unit was placed, so the view can answer a refused drop (occupied cell,
+    /// outside the zone, or over budget) with feedback instead of silently dropping it.
+    @discardableResult
+    func place(_ unitType: UnitTypeID, at cell: Int) -> Bool {
+        guard canPlace(at: cell), canAfford(unitType) else { return false }
         placements.append(ArmyPlacement(unitType: unitType, cell: cell))
+        return true
     }
 
     func remove(_ id: ArmyPlacement.ID) {

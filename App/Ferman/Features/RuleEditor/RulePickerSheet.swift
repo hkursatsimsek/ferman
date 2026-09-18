@@ -14,6 +14,8 @@ struct RulePickerSheet: View {
 
     let mode: Mode
     let constraints: RuleConstraints
+    /// The *enemy's* unit types — every unit-type parameter here (`targetInRange`, `nearestEnemyType`,
+    /// `focusFire`) names an enemy unit (`RuleEditorModel.enemyUnitTypes`).
     let availableUnitTypes: [UnitTypeID]
     var onConfirmRule: (RuleDraft) -> Void = { _ in }
     var onConfirmDefaultAction: (Action) -> Void = { _ in }

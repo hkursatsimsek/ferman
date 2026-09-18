@@ -138,12 +138,16 @@ struct ArmySetupView: View {
                             .foregroundStyle(Color.paper.opacity(0.75))
                     }
                     .padding(FermanSpacing.xs)
+                    // Still draggable when it doesn't fit — the drop is refused with a warning haptic
+                    // (`PlacementSlotView`) — but dimmed so the player sees why before trying.
+                    .opacity(model.canAfford(unitType.id) ? 1 : 0.4)
                     .contentShape(Rectangle())
                     .draggable(unitType.id.rawValue)
                     .accessibilityElement(children: .ignore)
                     .accessibilityLabel(
                         String(localized: "\(OrderPhraseFormatter.unitTypeName(unitType.id)), \(unitType.cost) puan")
                     )
+                    .accessibilityHint(model.canAfford(unitType.id) ? "" : String(localized: "Bütçe yetmiyor."))
                 }
             }
             .padding(FermanSpacing.md)
@@ -161,6 +165,7 @@ private struct PlacementSlotView: View {
     let accessibilityLabel: String
 
     @State private var isTargeted = false
+    @State private var refusedDrops = 0
 
     private var placement: ArmyPlacement? { model.placement(at: cell) }
 
@@ -183,8 +188,11 @@ private struct PlacementSlotView: View {
                 isTargeted = false
             }
             guard let rawUnitType = droppedIDs.first else { return }
-            model.place(UnitTypeID(rawValue: rawUnitType), at: cell)
+            if !model.place(UnitTypeID(rawValue: rawUnitType), at: cell) {
+                refusedDrops += 1
+            }
         }
+        .sensoryFeedback(.warning, trigger: refusedDrops)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(accessibilityLabel)
     }

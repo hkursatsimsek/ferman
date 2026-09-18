@@ -104,6 +104,13 @@ final class BattleModel {
         samplingTask?.cancel()
     }
 
+    /// Picks the trigger strip back up after `stop()` — e.g. returning here from the debrief, where
+    /// the finished battle can still be restarted. A no-op before the intro has finished.
+    func resume() {
+        guard phase == .playing else { return }
+        startSampling()
+    }
+
     /// Switches the trigger strip to the tapped unit's program, if it's one of the player's own.
     func selectUnit(_ unitID: UnitID) {
         guard let timeline, let clock else { return }

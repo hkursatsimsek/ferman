@@ -8,7 +8,7 @@ import SwiftUI
 struct RuleEditorView: View {
     /// Non-nil only on the real navigation path (`Route.ruleEditor`) — `nil` for the standalone
     /// `-uiTestRuleEditor` fixture (`ContentView`), which has no front/army to build a `BattleConfig`
-    /// from and so shows no "Savaşa Başla" button.
+    /// from and so shows no "Savaşı Başlat" button.
     let battleSetup: BattleSetup?
     @State var model: RuleEditorModel
     @State private var sheet: SheetKind?
@@ -17,7 +17,7 @@ struct RuleEditorView: View {
     /// Optional, not required: `-uiTestRuleEditor`'s standalone fixture never wraps this view in
     /// `.environment(AppRouter())`, and a required `@Environment(AppRouter.self)` crashes as soon as
     /// SwiftUI resolves this view's dependencies — before `body` even runs, regardless of whether the
-    /// "Savaşa Başla" branch that actually reads it is taken.
+    /// "Savaşı Başlat" branch that actually reads it is taken.
     @Environment(AppRouter.self) private var router: AppRouter?
 
     init(model: RuleEditorModel, battleSetup: BattleSetup? = nil) {
@@ -26,7 +26,7 @@ struct RuleEditorView: View {
     }
 
     /// Everything `RuleEditorModel` itself doesn't know (front, level content, placements) but
-    /// "Savaşa Başla" needs to assemble a `BattleConfig` — a View-level concern (`LevelSheet.onConfirm`,
+    /// "Savaşı Başlat" needs to assemble a `BattleConfig` — a View-level concern (`LevelSheet.onConfirm`,
     /// `DebriefView.onFixOrders`), not the model's.
     struct BattleSetup {
         let front: CampaignFront
@@ -75,22 +75,40 @@ struct RuleEditorView: View {
                 .padding(FermanSpacing.md)
             }
 
-            Button {
-                sheet = .add
-            } label: {
-                Label(String(localized: "Emir ekle"), systemImage: "plus")
+            if model.canAddRule {
+                Button {
+                    sheet = .add
+                } label: {
+                    Label(String(localized: "Emir ekle"), systemImage: "plus")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(FermanButton.Outline())
+                .padding(.horizontal, FermanSpacing.md)
+                .padding(.top, FermanSpacing.md)
+            } else if model.canWriteOrders {
+                Text(String(localized: "Kural hakkın doldu. Yeni emir için birini sil."))
+                    .font(FermanFont.caption())
+                    .foregroundStyle(Color.paper.opacity(0.65))
                     .frame(maxWidth: .infinity)
+                    .padding(.horizontal, FermanSpacing.md)
+                    .padding(.top, FermanSpacing.md)
             }
-            .buttonStyle(FermanButton.Outline())
-            .padding(.horizontal, FermanSpacing.md)
-            .padding(.top, FermanSpacing.md)
 
             if let battleSetup {
-                Button(String(localized: "Savaşa Başla")) {
-                    router?.push(.battle(battleConfig(battleSetup)))
+                VStack(spacing: FermanSpacing.xs) {
+                    if let blocker = model.battleBlocker {
+                        Text(Self.sentence(for: blocker))
+                            .font(FermanFont.caption())
+                            .foregroundStyle(Color.paper)
+                            .multilineTextAlignment(.center)
+                            .frame(maxWidth: .infinity)
+                    }
+                    Button(String(localized: "Savaşı Başlat")) {
+                        router?.push(.battle(battleConfig(battleSetup)))
+                    }
+                    .buttonStyle(FermanButton.Primary())
+                    .disabled(model.battleBlocker != nil)
                 }
-                .buttonStyle(FermanButton.Primary())
-                .disabled(!model.validationErrors.isEmpty)
                 .padding(FermanSpacing.md)
             }
         }
@@ -119,6 +137,17 @@ struct RuleEditorView: View {
                 Text(String(localized: "Bu emrin bir parametresi eksik kaldı. Tekrar dene."))
             }
         )
+    }
+
+    /// Says what to fix, not that something is wrong (brief §7 — a calm officer, no "hata oluştu").
+    private static func sentence(for blocker: RuleEditorModel.BattleBlocker) -> String {
+        switch blocker {
+        case .budgetExceeded(let used, let budget):
+            String(localized: "Kural hakkın \(budget), \(used) emir yazdın. Birini sil.")
+        case .invalidOrder(let unitType, let priority):
+            String(
+                localized: "\(OrderPhraseFormatter.unitTypeName(unitType)) · \(priority). emir bu cephede geçerli değil.")
+        }
     }
 
     private func battleConfig(_ setup: BattleSetup) -> BattleConfig {
@@ -244,20 +273,33 @@ struct RuleEditorView: View {
         }
     }
 
+    @ViewBuilder
     private var emptyState: some View {
         VStack(spacing: FermanSpacing.md) {
-            Text("Henüz emir yok.")
-                .font(FermanFont.sectionTitle())
-                .tracking(FermanFont.Tracking.sectionTitle)
-                .foregroundStyle(Color.paper)
-            Text("Askerlerin emir almazsa düşmana doğru yürür ve öldürülene kadar dövüşür.")
-                .font(FermanFont.body())
-                .foregroundStyle(Color.paper.opacity(0.65))
-                .multilineTextAlignment(.center)
-            Button(String(localized: "Hazır emir setlerini gör")) {
-                showingPresets = true
+            if model.canWriteOrders {
+                Text("Henüz emir yok.")
+                    .font(FermanFont.sectionTitle())
+                    .tracking(FermanFont.Tracking.sectionTitle)
+                    .foregroundStyle(Color.paper)
+                Text("Askerlerin emir almazsa düşmana doğru yürür ve öldürülene kadar dövüşür.")
+                    .font(FermanFont.body())
+                    .foregroundStyle(Color.paper.opacity(0.65))
+                    .multilineTextAlignment(.center)
+                Button(String(localized: "Hazır emir setlerini gör")) {
+                    showingPresets = true
+                }
+                .buttonStyle(FermanButton.Chip())
+            } else {
+                // Level 1 (F1.12): nothing to write, the default order is the whole lesson.
+                Text("Bu cephede emir yazılmaz.")
+                    .font(FermanFont.sectionTitle())
+                    .tracking(FermanFont.Tracking.sectionTitle)
+                    .foregroundStyle(Color.paper)
+                Text("Askerlerin varsayılan emri uygular: düşmana doğru yürür ve öldürülene kadar dövüşür. İzle.")
+                    .font(FermanFont.body())
+                    .foregroundStyle(Color.paper.opacity(0.65))
+                    .multilineTextAlignment(.center)
             }
-            .buttonStyle(FermanButton.Chip())
         }
         .padding(.vertical, FermanSpacing.xl)
         .frame(maxWidth: .infinity)
@@ -270,18 +312,18 @@ struct RuleEditorView: View {
         switch kind {
         case .add:
             RulePickerSheet(
-                mode: .add, constraints: model.constraints, availableUnitTypes: model.unitTypes,
+                mode: .add, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
                 onConfirmRule: { draft in Task { await model.addRule(draft) } })
         case .editRule(let id):
             if let item = model.orders.first(where: { $0.id == id }) {
                 RulePickerSheet(
-                    mode: .editRule, constraints: model.constraints, availableUnitTypes: model.unitTypes,
+                    mode: .editRule, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
                     initialRule: item.rule,
                     onConfirmRule: { draft in Task { await model.updateRule(id, to: draft) } })
             }
         case .editDefaultAction:
             RulePickerSheet(
-                mode: .editDefaultAction, constraints: model.constraints, availableUnitTypes: model.unitTypes,
+                mode: .editDefaultAction, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
                 initialRule: model.defaultRule.rule,
                 onConfirmDefaultAction: { action in model.updateDefaultAction(action) })
         }

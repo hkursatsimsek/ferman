@@ -63,12 +63,14 @@ struct ContentView: View {
             if let level = catalog.level(front.id), let map = catalog.map(level.map) {
                 let placedTypes = Set(playerSetup.placements.map(\.type))
                 let unitTypes = catalog.units.map(\.id).filter { placedTypes.contains($0) }
+                let enemyTypes = Set(level.enemy.placements.map(\.type))
                 if unitTypes.isEmpty {
                     contentLoadFailed
                 } else {
                     RuleEditorView(
                         model: RuleEditorModel(
                             unitTypes: unitTypes, catalog: catalog.units, constraints: level.constraints,
+                            enemyUnitTypes: catalog.units.map(\.id).filter { enemyTypes.contains($0) },
                             audio: AudioService.shared),
                         battleSetup: RuleEditorView.BattleSetup(
                             front: front, level: level, map: map, catalog: catalog, placements: playerSetup.placements))
@@ -87,19 +89,23 @@ struct ContentView: View {
         }
     }
 
-    /// The intro choreography's stamped stack (F1.5) shows the first placed unit type's program —
-    /// the same one `BattleModel.selectedUnitType` starts on and the trigger strip opens to. Building
-    /// `OrderStack.Item` (MainActor-isolated, like every other type in this app target) has to happen
-    /// here rather than in `OrderPhraseFormatter`, which stays `nonisolated` on purpose.
+    /// The intro choreography's stamped stack (F1.5): every unit type's program, each under its own
+    /// heading — stamping only the first type's (as F1.5 did) sealed half the army's orders out of
+    /// sight. Building `OrderStack.Item` (MainActor-isolated, like every other type in this app
+    /// target) has to happen here rather than in `OrderPhraseFormatter`, which stays `nonisolated`
+    /// on purpose.
     private func orderStackItems(for config: BattleConfig) -> [OrderStack.Item] {
-        guard let program = config.player.programs.first else { return [] }
-        let ability = config.unitCatalog.first { $0.id == program.unitType }?.ability
-        return program.rules.enumerated().map { index, rule in
-            OrderStack.Item(
-                priority: index + 1,
-                condition: OrderPhraseFormatter.condition(rule.condition),
-                action: OrderPhraseFormatter.action(rule.action, ability: ability),
-                state: index == program.rules.count - 1 ? .isDefault : .normal)
+        config.player.programs.flatMap { program in
+            let ability = config.unitCatalog.first { $0.id == program.unitType }?.ability
+            let heading = OrderPhraseFormatter.unitTypeName(program.unitType)
+            return program.rules.enumerated().map { index, rule in
+                OrderStack.Item(
+                    priority: index + 1,
+                    condition: OrderPhraseFormatter.condition(rule.condition),
+                    action: OrderPhraseFormatter.action(rule.action, ability: ability),
+                    state: index == program.rules.count - 1 ? .isDefault : .normal,
+                    groupTitle: heading)
+            }
         }
     }
 

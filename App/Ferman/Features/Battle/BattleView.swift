@@ -10,11 +10,15 @@ struct BattleView: View {
     /// Guards `onShowResult` against firing twice — once from a manual "Sonuç" tap and again from
     /// the clock naturally finishing, or vice versa.
     @State private var hasShownResult = false
+    /// The stamped stack's natural height, so it can be scaled down to fit when several unit types'
+    /// programs are stamped at once.
+    @State private var orderStackHeight: CGFloat = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dismiss) private var dismiss
     var onShowResult: (BattleResult) -> Void = { _ in }
 
     init(config: BattleConfig, orders: [OrderStack.Item], onShowResult: @escaping (BattleResult) -> Void = { _ in }) {
-        _model = State(initialValue: BattleModel(config: config, orders: orders))
+        _model = State(initialValue: BattleModel(config: config, orders: orders, audio: AudioService.shared))
         self.onShowResult = onShowResult
     }
 
@@ -39,6 +43,7 @@ struct BattleView: View {
                     isPlaying: model.clock?.isPlaying ?? false,
                     speed: speedBinding,
                     triggerRows: model.triggerRows,
+                    onBack: { dismiss() },
                     onTogglePlayPause: { model.clock?.togglePlayPause() },
                     onRestart: { model.restart() },
                     onShowResult: { showResult(delayed: false) }
@@ -48,8 +53,17 @@ struct BattleView: View {
             choreographyOverlay
         }
         .animation(reduceMotion ? .easeInOut(duration: 0.15) : .easeInOut(duration: 0.5), value: model.phase)
+        // The system bar would sit over the sand table and offer a back button mid-intro; the HUD's
+        // own back button takes its place once the battle is playing.
+        .toolbar(.hidden, for: .navigationBar)
         .task {
             model.start(reduceMotion: reduceMotion)
+        }
+        .onAppear {
+            // Coming back from the debrief: the result may be shown again (after a restart, or via
+            // the "Sonuç" button), and the trigger strip picks up where it stopped.
+            hasShownResult = false
+            model.resume()
         }
         .onDisappear {
             model.stop()
@@ -120,14 +134,18 @@ struct BattleView: View {
         }
     }
 
+    /// Every program is laid out from the start (unstamped cards invisible), so cards land in place
+    /// instead of pushing the stack around, and the whole stack is scaled down if it's taller than
+    /// the screen.
     private func orderStackOverlay(stampedCount: Int) -> some View {
-        VStack {
-            Spacer()
-            OrderStack(items: Array(model.orders.prefix(stampedCount)))
+        GeometryReader { proxy in
+            OrderStack(items: model.orders, revealedCount: stampedCount)
                 .padding(FermanSpacing.lg)
-            Spacer()
+                .fixedSize(horizontal: false, vertical: true)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { orderStackHeight = $0 }
+                .scaleEffect(min(1, proxy.size.height / max(orderStackHeight, 1)))
+                .frame(width: proxy.size.width, height: proxy.size.height)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .sensoryFeedback(.impact(weight: .light, intensity: 0.7), trigger: stampedCount)
     }
 }
