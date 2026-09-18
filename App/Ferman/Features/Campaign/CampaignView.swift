@@ -27,6 +27,11 @@ struct CampaignView: View {
             .presentationDetents([.medium])
             .presentationDragIndicator(.hidden)
             .presentationBackground(.clear)
+            // Without this, the system falls back to its own default corner radius for the sheet
+            // container itself — different from `BottomSheet`'s own `FermanRadius.panel` rounding —
+            // so the (invisible-but-still-shaped) system container reads as a second, mismatched
+            // rounded card stacked behind ours.
+            .presentationCornerRadius(FermanRadius.panel)
         }
     }
 
