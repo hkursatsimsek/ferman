@@ -1,75 +1,70 @@
+import FermanCore
 import SwiftUI
 
-enum UnitTokenTeam {
-    case brass
-    case iron
-
-    var gradient: RadialGradient {
-        switch self {
-        case .brass:
-            RadialGradient(
-                colors: [Color(hex: 0xC2A05C), Color(hex: 0x9A7B3F), Color(hex: 0x6B5426)],
-                center: UnitPoint(x: 0.34, y: 0.28),
-                startRadius: 0,
-                endRadius: 30
-            )
-        case .iron:
-            RadialGradient(
-                colors: [Color(hex: 0x837D76), Color(hex: 0x6C6660), Color(hex: 0x4A453F)],
-                center: UnitPoint(x: 0.34, y: 0.28),
-                startRadius: 0,
-                endRadius: 30
-            )
-        }
-    }
-
-    var ringColor: Color {
-        switch self {
-        case .brass: Color(hex: 0xC2A05C)
-        case .iron: Color(hex: 0x837D76)
-        }
-    }
-}
-
-enum UnitTokenSize {
-    case table
+enum UnitTokenSize: Equatable {
+    /// On a placement grid: the figure keeps the battle's proportion to its cell (a 48pt canvas on a
+    /// 32pt cell), so a unit looks the same placed as it does fighting (D24).
+    case onTable(cellSize: CGFloat)
     case tray
     case result
 
-    var diameter: CGFloat {
+    /// Side of the square canvas the figure is drawn in (base centred, weapons reaching out).
+    var canvas: CGFloat {
         switch self {
-        case .table: 22
-        case .tray: 44
-        case .result: 34
+        case .onTable(let cellSize): cellSize * UnitArt.canvasPoints / BoardProjection.scenePointsPerCell
+        case .tray: 64
+        case .result: 48
         }
     }
 }
 
-/// BirimJetonu — a cast-metal figure. Silhouette only, no detail (design brief §4.3).
+/// BirimJetonu — a cast-metal miniature seen from above, told apart by silhouette: the spearman's
+/// long spear, the archer's bow and quiver, the horse, the broad shield (D24). The player's figures
+/// stand on round brass bases, the enemy's on octagonal iron ones — never colour alone.
+///
+/// Decorative to VoiceOver: whoever places a token names the unit in its own label.
 struct UnitToken: View {
-    let team: UnitTokenTeam
+    let type: UnitTypeID
+    var team: Team = .player
     let size: UnitTokenSize
+    var pose: UnitPose = .base
     var isSelected: Bool = false
 
     var body: some View {
-        Circle()
-            .fill(team.gradient)
-            .overlay(
-                Circle().strokeBorder(team.ringColor, lineWidth: isSelected ? 2 : 0)
-                    .padding(isSelected ? -2 : 0)
-            )
-            .frame(width: size.diameter, height: size.diameter)
-            .shadow(color: .black.opacity(0.5), radius: size == .table ? 2.5 : 3.5, x: 0, y: size == .table ? 3 : 4)
+        ZStack {
+            Image(decorative: UnitArt.shadowName(type: type, fallen: pose == .fallen))
+                .resizable()
+            Image(decorative: UnitArt.imageName(type: type, team: team, pose: pose))
+                .resizable()
+            if isSelected {
+                Image(decorative: UnitArt.selectionRingName)
+                    .resizable()
+            }
+        }
+        .frame(width: size.canvas, height: size.canvas)
+        .accessibilityHidden(true)
     }
 }
 
 #Preview("UnitToken", traits: .sizeThatFitsLayout) {
-    HStack(alignment: .bottom, spacing: FermanSpacing.md) {
-        UnitToken(team: .brass, size: .table)
-        UnitToken(team: .brass, size: .tray)
-        UnitToken(team: .brass, size: .tray, isSelected: true)
-        UnitToken(team: .iron, size: .result)
+    VStack(spacing: FermanSpacing.md) {
+        HStack(spacing: FermanSpacing.md) {
+            ForEach(["mizrakci", "okcu", "suvari", "kalkan"] as [UnitTypeID], id: \.self) { type in
+                UnitToken(type: type, size: .tray)
+            }
+        }
+        HStack(spacing: FermanSpacing.md) {
+            ForEach(["mizrakci", "okcu", "suvari", "kalkan"] as [UnitTypeID], id: \.self) { type in
+                UnitToken(type: type, team: .enemy, size: .tray)
+            }
+        }
+        HStack(spacing: FermanSpacing.md) {
+            UnitToken(type: "okcu", size: .onTable(cellSize: 26))
+            UnitToken(type: "okcu", size: .tray, isSelected: true)
+            UnitToken(type: "kalkan", size: .result, pose: .brace)
+            UnitToken(type: "suvari", team: .enemy, size: .result, pose: .fallen)
+        }
     }
     .padding()
-    .background(Color.ink)
+    .background(Color.sand)
 }

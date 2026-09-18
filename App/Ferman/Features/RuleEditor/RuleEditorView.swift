@@ -173,7 +173,7 @@ struct RuleEditorView: View {
                         model.selectUnitType(unitType)
                     } label: {
                         VStack(spacing: FermanSpacing.xxs) {
-                            UnitToken(team: .brass, size: .tray, isSelected: isSelected)
+                            UnitToken(type: unitType, size: .tray, isSelected: isSelected)
                             Text(OrderPhraseFormatter.unitTypeName(unitType))
                                 .font(isSelected ? FermanFont.tabSelected() : FermanFont.tab())
                                 .foregroundStyle(isSelected ? Color.paper : Color.paper.opacity(0.75))

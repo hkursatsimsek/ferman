@@ -88,8 +88,8 @@ final class BattleScene: SKScene {
 
     private func buildUnitPool() {
         for event in timeline.result.events {
-            guard case .spawn(let unit, _, let team, _) = event.kind else { continue }
-            let node = UnitNode(unitID: unit, team: team)
+            guard case .spawn(let unit, let type, let team, _) = event.kind else { continue }
+            let node = UnitNode(unitID: unit, type: type, team: team)
             node.isHidden = true
             node.zPosition = 1
             unitNodes[unit] = node
@@ -210,7 +210,7 @@ final class BattleScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let point = touch.location(in: self)
-        guard let shapeNode = atPoint(point) as? SKShapeNode, let unitNode = shapeNode.parent as? UnitNode else {
+        guard let unitNode = nearestUnit(to: point) else {
             tappedUnitLabel.isHidden = true
             return
         }
@@ -218,12 +218,26 @@ final class BattleScene: SKScene {
         showLabel(for: unitNode)
     }
 
+    /// The closest visible figure within `UnitNode.touchRadius` — a figure is too small to hit by its
+    /// pixels, and a tap between two of them should still pick one.
+    private func nearestUnit(to point: CGPoint) -> UnitNode? {
+        var nearest: (node: UnitNode, distance: CGFloat)?
+        for node in unitNodes.values where !node.isHidden {
+            let distance = hypot(node.position.x - point.x, node.position.y - point.y)
+            guard distance <= UnitNode.touchRadius else { continue }
+            if nearest.map({ distance < $0.distance }) ?? true {
+                nearest = (node, distance)
+            }
+        }
+        return nearest?.node
+    }
+
     private func showLabel(for node: UnitNode) {
         let frame = timeline.frame(at: clock.currentTick)
         let ruleIndex = frame.activeRuleIndex[node.unitID]
         let unitType = frame.unitTypes[node.unitID]?.rawValue ?? "?"
         tappedUnitLabel.text = ruleIndex.map { "\(unitType) · \($0 + 1). emir" } ?? unitType
-        tappedUnitLabel.position = CGPoint(x: node.position.x, y: node.position.y + UnitNode.radius + 14)
+        tappedUnitLabel.position = CGPoint(x: node.position.x, y: node.position.y + UnitArt.canvasPoints / 2)
         tappedUnitLabel.isHidden = false
     }
 }

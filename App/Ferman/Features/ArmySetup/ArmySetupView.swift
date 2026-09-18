@@ -65,7 +65,7 @@ struct ArmySetupView: View {
                     ForEach(screenRows.indices, id: \.self) { screenRow in
                         HStack(spacing: 0) {
                             ForEach(screenRows[screenRow], id: \.row) { cell in
-                                cellView(column: cell.column, row: cell.row)
+                                cellView(column: cell.column, row: cell.row, cellSize: cellSize)
                                     .frame(width: cellSize, height: cellSize)
                             }
                         }
@@ -104,16 +104,13 @@ struct ArmySetupView: View {
     }
 
     @ViewBuilder
-    private func cellView(column: Int, row: Int) -> some View {
+    private func cellView(column: Int, row: Int, cellSize: CGFloat) -> some View {
         if let cell = model.map.cellIndex(column: column, row: row), model.isPlayerZone(cell) {
-            placementSlot(cell: cell)
+            PlacementSlotView(
+                model: model, cell: cell, cellSize: cellSize, accessibilityLabel: accessibilityLabel(forCell: cell))
         } else {
             Color.clear
         }
-    }
-
-    private func placementSlot(cell: Int) -> some View {
-        PlacementSlotView(model: model, cell: cell, accessibilityLabel: accessibilityLabel(forCell: cell))
     }
 
     private func accessibilityLabel(forCell cell: Int) -> String {
@@ -132,7 +129,7 @@ struct ArmySetupView: View {
                     // silhouette was a hard-to-hit drag handle on its own (found via a real
                     // playtest, F1.14); the label and cost underneath now start the drag too.
                     VStack(spacing: FermanSpacing.xxs) {
-                        UnitToken(team: .brass, size: .tray)
+                        UnitToken(type: unitType.id, size: .tray)
                         Text(OrderPhraseFormatter.unitTypeName(unitType.id))
                             .font(FermanFont.caption())
                             .foregroundStyle(Color.paper)
@@ -165,6 +162,7 @@ struct ArmySetupView: View {
 private struct PlacementSlotView: View {
     let model: ArmySetupModel
     let cell: Int
+    let cellSize: CGFloat
     let accessibilityLabel: String
 
     @State private var isTargeted = false
@@ -203,7 +201,9 @@ private struct PlacementSlotView: View {
     @ViewBuilder
     private func placedUnitView(_ placement: ArmyPlacement) -> some View {
         ZStack(alignment: .topTrailing) {
-            UnitToken(team: .brass, size: .table, isSelected: model.selectedPlacementID == placement.id)
+            UnitToken(
+                type: placement.unitType, size: .onTable(cellSize: cellSize),
+                isSelected: model.selectedPlacementID == placement.id)
             if placement.isCommander {
                 Image(systemName: "crown.fill")
                     .font(.system(size: 9))
@@ -211,7 +211,7 @@ private struct PlacementSlotView: View {
                     .offset(x: 3, y: -3)
             }
         }
-        // `UnitToken(.table)` is a 22pt silhouette — well under the tappable minimum on its own
+        // The figure's base is well under the tappable minimum on its own
         // (found via a real playtest, F1.14). The whole cell (already sized well past 44pt by
         // `placementGrid`'s layout) becomes the tap/context-menu target instead of just the token.
         .frame(maxWidth: .infinity, maxHeight: .infinity)

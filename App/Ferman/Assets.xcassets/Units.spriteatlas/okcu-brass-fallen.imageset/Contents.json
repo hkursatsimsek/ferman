@@ -1,0 +1,7 @@
+{
+  "images" : [
+    { "filename" : "okcu-brass-fallen@2x.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "okcu-brass-fallen@3x.png", "idiom" : "universal", "scale" : "3x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}

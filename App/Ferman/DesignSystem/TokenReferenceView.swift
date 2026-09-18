@@ -1,3 +1,4 @@
+import FermanCore
 import SwiftUI
 
 /// Single reference page for every DesignSystem token and component (design brief §8, step 1).
@@ -99,7 +100,7 @@ struct TokenReferenceView: View {
                     Text("buton 8pt")
                 }
                 VStack {
-                    UnitToken(team: .brass, size: .tray)
+                    UnitToken(type: "okcu", size: .tray)
                     Text("jeton")
                 }
             }
@@ -143,10 +144,10 @@ struct TokenReferenceView: View {
         VStack(alignment: .leading, spacing: FermanSpacing.xxl) {
             sectionLabel("BirimJetonu") {
                 HStack(alignment: .bottom, spacing: FermanSpacing.md) {
-                    UnitToken(team: .brass, size: .table)
-                    UnitToken(team: .brass, size: .tray)
-                    UnitToken(team: .brass, size: .tray, isSelected: true)
-                    UnitToken(team: .iron, size: .result)
+                    UnitToken(type: "mizrakci", size: .onTable(cellSize: 26))
+                    UnitToken(type: "okcu", size: .tray)
+                    UnitToken(type: "suvari", size: .tray, isSelected: true)
+                    UnitToken(type: "kalkan", team: .enemy, size: .result)
                 }
             }
             sectionLabel("TetiklenmeÇubuğu") {

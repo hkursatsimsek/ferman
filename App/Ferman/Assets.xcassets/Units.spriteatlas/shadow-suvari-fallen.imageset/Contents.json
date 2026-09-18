@@ -1,0 +1,7 @@
+{
+  "images" : [
+    { "filename" : "shadow-suvari-fallen@2x.png", "idiom" : "universal", "scale" : "2x" },
+    { "filename" : "shadow-suvari-fallen@3x.png", "idiom" : "universal", "scale" : "3x" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
