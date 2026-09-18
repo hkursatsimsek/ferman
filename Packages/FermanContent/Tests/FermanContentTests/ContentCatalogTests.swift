@@ -9,7 +9,7 @@ struct BundledContentTests {
     @Test func loadsAndValidates() throws {
         let catalog = try ContentCatalog.bundled()
         #expect(catalog.units.map(\.id) == ["kalkan", "mizrakci", "okcu", "suvari"])
-        #expect(catalog.maps.map(\.id) == ["alan", "gecit", "ova"])
+        #expect(catalog.maps.map(\.id) == ["alan", "gecit", "ova", "vadi"])
         #expect(catalog.unitType("okcu")?.ability == .volley)
         #expect(catalog.unitType("fil") == nil)
         #expect(catalog.map("ova")?.width == 24)

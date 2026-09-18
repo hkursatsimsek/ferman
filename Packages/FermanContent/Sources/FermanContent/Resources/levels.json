@@ -292,7 +292,7 @@
     },
     {
       "id": 4,
-      "map": "alan",
+      "map": "vadi",
       "objective": "eliminate",
       "constraints": {
         "maxRules": 3,
@@ -1104,7 +1104,7 @@
     },
     {
       "id": 8,
-      "map": "alan",
+      "map": "vadi",
       "objective": "eliminate",
       "constraints": {
         "maxRules": 4,
