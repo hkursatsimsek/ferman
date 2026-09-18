@@ -7,6 +7,9 @@ import SwiftUI
 /// view only decides when it's visible and dims/scales it while the intro plays.
 struct BattleView: View {
     @State private var model: BattleModel
+    /// Guards `onShowResult` against firing twice — once from a manual "Sonuç" tap and again from
+    /// the clock naturally finishing, or vice versa.
+    @State private var hasShownResult = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     var onShowResult: (BattleResult) -> Void = { _ in }
 
@@ -38,7 +41,7 @@ struct BattleView: View {
                     triggerRows: model.triggerRows,
                     onTogglePlayPause: { model.clock?.togglePlayPause() },
                     onRestart: { model.restart() },
-                    onShowResult: { if let result = model.result { onShowResult(result) } }
+                    onShowResult: { showResult(delayed: false) }
                 )
             }
 
@@ -53,6 +56,29 @@ struct BattleView: View {
         }
         .onTapGesture {
             model.skip()
+        }
+        // The battle screen is watch-only (brief §4.5) — once the clock plays itself out there's
+        // nothing left to do here, so it cuts to the debrief on its own rather than stranding the
+        // player on a frozen sand table waiting for a manual "Sonuç" tap.
+        .onChange(of: model.clock?.isPlaying) { _, isPlaying in
+            guard model.phase == .playing, isPlaying == false, model.clock?.isFinished == true else { return }
+            showResult(delayed: true)
+        }
+    }
+
+    /// Guarded by `hasShownResult` so a manual "Sonuç" tap and the auto-finish transition can never
+    /// both fire. `delayed` gives the player a beat to register the battle's last frame before the
+    /// cut — a manual tap already IS that beat, so it navigates immediately.
+    private func showResult(delayed: Bool) {
+        guard !hasShownResult, let result = model.result else { return }
+        hasShownResult = true
+        guard delayed else {
+            onShowResult(result)
+            return
+        }
+        Task {
+            try? await Task.sleep(for: .milliseconds(700))
+            onShowResult(result)
         }
     }
 
