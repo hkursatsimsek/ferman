@@ -1,29 +1,18 @@
 import Foundation
 import SwiftUI
 
-/// The battle screen's only chrome: a minimal top bar and the live trigger strip (design brief
-/// §4.5). Presentation only — reads whatever `BattleView` hands it.
-struct BattleHUD: View {
+/// The battle screen's top bar (design brief §4.5). Presentation only — reads whatever `BattleView`
+/// hands it.
+struct BattleTopBar: View {
     let elapsedSeconds: Int
     let isPlaying: Bool
     @Binding var speed: BattleSpeed
-    let triggerRows: [BattleModel.TriggerRow]
     var onBack: () -> Void
     var onTogglePlayPause: () -> Void
     var onRestart: () -> Void
     var onShowResult: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            topBar
-            Spacer(minLength: 0)
-            if !triggerRows.isEmpty {
-                triggerStrip
-            }
-        }
-    }
-
-    private var topBar: some View {
         HStack(spacing: FermanSpacing.md) {
             Button(action: onBack) {
                 Image(systemName: "chevron.backward")
@@ -66,10 +55,29 @@ struct BattleHUD: View {
         .padding(.top, FermanSpacing.xs)
     }
 
-    private var triggerStrip: some View {
+    private var timeText: String {
+        String(format: "%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
+    }
+}
+
+/// The live trigger strip under the sand table (design brief §4.5). It always reserves
+/// `reservedRowCount` rows — the army's longest program — so switching to a unit type with fewer
+/// orders, or the strip filling in after the intro, never resizes the table above it.
+struct BattleTriggerStrip: View {
+    let rows: [BattleModel.TriggerRow]
+    let reservedRowCount: Int
+
+    var body: some View {
         VStack(spacing: FermanSpacing.sm) {
-            ForEach(triggerRows) { row in
-                TriggerBar(priority: row.priority, fraction: row.fraction, count: row.count, isSpark: row.isSpark)
+            ForEach(0..<max(reservedRowCount, rows.count), id: \.self) { index in
+                if index < rows.count {
+                    let row = rows[index]
+                    TriggerBar(priority: row.priority, fraction: row.fraction, count: row.count, isSpark: row.isSpark)
+                } else {
+                    TriggerBar(priority: index + 1, fraction: 0, count: 0, isSpark: false)
+                        .hidden()
+                        .accessibilityHidden(true)
+                }
             }
         }
         .padding(FermanSpacing.md)
@@ -78,32 +86,22 @@ struct BattleHUD: View {
         .padding(.horizontal, FermanSpacing.sm)
         .padding(.bottom, FermanSpacing.xs)
     }
-
-    private var timeText: String {
-        String(format: "%02d:%02d", elapsedSeconds / 60, elapsedSeconds % 60)
-    }
 }
 
-#Preview("BattleHUD", traits: .sizeThatFitsLayout) {
-    ZStack {
-        Color.ink
-        VStack {
-            BattleHUD(
-                elapsedSeconds: 23,
-                isPlaying: true,
-                speed: .constant(.x2),
-                triggerRows: [
-                    .init(id: 0, priority: 1, fraction: 0.74, count: 14, isSpark: false),
-                    .init(id: 1, priority: 2, fraction: 1, count: 19, isSpark: true),
-                    .init(id: 2, priority: 3, fraction: 0, count: 0, isSpark: false),
-                ],
-                onBack: {},
-                onTogglePlayPause: {},
-                onRestart: {},
-                onShowResult: {}
-            )
-            Spacer()
-        }
+#Preview("Battle HUD", traits: .sizeThatFitsLayout) {
+    VStack {
+        BattleTopBar(
+            elapsedSeconds: 23, isPlaying: true, speed: .constant(.x2),
+            onBack: {}, onTogglePlayPause: {}, onRestart: {}, onShowResult: {})
+        Spacer()
+        BattleTriggerStrip(
+            rows: [
+                .init(id: 0, priority: 1, fraction: 0.74, count: 14, isSpark: false),
+                .init(id: 1, priority: 2, fraction: 1, count: 19, isSpark: true),
+                .init(id: 2, priority: 3, fraction: 0, count: 0, isSpark: false),
+            ],
+            reservedRowCount: 4)
     }
+    .background(Color.ink)
     .frame(width: 393, height: 500)
 }

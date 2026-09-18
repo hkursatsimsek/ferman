@@ -9,6 +9,7 @@ import os
 final class BattleScene: SKScene {
     private let timeline: ReplayTimeline
     private let clock: ReplayClock
+    private let projection: BoardProjection
     var onUnitTapped: ((UnitID) -> Void)?
 
     private var unitNodes: [UnitID: UnitNode] = [:]
@@ -26,21 +27,18 @@ final class BattleScene: SKScene {
     init(map: BattleMap, timeline: ReplayTimeline, clock: ReplayClock) {
         self.timeline = timeline
         self.clock = clock
+        self.projection = BoardProjection(map: map)
         tappedUnitLabel = Self.makeTappedUnitLabel()
 
-        let sceneSize = CGSize(
-            width: CGFloat(map.width) * SceneScale.pointsPerCell,
-            height: CGFloat(map.height) * SceneScale.pointsPerCell
-        )
+        // Upright (D26): the landscape map is drawn a quarter turn counter-clockwise, player at the
+        // bottom — every position below goes through `projection`.
+        let sceneSize = projection.boardSize
         super.init(size: sceneSize)
 
         // `.aspectFit`: the sand table (design brief §4.5 — "Tam ekran kum masası") must show the
-        // whole battlefield at once. Most maps are wider than a portrait phone screen (e.g. 24x14
-        // cells = 768x448pt); `.aspectFill` cropped that down to a sliver, hiding most of the battle
-        // off-screen. `anchorPoint` stays `.zero` — it places the scene's origin (not its center) at
-        // that point in the view, so every node position in this file stays a bottom-left-relative
-        // coordinate; `BattleSceneView` centers the letterboxed result via SwiftUI's own
-        // `aspectRatio(_:contentMode:)` instead of fighting SpriteKit's anchor semantics for it.
+        // whole battlefield at once. `anchorPoint` stays `.zero`, so every node position in this file
+        // is bottom-left-relative; `BattleSceneView` locks its own aspect ratio to the board's so
+        // the scene fills it exactly.
         backgroundColor = SKColor(red: 0x0F / 255, green: 0x16 / 255, blue: 0x1B / 255, alpha: 1)
         scaleMode = .aspectFit
         isUserInteractionEnabled = true
@@ -201,8 +199,8 @@ final class BattleScene: SKScene {
                 continue
             }
             node.isHidden = false
-            let from = currentPosition.scenePoint
-            let to = next.positions[unitID]?.scenePoint ?? from
+            let from = projection.scenePoint(currentPosition)
+            let to = next.positions[unitID].map(projection.scenePoint) ?? from
             node.position = from.interpolated(to: to, fraction: fraction)
         }
     }

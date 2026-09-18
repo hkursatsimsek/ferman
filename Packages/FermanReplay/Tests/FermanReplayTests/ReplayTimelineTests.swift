@@ -89,4 +89,74 @@ struct ReplayTimelineTests {
         let final = timeline.fireCounts(upTo: Int32(result.tickCount))
         #expect(Set(final) == Set(result.ruleFireCounts))
     }
+
+    @Test func fireCountsMatchAFullScanAtEveryTick() async throws {
+        let result = makeResult()
+        let timeline = ReplayTimeline(result: result)
+
+        for tick in Int32(-1)...Int32(result.tickCount + 5) {
+            #expect(timeline.fireCounts(upTo: tick) == fullScanFireCounts(result, upTo: tick), "tick \(tick)")
+        }
+    }
+
+    /// `frame(at:)` runs twice per rendered frame (F1.4); it must fold only the events between its
+    /// keyframe and the requested tick, never the whole stream from the start.
+    @Test func frameFoldsOnlyTheEventsAfterItsKeyframe() async throws {
+        let result = longResult(ticks: 3_000)
+        let timeline = ReplayTimeline(result: result, keyframeInterval: 30)
+
+        for tick in stride(from: Int32(0), through: Int32(3_000), by: 97) {
+            let keyframeTick = tick / 30 * 30
+            let window = result.events.indices.filter {
+                result.events[$0].tick > keyframeTick && result.events[$0].tick <= tick
+            }
+            #expect(Array(timeline.foldedEventRange(forFrameAt: tick)) == window, "tick \(tick)")
+        }
+    }
+
+    @Test func aLongBattleStillSeeksToTheSameFrameAsFoldingFromTheStart() async throws {
+        let result = longResult(ticks: 900)
+        let keyed = ReplayTimeline(result: result, keyframeInterval: 30)
+        let unkeyed = ReplayTimeline(result: result, keyframeInterval: .max)
+
+        for tick in stride(from: Int32(0), through: Int32(900), by: 13) {
+            #expect(keyed.frame(at: tick) == unkeyed.frame(at: tick), "mismatch at tick \(tick)")
+        }
+    }
+}
+
+/// One unit walking one step per tick and switching orders every 7 ticks — a stream long enough that
+/// a full scan and a keyframe-bounded fold differ by orders of magnitude.
+private func longResult(ticks: Int32) -> BattleResult {
+    var events: [BattleEvent] = [
+        BattleEvent(tick: 0, kind: .spawn(unit1, archer, .player, FixedVector2(x: Fixed(0), y: Fixed(1))))
+    ]
+    for tick in 1...ticks {
+        events.append(BattleEvent(tick: tick, kind: .move(unit1, FixedVector2(x: Fixed(Int(tick % 20)), y: Fixed(1)))))
+        if tick % 7 == 0 {
+            events.append(BattleEvent(tick: tick, kind: .ruleActivated(unit1, ruleIndex: Int(tick / 7 % 2))))
+        }
+    }
+    return BattleResult(
+        outcome: .draw, endReason: .timeLimit, tickCount: Int(ticks), events: events,
+        ruleFireCounts: [RuleFireCounts(team: .player, unitType: archer, counts: [0, 0])],
+        survivorsPlayer: 1, survivorsEnemy: 0, checksum: 0)
+}
+
+/// The definition `fireCounts(upTo:)` has to keep matching: every `ruleActivated` event up to `tick`.
+private func fullScanFireCounts(_ result: BattleResult, upTo tick: Int32) -> [RuleFireCounts] {
+    var unitTypes: [UnitID: (Team, UnitTypeID)] = [:]
+    for event in result.events {
+        if case .spawn(let unit, let type, let team, _) = event.kind { unitTypes[unit] = (team, type) }
+    }
+    return result.ruleFireCounts.map { entry in
+        var counts = Array(repeating: 0, count: entry.counts.count)
+        for event in result.events where event.tick <= tick {
+            guard case .ruleActivated(let unit, let ruleIndex) = event.kind, let owner = unitTypes[unit],
+                owner.0 == entry.team, owner.1 == entry.unitType, ruleIndex < counts.count
+            else { continue }
+            counts[ruleIndex] += 1
+        }
+        return RuleFireCounts(team: entry.team, unitType: entry.unitType, counts: counts)
+    }
 }

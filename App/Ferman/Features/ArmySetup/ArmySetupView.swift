@@ -51,24 +51,27 @@ struct ArmySetupView: View {
         .padding(FermanSpacing.md)
     }
 
+    /// The zone laid out upright like the battle table (D26): its column nearest the enemy on top,
+    /// ASCII row 0 on the left — so a unit lands in battle exactly where it was placed.
     private var placementGrid: some View {
-        let columns = Array(model.gridColumns)
-        let rows = Array(model.gridRows)
+        let screenRows = BoardProjection(map: model.map).screenRows(columns: model.gridColumns, rows: model.gridRows)
+        let columnCount = screenRows.first?.count ?? 1
         return GeometryReader { proxy in
-            let cellSize = min(proxy.size.width / CGFloat(columns.count), proxy.size.height / CGFloat(rows.count))
+            let cellSize = min(
+                proxy.size.width / CGFloat(columnCount), proxy.size.height / CGFloat(max(screenRows.count, 1)))
             ZStack {
                 SandTable()
                 VStack(spacing: 0) {
-                    ForEach(rows, id: \.self) { row in
+                    ForEach(screenRows.indices, id: \.self) { screenRow in
                         HStack(spacing: 0) {
-                            ForEach(columns, id: \.self) { column in
-                                cellView(column: column, row: row)
+                            ForEach(screenRows[screenRow], id: \.row) { cell in
+                                cellView(column: cell.column, row: cell.row)
                                     .frame(width: cellSize, height: cellSize)
                             }
                         }
                     }
                 }
-                .frame(width: cellSize * CGFloat(columns.count), height: cellSize * CGFloat(rows.count))
+                .frame(width: cellSize * CGFloat(columnCount), height: cellSize * CGFloat(screenRows.count))
                 if model.placements.isEmpty {
                     emptyGridHint
                 }

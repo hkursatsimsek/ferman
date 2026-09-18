@@ -56,6 +56,11 @@ final class BattleModel {
     private(set) var triggerRows: [TriggerRow] = []
     private(set) var selectedUnitType: UnitTypeID?
 
+    /// Rows the trigger strip reserves: the longest of the player's programs, default order included.
+    var reservedTriggerRowCount: Int {
+        config.player.programs.map(\.rules.count).max() ?? 0
+    }
+
     private let runner: BattleRunner
     private let audio: any AudioPlaying
     private var isSkipping = false

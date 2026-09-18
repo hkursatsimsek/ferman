@@ -22,14 +22,13 @@ struct BattleSceneView: View {
     }
 
     var body: some View {
-        // Locks the view's own aspect ratio to the map's before SpriteKit ever scales anything, so
-        // the letterboxed sand table lands centered (SwiftUI centers a smaller child in its parent
-        // by default) instead of pinned to whichever corner `SKScene.anchorPoint` happens to place
-        // the scene's origin at.
+        // Locks the view's own aspect ratio to the (upright, D26) board's before SpriteKit ever
+        // scales anything, so the sand table lands centered (SwiftUI centers a smaller child in its
+        // parent by default) instead of pinned to whichever corner `SKScene.anchorPoint` happens to
+        // place the scene's origin at.
         SpriteView(scene: scene, options: [.ignoresSiblingOrder])
             .onAppear { scene.onUnitTapped = onUnitTapped }
-            .aspectRatio(CGFloat(map.width) / CGFloat(map.height), contentMode: .fit)
+            .aspectRatio(BoardProjection(map: map).aspectRatio, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ignoresSafeArea()
     }
 }

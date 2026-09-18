@@ -31,6 +31,14 @@ struct ContentView: View {
         // that doesn't need to walk Home -> Campaign -> ArmySetup first.
         if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
+        } else if let catalog, let screen = DirectLaunch.current, let front = directLaunchFront(screen, catalog) {
+            NavigationStack(path: $router.path) {
+                directLaunchView(screen, front: front, catalog: catalog)
+                    .navigationDestination(for: Route.self) { route in
+                        destination(for: route, catalog: catalog)
+                    }
+            }
+            .environment(router)
         } else if let catalog {
             NavigationStack(path: $router.path) {
                 HomeView(model: HomeModel(nextFront: CampaignFront.fronts(from: catalog).first))
@@ -106,6 +114,55 @@ struct ContentView: View {
                     state: index == program.rules.count - 1 ? .isDefault : .normal,
                     groupTitle: heading)
             }
+        }
+    }
+
+    // MARK: - Direct launch (UI tests, screenshots)
+
+    /// `-uiTestBattle <level>` / `-uiTestArmySetup <level>` open that level's battle (its reference
+    /// solution against its enemy) or army setup directly — a screen a test or a screenshot can reach
+    /// without walking Home → Campaign by touch, which this machine's simulator can't automate.
+    private enum DirectLaunch {
+        case battle(level: Int)
+        case armySetup(level: Int)
+
+        static var current: DirectLaunch? {
+            let defaults = UserDefaults.standard
+            if defaults.integer(forKey: "uiTestBattle") > 0 {
+                return .battle(level: defaults.integer(forKey: "uiTestBattle"))
+            }
+            if defaults.integer(forKey: "uiTestArmySetup") > 0 {
+                return .armySetup(level: defaults.integer(forKey: "uiTestArmySetup"))
+            }
+            return nil
+        }
+
+        var level: Int {
+            switch self {
+            case .battle(let level), .armySetup(let level): level
+            }
+        }
+    }
+
+    private func directLaunchFront(_ screen: DirectLaunch, _ catalog: ContentCatalog) -> CampaignFront? {
+        CampaignFront.fronts(from: catalog).first { $0.id == screen.level }
+    }
+
+    @ViewBuilder
+    private func directLaunchView(_ screen: DirectLaunch, front: CampaignFront, catalog: ContentCatalog) -> some View {
+        switch screen {
+        case .battle:
+            if let level = catalog.level(front.id), let map = catalog.map(level.map) {
+                let config = BattleConfig(
+                    map: map, unitCatalog: catalog.units, player: level.referenceSolution, enemy: level.enemy,
+                    objective: level.objective, constraints: level.constraints, seed: level.seed,
+                    maxTicks: level.maxTicks)
+                destination(for: .battle(config), catalog: catalog)
+            } else {
+                contentLoadFailed
+            }
+        case .armySetup:
+            destination(for: .armySetup(front), catalog: catalog)
         }
     }
 

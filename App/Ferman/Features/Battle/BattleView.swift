@@ -26,28 +26,34 @@ struct BattleView: View {
         ZStack {
             Color.ink.ignoresSafeArea()
 
-            if let clock = model.clock, let timeline = model.timeline {
-                BattleSceneView(map: model.config.map, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit)
-                    .ignoresSafeArea()
-                    .scaleEffect(sceneScale)
-                    .brightness(sceneBrightness)
-            }
-
-            if model.phase == .lampFlicker {
-                Color.white.opacity(0.25).ignoresSafeArea()
-            }
-
-            if model.phase == .playing {
-                BattleHUD(
+            // Top bar, table, strip stacked rather than overlaid (D26): the upright table gets
+            // exactly the height between them, and nothing covers the player's own deployment zone
+            // at the bottom. The chrome keeps its space through the intro so the table doesn't
+            // resize the moment the battle starts.
+            VStack(spacing: 0) {
+                BattleTopBar(
                     elapsedSeconds: elapsedSeconds,
                     isPlaying: model.clock?.isPlaying ?? false,
                     speed: speedBinding,
-                    triggerRows: model.triggerRows,
                     onBack: { dismiss() },
                     onTogglePlayPause: { model.clock?.togglePlayPause() },
                     onRestart: { model.restart() },
                     onShowResult: { showResult(delayed: false) }
                 )
+                .opacity(isShowingBattle ? 1 : 0)
+                .allowsHitTesting(isShowingBattle)
+                .accessibilityHidden(!isShowingBattle)
+
+                sandTable
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+                BattleTriggerStrip(rows: model.triggerRows, reservedRowCount: model.reservedTriggerRowCount)
+                    .opacity(isShowingBattle ? 1 : 0)
+                    .accessibilityHidden(!isShowingBattle)
+            }
+
+            if model.phase == .lampFlicker {
+                Color.white.opacity(0.25).ignoresSafeArea()
             }
 
             choreographyOverlay
@@ -77,6 +83,22 @@ struct BattleView: View {
         .onChange(of: model.clock?.isPlaying) { _, isPlaying in
             guard model.phase == .playing, isPlaying == false, model.clock?.isFinished == true else { return }
             showResult(delayed: true)
+        }
+    }
+
+    /// Past the intro — the battle is on screen, running or not.
+    private var isShowingBattle: Bool {
+        model.phase == .playing
+    }
+
+    @ViewBuilder
+    private var sandTable: some View {
+        if let clock = model.clock, let timeline = model.timeline {
+            BattleSceneView(map: model.config.map, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit)
+                .scaleEffect(sceneScale)
+                .brightness(sceneBrightness)
+        } else {
+            Color.clear
         }
     }
 
