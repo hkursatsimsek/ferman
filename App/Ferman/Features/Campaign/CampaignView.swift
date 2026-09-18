@@ -40,13 +40,20 @@ struct CampaignView: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(String(localized: "\(front.id). Cephe"))
                         .font(FermanFont.caption())
-                        .foregroundStyle(Color.paper.opacity(0.6))
+                        .foregroundStyle(Color.paper.opacity(0.75))
                     Text(front.title)
                         .font(FermanFont.sectionTitle())
-                        .foregroundStyle(isLocked ? Color.paper.opacity(0.4) : Color.paper)
+                        .foregroundStyle(isLocked ? Color.paper.opacity(0.75) : Color.paper)
                 }
                 Spacer()
             }
+            .padding(FermanSpacing.md)
+            // The sand table underneath varies in brightness with its lighting (design brief §3.2),
+            // so text sitting directly on it can't have a fixed, checkable contrast ratio — a
+            // `performAccessibilityAudit()` failure (F1.13), not a style choice. This panel gives
+            // every row the same solid, dark backing regardless of what's rendered behind it.
+            .background(Color.slateRaised.opacity(0.88))
+            .clipShape(RoundedRectangle(cornerRadius: FermanRadius.panel))
             // See `HomeView.menuRow` — `.buttonStyle(.plain)` needs this to make the
             // `Spacer()`-stretched part of the row tappable, not just its intrinsic content.
             .contentShape(Rectangle())
@@ -54,6 +61,13 @@ struct CampaignView: View {
         .buttonStyle(.plain)
         .disabled(isLocked)
         .accessibilityIdentifier("campaign.front.\(front.id)")
+        // See `HomeView.menuRow`: default combining across `FrontFlag` + two differently-colored
+        // `Text` runs gave the contrast audit a frame wide enough to sample empty space instead of
+        // either one (F1.13). Must come after `accessibilityIdentifier` — the reverse order drops it.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(
+            String(localized: "\(front.id). Cephe, \(front.title), \(front.state.accessibilityDescription)")
+        )
     }
 }
 

@@ -56,14 +56,19 @@ final class BattleModel {
     private(set) var selectedUnitType: UnitTypeID?
 
     private let runner: BattleRunner
+    private let audio: any AudioPlaying
     private var isSkipping = false
     private var runTask: Task<Void, Never>?
     private var samplingTask: Task<Void, Never>?
 
-    init(config: BattleConfig, orders: [OrderStack.Item], runner: BattleRunner = BattleRunner()) {
+    init(
+        config: BattleConfig, orders: [OrderStack.Item], runner: BattleRunner = BattleRunner(),
+        audio: any AudioPlaying = SilentAudioPlaying()
+    ) {
         self.config = config
         self.orders = orders
         self.runner = runner
+        self.audio = audio
         self.phase = orders.isEmpty ? .slidingAway : .stamping(stampedCount: 0)
         self.selectedUnitType = config.player.programs.first?.unitType
     }
@@ -114,6 +119,7 @@ final class BattleModel {
 
         for index in orders.indices {
             phase = .stamping(stampedCount: index + 1)
+            audio.play(.stamp)
             await sleepStep(Self.stampInterval)
         }
         phase = .slidingAway

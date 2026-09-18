@@ -39,16 +39,17 @@ struct HomeView: View {
             HStack {
                 Text(title)
                     .font(FermanFont.sectionTitle())
-                    .foregroundStyle(isEnabled ? Color.paper : Color.paper.opacity(0.35))
+                    .foregroundStyle(isEnabled ? Color.paper : Color.paper.opacity(0.75))
                 Spacer()
                 if !subtitle.isEmpty {
                     Text(subtitle)
                         .font(FermanFont.caption())
-                        .foregroundStyle(isEnabled ? Color.brass : Color.paper.opacity(0.3))
+                        .foregroundStyle(isEnabled ? Color.brass : Color.paper.opacity(0.75))
                 }
                 Image(systemName: "chevron.right")
                     .font(.system(size: 13, weight: .medium))
                     .foregroundStyle(isEnabled ? Color.paper.opacity(0.4) : Color.paper.opacity(0.15))
+                    .accessibilityHidden(true)
             }
             .padding(.vertical, FermanSpacing.sm)
             // `.buttonStyle(.plain)` alone leaves the `Spacer()`-stretched middle of the row
@@ -59,6 +60,8 @@ struct HomeView: View {
         .buttonStyle(.plain)
         .disabled(!isEnabled)
         .accessibilityIdentifier(identifier)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(subtitle.isEmpty ? title : "\(title), \(subtitle)")
     }
 }
 

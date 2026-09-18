@@ -35,11 +35,13 @@ struct BattleHUD: View {
                 Image(systemName: "arrow.counterclockwise")
                     .foregroundStyle(Color.paper.opacity(0.85))
             }
+            .accessibilityLabel(String(localized: "Başa sar"))
 
             Button(action: onTogglePlayPause) {
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     .foregroundStyle(Color.paper.opacity(0.85))
             }
+            .accessibilityLabel(isPlaying ? String(localized: "Duraklat") : String(localized: "Oynat"))
 
             SpeedControl(selection: $speed)
         }

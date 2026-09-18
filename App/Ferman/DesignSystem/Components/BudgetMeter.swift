@@ -32,6 +32,7 @@ struct BudgetMeter: View {
             }
             .frame(height: 3)
         }
+        .accessibilityElement(children: .combine)
     }
 }
 

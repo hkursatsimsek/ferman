@@ -57,7 +57,9 @@ struct OrderCard: View {
                 .font(FermanFont.counter(size: 12))
                 .foregroundStyle(badgeText)
         }
-        .frame(width: 23, height: 23)
+        // `minWidth`/`minHeight`, not `width`/`height`: at accessibility Dynamic Type sizes the
+        // priority number is wider than a fixed 23pt circle, and a hard frame would clip it.
+        .frame(minWidth: 23, minHeight: 23)
         .padding(.top, 1)
     }
 
@@ -80,10 +82,11 @@ struct OrderCard: View {
     private var background: some View {
         Group {
             switch state {
-            case .normal, .dragging, .triggered, .editing:
+            // `.disabled` used to sit on a dim paper tint; a `performAccessibilityAudit()` failure
+            // (F1.13) showed `paperInk` text needs a genuinely light card under it to stay readable,
+            // so it now shares `.normal`'s full-strength card and dims only its badge stroke instead.
+            case .normal, .dragging, .triggered, .editing, .disabled:
                 Paper()
-            case .disabled:
-                Color.paper.opacity(0.14)
             case .isDefault:
                 Color.clear
             }
@@ -109,16 +112,14 @@ struct OrderCard: View {
 
     private var conditionColor: Color {
         switch state {
-        case .disabled: Color.paperInk.opacity(0.38)
-        case .isDefault: Color.paper.opacity(0.55)
+        case .isDefault: Color.paper.opacity(0.75)
         default: Color.paperInk
         }
     }
 
     private var actionColor: Color {
         switch state {
-        case .disabled: Color.paperInk.opacity(0.38)
-        case .isDefault: Color.paper.opacity(0.7)
+        case .isDefault: Color.paper.opacity(0.85)
         default: Color.paperInk
         }
     }
@@ -133,8 +134,7 @@ struct OrderCard: View {
 
     private var badgeText: Color {
         switch state {
-        case .disabled: Color.paper.opacity(0.4)
-        case .isDefault: Color.paper.opacity(0.55)
+        case .isDefault: Color.paper.opacity(0.75)
         default: Color.paperInk
         }
     }

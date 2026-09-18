@@ -27,7 +27,7 @@ struct ArmySetupView: View {
                         .foregroundStyle(Color.brass)
                     Text(badge.detail)
                         .font(FermanFont.caption())
-                        .foregroundStyle(Color.paper.opacity(0.65))
+                        .foregroundStyle(Color.paper.opacity(0.75))
                 }
             }
         }
@@ -78,6 +78,16 @@ struct ArmySetupView: View {
             guard let rawUnitType = droppedIDs.first else { return }
             model.place(UnitTypeID(rawValue: rawUnitType), at: cell)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel(forCell: cell))
+    }
+
+    private func accessibilityLabel(forCell cell: Int) -> String {
+        guard let placement = model.placement(at: cell) else {
+            return String(localized: "Boş hücre")
+        }
+        let name = OrderPhraseFormatter.unitTypeName(placement.unitType)
+        return placement.isCommander ? String(localized: "\(name), komutan") : name
     }
 
     @ViewBuilder
@@ -124,8 +134,12 @@ struct ArmySetupView: View {
                             .foregroundStyle(Color.paper)
                         Text(String(localized: "\(unitType.cost)p"))
                             .font(FermanFont.counter(size: 12))
-                            .foregroundStyle(Color.paper.opacity(0.6))
+                            .foregroundStyle(Color.paper.opacity(0.75))
                     }
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(
+                        String(localized: "\(OrderPhraseFormatter.unitTypeName(unitType.id)), \(unitType.cost) puan")
+                    )
                 }
             }
             .padding(FermanSpacing.md)

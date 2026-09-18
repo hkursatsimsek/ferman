@@ -80,7 +80,8 @@ struct ContentView: View {
                 id: shield, cost: 30, maxHP: 160, speedMilliCellsPerSecond: 900, rangeMilliCells: 1_000,
                 damage: 8, attackIntervalTicks: 30, armor: 4, moraleMax: 120, counters: [], ability: .shieldWall),
         ]
-        return RuleEditorModel(unitTypes: [archer, shield], catalog: catalog, constraints: .unrestricted)
+        return RuleEditorModel(
+            unitTypes: [archer, shield], catalog: catalog, constraints: .unrestricted, audio: AudioService.shared)
     }
 }
 

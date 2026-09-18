@@ -96,11 +96,17 @@ struct RuleEditorView: View {
                             UnitToken(team: .brass, size: .tray, isSelected: isSelected)
                             Text(OrderPhraseFormatter.unitTypeName(unitType))
                                 .font(isSelected ? FermanFont.tabSelected() : FermanFont.tab())
-                                .foregroundStyle(isSelected ? Color.paper : Color.paper.opacity(0.5))
+                                .foregroundStyle(isSelected ? Color.paper : Color.paper.opacity(0.75))
                         }
                     }
                     .buttonStyle(.plain)
+                    // See `HomeView.menuRow`: a tab combining `UnitToken`'s icon with `Text` under
+                    // the default grouping gave the contrast audit a frame reaching into the icon
+                    // instead of just the text (F1.13). `.accessibilityElement` first, traits/label
+                    // after — the reverse order lets them get discarded when the element regroups.
+                    .accessibilityElement(children: .ignore)
                     .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+                    .accessibilityLabel(OrderPhraseFormatter.unitTypeName(unitType))
                 }
             }
             .padding(.horizontal, FermanSpacing.md)

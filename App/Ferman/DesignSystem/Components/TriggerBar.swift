@@ -13,7 +13,8 @@ struct TriggerBar: View {
             Text("\(priority)")
                 .font(FermanFont.counter(size: 11))
                 .foregroundStyle(isSpark ? Color.spark : Color.paper.opacity(0.55))
-                .frame(width: 12, alignment: .leading)
+                // `minWidth`, not `width` — a hard width clips this at accessibility Dynamic Type sizes.
+                .frame(minWidth: 12, alignment: .leading)
 
             GeometryReader { proxy in
                 ZStack(alignment: .leading) {
@@ -30,8 +31,11 @@ struct TriggerBar: View {
             Text("\(count)")
                 .font(FermanFont.counter(size: 12))
                 .foregroundStyle(isSpark ? Color.spark : Color.paper.opacity(0.7))
-                .frame(width: 30, alignment: .trailing)
+                .frame(minWidth: 30, alignment: .trailing)
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "\(priority). emir"))
+        .accessibilityValue(String(localized: "\(count) kez tetiklendi"))
     }
 }
 

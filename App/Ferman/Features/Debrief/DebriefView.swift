@@ -81,7 +81,8 @@ private struct DebriefOrderRowView: View {
                 Text("\(row.priority)")
                     .font(FermanFont.counter(size: 12))
                     .foregroundStyle(Color.paper.opacity(0.55))
-                    .frame(width: 16, alignment: .leading)
+                    // `minWidth`, not `width` — a hard width clips this at accessibility Dynamic Type sizes.
+                    .frame(minWidth: 16, alignment: .leading)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(row.condition)
                         .font(FermanFont.orderCondition())
@@ -106,7 +107,7 @@ private struct DebriefOrderRowView: View {
                 Text(String(localized: "\(row.fireCount) kez"))
                     .font(FermanFont.counter(size: 12))
                     .foregroundStyle(Color.paper.opacity(0.6))
-                    .frame(width: 48, alignment: .trailing)
+                    .frame(minWidth: 48, alignment: .trailing)
             }
             if row.neverFired {
                 Text(String(localized: "⚠ Bu emir hiç çalışmadı."))
@@ -115,5 +116,6 @@ private struct DebriefOrderRowView: View {
                     .padding(.leading, 16 + FermanSpacing.sm)
             }
         }
+        .accessibilityElement(children: .combine)
     }
 }

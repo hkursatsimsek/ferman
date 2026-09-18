@@ -4,6 +4,15 @@ enum FrontFlagState: Hashable {
     case cleared
     case open
     case locked
+
+    /// The flag carries this through color alone otherwise — VoiceOver has no color.
+    var accessibilityDescription: String {
+        switch self {
+        case .cleared: String(localized: "geçildi")
+        case .open: String(localized: "açık")
+        case .locked: String(localized: "kilitli")
+        }
+    }
 }
 
 /// CepheBayrağı — a map pin stuck into the sand table (design brief §4.2).
@@ -37,6 +46,8 @@ struct FrontFlag: View {
                 .shadow(color: poleColor.opacity(state == .open ? 0.7 : 0), radius: 10)
         }
         .frame(width: 26, height: 44, alignment: .top)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(state.accessibilityDescription)
     }
 }
 

@@ -68,19 +68,22 @@ final class RuleEditorModel {
     var lastCompileError: RuleCompileError?
 
     private let compiler: any RuleCompiler<RuleDraft>
+    private let audio: any AudioPlaying
 
     init(
         unitTypes: [UnitTypeID],
         catalog: [UnitType],
         constraints: RuleConstraints,
         initialPrograms: [RuleProgram] = [],
-        compiler: any RuleCompiler<RuleDraft> = ManualCompiler()
+        compiler: any RuleCompiler<RuleDraft> = ManualCompiler(),
+        audio: any AudioPlaying = SilentAudioPlaying()
     ) {
         precondition(!unitTypes.isEmpty, "RuleEditorModel needs at least one unit type")
         self.unitTypes = unitTypes
         self.catalog = catalog
         self.constraints = constraints
         self.compiler = compiler
+        self.audio = audio
         self.selectedUnitType = unitTypes[0]
 
         var orders: [UnitTypeID: [EditableRule]] = [:]
@@ -230,6 +233,7 @@ final class RuleEditorModel {
             rules.append(contentsOf: moving)
         }
         ordersByUnitType[selectedUnitType] = rules
+        audio.play(.paper)
         refreshValidation()
     }
 
@@ -240,6 +244,7 @@ final class RuleEditorModel {
         else { return }
         rules.swapAt(index, index - 1)
         ordersByUnitType[selectedUnitType] = rules
+        audio.play(.paper)
         refreshValidation()
     }
 
@@ -249,6 +254,7 @@ final class RuleEditorModel {
         else { return }
         rules.swapAt(index, index + 1)
         ordersByUnitType[selectedUnitType] = rules
+        audio.play(.paper)
         refreshValidation()
     }
 
