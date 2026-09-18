@@ -154,14 +154,19 @@ final class BattleModel {
 
     // MARK: - Trigger strip
 
+    /// Refreshes once synchronously before spawning the recurring sampler: `phase` flips to
+    /// `.playing` the moment this is called (from `beginPlaying()`), so without an immediate,
+    /// non-async refresh here `triggerRows` would stay empty until the new `Task` first gets
+    /// scheduled — a race a caller watching `phase` has no way to wait out.
     private func startSampling() {
         samplingTask?.cancel()
+        refreshTriggerRows()
         samplingTask = Task { [weak self] in
             guard let self else { return }
             while !Task.isCancelled {
-                self.refreshTriggerRows()
                 guard let clock = self.clock, !clock.isFinished else { break }
                 try? await Task.sleep(for: Self.sampleInterval)
+                self.refreshTriggerRows()
             }
         }
     }
