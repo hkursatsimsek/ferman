@@ -52,6 +52,7 @@ final class BattleModel {
     private(set) var phase: Phase
     private(set) var clock: ReplayClock?
     private(set) var timeline: ReplayTimeline?
+    private(set) var result: BattleResult?
     private(set) var triggerRows: [TriggerRow] = []
     private(set) var selectedUnitType: UnitTypeID?
 
@@ -147,6 +148,7 @@ final class BattleModel {
     }
 
     private func installResult(_ result: BattleResult) {
+        self.result = result
         let timeline = ReplayTimeline(result: result)
         self.timeline = timeline
         let clock = ReplayClock(tickCount: Int32(result.tickCount))

@@ -8,9 +8,11 @@ import SwiftUI
 struct BattleView: View {
     @State private var model: BattleModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    var onShowResult: (BattleResult) -> Void = { _ in }
 
-    init(config: BattleConfig, orders: [OrderStack.Item]) {
+    init(config: BattleConfig, orders: [OrderStack.Item], onShowResult: @escaping (BattleResult) -> Void = { _ in }) {
         _model = State(initialValue: BattleModel(config: config, orders: orders))
+        self.onShowResult = onShowResult
     }
 
     var body: some View {
@@ -35,7 +37,8 @@ struct BattleView: View {
                     speed: speedBinding,
                     triggerRows: model.triggerRows,
                     onTogglePlayPause: { model.clock?.togglePlayPause() },
-                    onRestart: { model.restart() }
+                    onRestart: { model.restart() },
+                    onShowResult: { if let result = model.result { onShowResult(result) } }
                 )
             }
 

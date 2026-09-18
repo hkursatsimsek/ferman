@@ -5,7 +5,9 @@ import SwiftUI
 /// the drag source, the grid is the drop destination — both plain `String` payloads (a unit type's
 /// raw id), so dragging a unit needs no custom `Transferable` type or exported UTType.
 struct ArmySetupView: View {
+    let front: CampaignFront
     @State var model: ArmySetupModel
+    @Environment(AppRouter.self) private var router
 
     var body: some View {
         VStack(spacing: 0) {
@@ -13,8 +15,23 @@ struct ArmySetupView: View {
             placementGrid
                 .frame(maxHeight: .infinity)
             unitTray
+            if !model.placements.isEmpty {
+                writeOrdersButton
+            }
         }
         .background(Color.ink)
+    }
+
+    // At least one placement showing before this appears, rather than showing it disabled from the
+    // start: `FermanButton.Primary()`'s disabled state (`Color.paper` at low opacity on low opacity)
+    // isn't meant to sit on screen at launch — `performAccessibilityAudit()` flags it there (F1.14).
+    private var writeOrdersButton: some View {
+        Button(String(localized: "Emirleri Yaz")) {
+            router.push(.ruleEditor(front, model.teamSetup))
+        }
+        .buttonStyle(FermanButton.Primary())
+        .padding(FermanSpacing.md)
+        .background(Color.slateRaised)
     }
 
     private var header: some View {

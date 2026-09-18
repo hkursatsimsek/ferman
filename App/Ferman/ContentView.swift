@@ -26,14 +26,14 @@ struct ContentView: View {
     }
 
     var body: some View {
-        // FermanUITests still reaches RuleEditorView directly through this launch argument — it
-        // isn't a stop on the real navigation graph below (RuleEditor needs an army's unit types,
-        // which only exist once ArmySetup has placements; that hop isn't wired yet).
+        // FermanUITests still reaches RuleEditorView directly through this launch argument, with a
+        // fixed two-unit fixture instead of a real army — a fast, deterministic UI-test entry point
+        // that doesn't need to walk Home -> Campaign -> ArmySetup first.
         if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
         } else if let catalog {
             NavigationStack(path: $router.path) {
-                HomeView(model: HomeModel(nextFront: CampaignFront.placeholders.first { $0.state == .open }))
+                HomeView(model: HomeModel(nextFront: CampaignFront.fronts(from: catalog).first))
                     .navigationDestination(for: Route.self) { route in
                         destination(for: route, catalog: catalog)
                     }
@@ -48,16 +48,58 @@ struct ContentView: View {
     private func destination(for route: Route, catalog: ContentCatalog) -> some View {
         switch route {
         case .campaign:
-            CampaignView(model: CampaignModel())
+            CampaignView(model: CampaignModel(fronts: CampaignFront.fronts(from: catalog)))
         case .armySetup(let front):
             if let map = catalog.map(front.map) {
                 ArmySetupView(
+                    front: front,
                     model: ArmySetupModel(
                         map: map, catalog: catalog.units, totalBudget: front.playerBudget,
                         constraintBadge: front.constraintBadge))
             } else {
                 contentLoadFailed
             }
+        case .ruleEditor(let front, let playerSetup):
+            if let level = catalog.level(front.id), let map = catalog.map(level.map) {
+                let placedTypes = Set(playerSetup.placements.map(\.type))
+                let unitTypes = catalog.units.map(\.id).filter { placedTypes.contains($0) }
+                if unitTypes.isEmpty {
+                    contentLoadFailed
+                } else {
+                    RuleEditorView(
+                        model: RuleEditorModel(
+                            unitTypes: unitTypes, catalog: catalog.units, constraints: level.constraints,
+                            audio: AudioService.shared),
+                        battleSetup: RuleEditorView.BattleSetup(
+                            front: front, level: level, map: map, catalog: catalog, placements: playerSetup.placements))
+                }
+            } else {
+                contentLoadFailed
+            }
+        case .battle(let config):
+            BattleView(config: config, orders: orderStackItems(for: config)) { result in
+                router.push(.debrief(config, result))
+            }
+        case .debrief(let config, let result):
+            DebriefView(model: DebriefModel(config: config, result: result)) {
+                router.pop(2)
+            }
+        }
+    }
+
+    /// The intro choreography's stamped stack (F1.5) shows the first placed unit type's program —
+    /// the same one `BattleModel.selectedUnitType` starts on and the trigger strip opens to. Building
+    /// `OrderStack.Item` (MainActor-isolated, like every other type in this app target) has to happen
+    /// here rather than in `OrderPhraseFormatter`, which stays `nonisolated` on purpose.
+    private func orderStackItems(for config: BattleConfig) -> [OrderStack.Item] {
+        guard let program = config.player.programs.first else { return [] }
+        let ability = config.unitCatalog.first { $0.id == program.unitType }?.ability
+        return program.rules.enumerated().map { index, rule in
+            OrderStack.Item(
+                priority: index + 1,
+                condition: OrderPhraseFormatter.condition(rule.condition),
+                action: OrderPhraseFormatter.action(rule.action, ability: ability),
+                state: index == program.rules.count - 1 ? .isDefault : .normal)
         }
     }
 

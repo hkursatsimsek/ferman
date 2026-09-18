@@ -1,4 +1,5 @@
 import FermanContent
+import FermanCore
 import Foundation
 import Observation
 
@@ -19,6 +20,39 @@ struct CampaignFront: Identifiable, Sendable, Hashable {
 }
 
 extension CampaignFront {
+    /// Titles for the 8 real levels `FermanContent` ships (F1.12) — `LevelDefinition` carries no
+    /// display name of its own (same reasoning as `UnitType.id`, D19), and nothing here reads a
+    /// `level.<id>` String Catalog key yet, so these are plain literals rather than a lookup.
+    private static let titles: [Int: String] = [
+        1: String(localized: "İlk Tepe"),
+        2: String(localized: "Kum Sırtı"),
+        3: String(localized: "Taş Geçit"),
+        4: String(localized: "Kuru Vadi"),
+        5: String(localized: "Demir Kapı"),
+        6: String(localized: "Kızıl Yamaç"),
+        7: String(localized: "Son Hat"),
+        8: String(localized: "Kara Boğaz"),
+    ]
+
+    /// Real fronts, one per `ContentCatalog.levels` entry. Every front is `.open`: `ProgressStore`
+    /// (F1.11) isn't wired to any screen yet, so there is no real "cleared" signal to gate a lock/
+    /// unlock sequence on — that join is separate, later work, not this step's.
+    static func fronts(from catalog: ContentCatalog) -> [CampaignFront] {
+        let costByUnitType = Dictionary(uniqueKeysWithValues: catalog.units.map { ($0.id, $0.cost) })
+        return catalog.levels.map { level in
+            let enemyBudget = level.enemy.placements.reduce(0) { $0 + (costByUnitType[$1.type] ?? 0) }
+            return CampaignFront(
+                id: level.id,
+                title: titles[level.id] ?? String(localized: "\(level.id). Cephe"),
+                map: level.map,
+                enemyBudget: enemyBudget,
+                playerBudget: level.playerBudget,
+                ruleBudget: level.constraints.maxRules,
+                constraintBadge: nil,
+                state: .open)
+        }
+    }
+
     static let placeholders: [CampaignFront] = [
         CampaignFront(
             id: 1, title: String(localized: "İlk Tepe"), map: "ova", enemyBudget: 120, playerBudget: 150,

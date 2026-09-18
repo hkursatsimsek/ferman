@@ -1,3 +1,4 @@
+import FermanContent
 import FermanCore
 import SwiftUI
 
@@ -5,10 +6,38 @@ import SwiftUI
 /// with a fixed default at the bottom, and a selector sheet to add or edit an order. No natural
 /// language input here yet — that's Faz 2 (CLAUDE.md rule 3).
 struct RuleEditorView: View {
+    /// Non-nil only on the real navigation path (`Route.ruleEditor`) — `nil` for the standalone
+    /// `-uiTestRuleEditor` fixture (`ContentView`), which has no front/army to build a `BattleConfig`
+    /// from and so shows no "Savaşa Başla" button.
+    let battleSetup: BattleSetup?
     @State var model: RuleEditorModel
     @State private var sheet: SheetKind?
     @State private var dialTarget: EditableRule.ID?
     @State private var showingPresets = false
+    /// Optional, not required: `-uiTestRuleEditor`'s standalone fixture never wraps this view in
+    /// `.environment(AppRouter())`, and a required `@Environment(AppRouter.self)` crashes as soon as
+    /// SwiftUI resolves this view's dependencies — before `body` even runs, regardless of whether the
+    /// "Savaşa Başla" branch that actually reads it is taken.
+    @Environment(AppRouter.self) private var router: AppRouter?
+
+    init(model: RuleEditorModel, battleSetup: BattleSetup? = nil) {
+        _model = State(initialValue: model)
+        self.battleSetup = battleSetup
+    }
+
+    /// Everything `RuleEditorModel` itself doesn't know (front, level content, placements) but
+    /// "Savaşa Başla" needs to assemble a `BattleConfig` — a View-level concern (`LevelSheet.onConfirm`,
+    /// `DebriefView.onFixOrders`), not the model's.
+    struct BattleSetup {
+        let front: CampaignFront
+        let level: LevelDefinition
+        /// Resolved by whoever builds this (`ContentView`, same as `Route.armySetup`'s own
+        /// `catalog.map(front.map)` lookup) so this view never needs to force-unwrap a lookup that
+        /// content validation already guaranteed succeeds.
+        let map: BattleMap
+        let catalog: ContentCatalog
+        let placements: [UnitPlacement]
+    }
 
     private enum SheetKind: Identifiable, Equatable {
         case add
@@ -53,7 +82,17 @@ struct RuleEditorView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(FermanButton.Outline())
-            .padding(FermanSpacing.md)
+            .padding(.horizontal, FermanSpacing.md)
+            .padding(.top, FermanSpacing.md)
+
+            if let battleSetup {
+                Button(String(localized: "Savaşa Başla")) {
+                    router?.push(.battle(battleConfig(battleSetup)))
+                }
+                .buttonStyle(FermanButton.Primary())
+                .disabled(!model.validationErrors.isEmpty)
+                .padding(FermanSpacing.md)
+            }
         }
         .background(Color.ink)
         .sheet(item: $sheet) { kind in
@@ -80,6 +119,18 @@ struct RuleEditorView: View {
                 Text(String(localized: "Bu emrin bir parametresi eksik kaldı. Tekrar dene."))
             }
         )
+    }
+
+    private func battleConfig(_ setup: BattleSetup) -> BattleConfig {
+        BattleConfig(
+            map: setup.map,
+            unitCatalog: setup.catalog.units,
+            player: TeamSetup(placements: setup.placements, programs: model.programs),
+            enemy: setup.level.enemy,
+            objective: setup.level.objective,
+            constraints: setup.level.constraints,
+            seed: setup.level.seed,
+            maxTicks: setup.level.maxTicks)
     }
 
     // MARK: - Tabs

@@ -10,6 +10,7 @@ struct BattleHUD: View {
     let triggerRows: [BattleModel.TriggerRow]
     var onTogglePlayPause: () -> Void
     var onRestart: () -> Void
+    var onShowResult: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
@@ -44,6 +45,12 @@ struct BattleHUD: View {
             .accessibilityLabel(isPlaying ? String(localized: "Duraklat") : String(localized: "Oynat"))
 
             SpeedControl(selection: $speed)
+
+            Button(action: onShowResult) {
+                Image(systemName: "flag.checkered")
+                    .foregroundStyle(Color.paper.opacity(0.85))
+            }
+            .accessibilityLabel(String(localized: "Sonuç"))
         }
         .padding(.horizontal, FermanSpacing.md)
         .padding(.vertical, FermanSpacing.sm)
@@ -84,7 +91,8 @@ struct BattleHUD: View {
                     .init(id: 2, priority: 3, fraction: 0, count: 0, isSpark: false),
                 ],
                 onTogglePlayPause: {},
-                onRestart: {}
+                onRestart: {},
+                onShowResult: {}
             )
             Spacer()
         }
