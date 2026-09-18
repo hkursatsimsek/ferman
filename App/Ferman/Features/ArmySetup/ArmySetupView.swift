@@ -69,8 +69,35 @@ struct ArmySetupView: View {
                     }
                 }
                 .frame(width: cellSize * CGFloat(columns.count), height: cellSize * CGFloat(rows.count))
+                if model.placements.isEmpty {
+                    emptyGridHint
+                }
             }
         }
+    }
+
+    /// Nothing else on this screen hints that placing units is a *drag* — without this, a first-time
+    /// player sees an empty grid and a tray with no visible next step (found via a real playtest,
+    /// F1.14). `.allowsHitTesting(false)` so it never steals a drop from the grid cell underneath it.
+    ///
+    /// Backed by a `slateRaised` panel rather than sitting directly on `SandTable`'s variable-brightness
+    /// shader — the same fix F1.13 already needed for `CampaignView`'s front rows, and for the same
+    /// reason: `performAccessibilityAudit()` fails contrast against a background that isn't a flat color.
+    private var emptyGridHint: some View {
+        VStack(spacing: FermanSpacing.xs) {
+            Image(systemName: "hand.draw")
+                .font(.system(size: 28))
+                .foregroundStyle(Color.paper.opacity(0.5))
+            Text(String(localized: "Birimlerini aşağıdaki tepsiden buraya sürükle."))
+                .font(FermanFont.body())
+                .foregroundStyle(Color.paper)
+                .multilineTextAlignment(.center)
+        }
+        .padding(FermanSpacing.lg)
+        .background(Color.slateRaised.opacity(0.94), in: RoundedRectangle(cornerRadius: FermanRadius.panel))
+        .allowsHitTesting(false)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(String(localized: "Birimlerini aşağıdaki tepsiden buraya sürükle."))
     }
 
     @ViewBuilder
@@ -83,20 +110,7 @@ struct ArmySetupView: View {
     }
 
     private func placementSlot(cell: Int) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 4)
-                .strokeBorder(Color.paper.opacity(0.18), lineWidth: 1)
-            if let placement = model.placement(at: cell) {
-                placedUnitView(placement)
-            }
-        }
-        .padding(2)
-        .dropDestination(for: String.self, isEnabled: model.placement(at: cell) == nil) { droppedIDs, _ in
-            guard let rawUnitType = droppedIDs.first else { return }
-            model.place(UnitTypeID(rawValue: rawUnitType), at: cell)
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(accessibilityLabel(forCell: cell))
+        PlacementSlotView(model: model, cell: cell, accessibilityLabel: accessibilityLabel(forCell: cell))
     }
 
     private func accessibilityLabel(forCell cell: Int) -> String {
@@ -105,6 +119,74 @@ struct ArmySetupView: View {
         }
         let name = OrderPhraseFormatter.unitTypeName(placement.unitType)
         return placement.isCommander ? String(localized: "\(name), komutan") : name
+    }
+
+    private var unitTray: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: FermanSpacing.lg) {
+                ForEach(model.catalog, id: \.id) { unitType in
+                    // The whole card is the drag source, not just the `UnitToken` circle — a 44pt
+                    // silhouette was a hard-to-hit drag handle on its own (found via a real
+                    // playtest, F1.14); the label and cost underneath now start the drag too.
+                    VStack(spacing: FermanSpacing.xxs) {
+                        UnitToken(team: .brass, size: .tray)
+                        Text(OrderPhraseFormatter.unitTypeName(unitType.id))
+                            .font(FermanFont.caption())
+                            .foregroundStyle(Color.paper)
+                        Text(String(localized: "\(unitType.cost)p"))
+                            .font(FermanFont.counter(size: 12))
+                            .foregroundStyle(Color.paper.opacity(0.75))
+                    }
+                    .padding(FermanSpacing.xs)
+                    .contentShape(Rectangle())
+                    .draggable(unitType.id.rawValue)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel(
+                        String(localized: "\(OrderPhraseFormatter.unitTypeName(unitType.id)), \(unitType.cost) puan")
+                    )
+                }
+            }
+            .padding(FermanSpacing.md)
+        }
+        .background(Color.slateRaised)
+    }
+}
+
+/// One placement cell. Its own view (rather than a `ArmySetupView` method) so it can own the
+/// `isTargeted` highlight — the only feedback a player gets, while their finger is still down, that
+/// a cell will actually receive the drop (found missing via a real playtest, F1.14).
+private struct PlacementSlotView: View {
+    let model: ArmySetupModel
+    let cell: Int
+    let accessibilityLabel: String
+
+    @State private var isTargeted = false
+
+    private var placement: ArmyPlacement? { model.placement(at: cell) }
+
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: 4)
+                .fill(isTargeted ? Color.brass.opacity(0.25) : Color.clear)
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(isTargeted ? Color.brass : Color.paper.opacity(0.18), lineWidth: isTargeted ? 2 : 1)
+            if let placement {
+                placedUnitView(placement)
+            }
+        }
+        .padding(2)
+        .dropDestination(for: String.self, isEnabled: placement == nil) { droppedIDs, session in
+            switch session.phase {
+            case .entering, .active:
+                isTargeted = true
+            default:
+                isTargeted = false
+            }
+            guard let rawUnitType = droppedIDs.first else { return }
+            model.place(UnitTypeID(rawValue: rawUnitType), at: cell)
+        }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(accessibilityLabel)
     }
 
     @ViewBuilder
@@ -118,6 +200,11 @@ struct ArmySetupView: View {
                     .offset(x: 3, y: -3)
             }
         }
+        // `UnitToken(.table)` is a 22pt silhouette — well under the tappable minimum on its own
+        // (found via a real playtest, F1.14). The whole cell (already sized well past 44pt by
+        // `placementGrid`'s layout) becomes the tap/context-menu target instead of just the token.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .contentShape(Rectangle())
         .onTapGesture {
             model.toggleSelection(placement.id)
         }
@@ -137,30 +224,5 @@ struct ArmySetupView: View {
                 Text(String(localized: "Kaldır"))
             }
         }
-    }
-
-    private var unitTray: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: FermanSpacing.lg) {
-                ForEach(model.catalog, id: \.id) { unitType in
-                    VStack(spacing: FermanSpacing.xxs) {
-                        UnitToken(team: .brass, size: .tray)
-                            .draggable(unitType.id.rawValue)
-                        Text(OrderPhraseFormatter.unitTypeName(unitType.id))
-                            .font(FermanFont.caption())
-                            .foregroundStyle(Color.paper)
-                        Text(String(localized: "\(unitType.cost)p"))
-                            .font(FermanFont.counter(size: 12))
-                            .foregroundStyle(Color.paper.opacity(0.75))
-                    }
-                    .accessibilityElement(children: .ignore)
-                    .accessibilityLabel(
-                        String(localized: "\(OrderPhraseFormatter.unitTypeName(unitType.id)), \(unitType.cost) puan")
-                    )
-                }
-            }
-            .padding(FermanSpacing.md)
-        }
-        .background(Color.slateRaised)
     }
 }
