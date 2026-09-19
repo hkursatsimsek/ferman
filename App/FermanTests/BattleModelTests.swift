@@ -78,6 +78,68 @@ struct BattleModelTests {
         #expect(model.selectedUnitType == Fixture.archer)
     }
 
+    /// Seeks to a tick where the fixture's archer is holding (its second order) and pauses there.
+    private static func archerHolding(_ model: BattleModel) throws -> UnitID {
+        let timeline = try #require(model.timeline)
+        let clock = try #require(model.clock)
+        clock.isPlaying = false
+        let archer = try #require(timeline.frame(at: 1).teams.first { $0.value == .player }?.key)
+        let tick = try #require((1..<300).first { timeline.frame(at: Int32($0)).activeRuleIndex[archer] == 1 })
+        clock.seek(to: Int32(tick))
+        return archer
+    }
+
+    /// G13's evaluating pen: tap a unit and the pen reads its orders from the top, passing the ones whose
+    /// condition doesn't hold, and rests on the one it's carrying out.
+    @Test
+    func thePenReadsATappedUnitsOrdersFromTheTop() async throws {
+        let model = BattleModel(config: try Fixture.config(), orders: [])
+        model.start(reduceMotion: false)
+        try await Fixture.waitUntilPlaying(model)
+        let archer = try Self.archerHolding(model)
+
+        model.selectUnit(archer)
+        #expect(model.evaluation == BattleModel.Evaluation(unit: archer, row: 0, target: 1))
+        #expect(model.triggerRows.map { $0.pen } == [.reading, nil])
+
+        let deadline = ContinuousClock.now + .seconds(2)
+        while model.evaluation?.row != 1, ContinuousClock.now < deadline {
+            try await Task.sleep(for: .milliseconds(20))
+        }
+        #expect(model.triggerRows.map { $0.pen } == [.passed, .holds])
+    }
+
+    @Test
+    func underReduceMotionThePenIsAlreadyInPlace() async throws {
+        let model = BattleModel(config: try Fixture.config(), orders: [])
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+        let archer = try Self.archerHolding(model)
+
+        model.selectUnit(archer)
+        #expect(model.triggerRows.map { $0.pen } == [.passed, .holds])
+    }
+
+    /// Empty sand puts the pen down; so does tapping an enemy, whose orders aren't the player's to read.
+    @Test
+    func tappingElsewherePutsThePenDown() async throws {
+        let model = BattleModel(config: try Fixture.config(), orders: [])
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+        let archer = try Self.archerHolding(model)
+        let timeline = try #require(model.timeline)
+        let enemy = try #require(timeline.frame(at: 1).teams.first { $0.value == .enemy }?.key)
+
+        model.selectUnit(archer)
+        model.selectUnit(nil)
+        #expect(model.evaluation == nil)
+        #expect(model.triggerRows.allSatisfy { $0.pen == nil })
+
+        model.selectUnit(archer)
+        model.selectUnit(enemy)
+        #expect(model.evaluation == nil)
+    }
+
     /// At 4× a burst of orders would buzz continuously; the hand feels at most one every 220 ms.
     @Test
     func orderHapticsAreRateLimited() throws {

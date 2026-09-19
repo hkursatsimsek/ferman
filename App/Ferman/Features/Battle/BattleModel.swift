@@ -31,6 +31,27 @@ final class BattleModel {
         var condition: String = ""
         var action: String = ""
         var isDefault: Bool = false
+        /// Where the evaluating pen is on this order, for the tapped unit (G13).
+        var pen: PenMark?
+    }
+
+    /// The evaluating pen (G13, ART-DIRECTION §10 — "the first true order wins" is the hardest idea to
+    /// teach): for the tapped player unit, the pen reads its orders from the top and stops on the first
+    /// whose condition holds — the one it's carrying out.
+    enum PenMark: Equatable {
+        /// Read and passed over: its condition didn't hold.
+        case passed
+        /// The pen is here: reading it, or resting on it once it holds.
+        case reading
+        case holds
+    }
+
+    struct Evaluation: Equatable {
+        let unit: UnitID
+        /// How far down the program the pen has read.
+        var row: Int
+        /// The order the unit is carrying out — where the pen comes to rest.
+        var target: Int
     }
 
     static let stampInterval: Duration = .milliseconds(60)
@@ -68,6 +89,7 @@ final class BattleModel {
     /// Counts the player's orders taking effect, as far as the hand should feel them — the view's haptic
     /// trigger. Rate-limited: at 4× a burst of orders would otherwise be one long buzz (ART-DIRECTION §7).
     private(set) var orderFeedbackPulse = 0
+    private(set) var evaluation: Evaluation?
 
     /// Rows the trigger strip reserves: the longest of the player's programs, default order included.
     var reservedTriggerRowCount: Int {
@@ -76,6 +98,8 @@ final class BattleModel {
 
     /// Shortest gap between two order haptics.
     static let orderFeedbackInterval: Duration = .milliseconds(220)
+    /// How long the pen takes over each order it reads past.
+    static let penStepDuration: Duration = .milliseconds(160)
 
     private let runner: BattleRunner
     /// The battle's sound: the choreography's stamps and result slip here, the table's own cues in
@@ -83,6 +107,8 @@ final class BattleModel {
     let audio: any AudioPlaying
     private var lastOrderFeedback: ContinuousClock.Instant?
     private var isSkipping = false
+    private var reduceMotion = false
+    private var penTask: Task<Void, Never>?
     private var runTask: Task<Void, Never>?
     private var samplingTask: Task<Void, Never>?
 
@@ -103,6 +129,7 @@ final class BattleModel {
     /// behind it. Call once, from the view's `.task`.
     func start(reduceMotion: Bool) {
         guard runTask == nil else { return }
+        self.reduceMotion = reduceMotion
         runTask = Task { [weak self] in
             guard let self else { return }
             if reduceMotion {
@@ -127,6 +154,7 @@ final class BattleModel {
     func stop() {
         runTask?.cancel()
         samplingTask?.cancel()
+        penTask?.cancel()
     }
 
     /// Picks the trigger strip back up after `stop()` — e.g. returning here from the debrief, where
@@ -153,17 +181,45 @@ final class BattleModel {
         config.player.programs.map(\.unitType)
     }
 
-    /// Switches the trigger strip to the tapped unit's program, if it's one of the player's own.
-    func selectUnit(_ unitID: UnitID) {
+    /// Switches the trigger strip to the tapped unit's program, if it's one of the player's own, and
+    /// sets the pen reading it from the top. `nil` — a tap on empty sand — puts the pen down.
+    func selectUnit(_ unitID: UnitID?) {
         guard let timeline, let clock else { return }
         let frame = timeline.frame(at: clock.currentTick)
-        guard frame.teams[unitID] == .player, let unitType = frame.unitTypes[unitID] else { return }
+        guard let unitID, frame.teams[unitID] == .player, let unitType = frame.unitTypes[unitID] else {
+            endEvaluation()
+            return
+        }
         selectUnitType(unitType)
+        guard let target = frame.activeRuleIndex[unitID], frame.livingUnits.contains(unitID) else {
+            endEvaluation()
+            return
+        }
+        penTask?.cancel()
+        evaluation = Evaluation(unit: unitID, row: reduceMotion ? target : 0, target: target)
+        refreshTriggerRows()
+        guard !reduceMotion, target > 0 else { return }
+        penTask = Task { [weak self] in
+            while let self, let evaluation = self.evaluation, evaluation.row < evaluation.target {
+                try? await Task.sleep(for: Self.penStepDuration)
+                guard !Task.isCancelled else { return }
+                self.evaluation?.row += 1
+                self.refreshTriggerRows()
+            }
+        }
     }
 
     func selectUnitType(_ unitType: UnitTypeID) {
         guard config.player.program(for: unitType) != nil else { return }
+        if unitType != selectedUnitType { endEvaluation() }
         selectedUnitType = unitType
+        refreshTriggerRows()
+    }
+
+    private func endEvaluation() {
+        penTask?.cancel()
+        guard evaluation != nil else { return }
+        evaluation = nil
         refreshTriggerRows()
     }
 
@@ -279,6 +335,7 @@ final class BattleModel {
         }
 
         let tick = clock.currentTick
+        followEvaluatedUnit(in: timeline, at: tick)
         let counts = Self.counts(in: timeline.fireCounts(upTo: tick), team: .player, unitType: unitType)
         let priorCounts = Self.counts(
             in: timeline.fireCounts(upTo: max(0, tick - Self.sparkGlowTicks)), team: .player, unitType: unitType)
@@ -296,9 +353,32 @@ final class BattleModel {
                 isSpark: count > priorCount,
                 condition: index < words.count ? words[index].condition : "",
                 action: index < words.count ? words[index].action : "",
-                isDefault: index == program.rules.count - 1
+                isDefault: index == program.rules.count - 1,
+                pen: penMark(at: index)
             )
         }
+    }
+
+    private func penMark(at index: Int) -> PenMark? {
+        guard let evaluation else { return nil }
+        if index < evaluation.row { return .passed }
+        if index == evaluation.row { return evaluation.row == evaluation.target ? .holds : .reading }
+        return nil
+    }
+
+    /// Once the pen has come to rest it follows the unit: when the unit takes up another order the pen
+    /// moves to it; when the unit falls the pen is put down.
+    private func followEvaluatedUnit(in timeline: ReplayTimeline, at tick: Int32) {
+        guard let current = evaluation else { return }
+        let frame = timeline.frame(at: tick)
+        guard frame.livingUnits.contains(current.unit), let target = frame.activeRuleIndex[current.unit] else {
+            penTask?.cancel()
+            evaluation = nil
+            return
+        }
+        guard target != current.target else { return }
+        evaluation?.target = target
+        if current.row == current.target { evaluation?.row = target }
     }
 
     private static func counts(in entries: [RuleFireCounts], team: Team, unitType: UnitTypeID) -> [Int] {

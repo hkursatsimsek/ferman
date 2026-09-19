@@ -249,7 +249,7 @@ private struct Paper: View {
 
 /// A slip cut from a sheet, not a card from a machine: edges that wander a fraction of a point, the
 /// same way every time for the same slip (brief §3.0 — "hafif tırtıklı").
-private struct DeckleEdge: Shape {
+struct DeckleEdge: Shape {
     let seed: Int
 
     nonisolated func path(in rect: CGRect) -> Path {

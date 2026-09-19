@@ -17,8 +17,8 @@ enum GameSettings {
     }
 }
 
-/// Ayarlar (design gap list, FERMAN-PLAN §10): minimal on purpose — sound, and the speed battles
-/// start at. Haptics and reduced motion follow the system's own settings.
+/// Ayarlar (design gap list, FERMAN-PLAN §10): minimal on purpose — sound, the speed battles start at,
+/// and the first fronts' notes back. Haptics and reduced motion follow the system's own settings.
 @Observable
 @MainActor
 final class SettingsModel {
@@ -36,10 +36,20 @@ final class SettingsModel {
         didSet { defaults.set(defaultSpeed.rawValue, forKey: GameSettings.speedKey) }
     }
 
+    /// The first fronts' pencil notes come back from the next launch (TipKit clears its records only
+    /// before it's configured — `TutorialNotes.configure`).
+    private(set) var tutorialNotesWillReturn: Bool
+
+    func showTutorialNotesAgain() {
+        defaults.set(true, forKey: TutorialNotes.resetKey)
+        tutorialNotesWillReturn = true
+    }
+
     init(defaults: UserDefaults = .standard, audio: any AudioPlaying = SilentAudioPlaying()) {
         self.defaults = defaults
         self.audio = audio
         soundEnabled = defaults.object(forKey: GameSettings.soundKey) as? Bool ?? true
         defaultSpeed = BattleSpeed(rawValue: defaults.integer(forKey: GameSettings.speedKey)) ?? .x1
+        tutorialNotesWillReturn = defaults.bool(forKey: TutorialNotes.resetKey)
     }
 }

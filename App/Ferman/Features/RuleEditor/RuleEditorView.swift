@@ -1,6 +1,7 @@
 import FermanContent
 import FermanCore
 import SwiftUI
+import TipKit
 
 /// EmirEditörü — the game's heart (design brief §4.4). Unit type tabs, a reorderable order stack
 /// with a fixed default at the bottom, and a selector sheet to add or edit an order. No natural
@@ -53,6 +54,18 @@ struct RuleEditorView: View {
         }
     }
 
+    /// The first three fronts' pencil note (G13): watch the default order, write a first order, mind
+    /// the order they're read in.
+    @ViewBuilder
+    private var tutorialNote: some View {
+        switch battleSetup?.front.id {
+        case 1: TipView(DefaultOrderNote()).tipViewStyle(PencilNoteStyle())
+        case 2: TipView(FirstOrderNote()).tipViewStyle(PencilNoteStyle())
+        case 3: TipView(PriorityNote()).tipViewStyle(PencilNoteStyle())
+        default: EmptyView()
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             unitTypeTabs
@@ -65,6 +78,7 @@ struct RuleEditorView: View {
 
             ScrollView {
                 VStack(spacing: FermanSpacing.md - 2) {
+                    tutorialNote
                     if model.orders.isEmpty {
                         emptyState
                     } else {
@@ -234,6 +248,12 @@ struct RuleEditorView: View {
             model.move(difference)
         }
         .sensoryFeedback(SoundEffect.paper.feel?.feedback ?? .selection, trigger: model.orders)
+        .onAppear {
+            // The second front's note asks for exactly this: once there's an order, it has been read.
+            if battleSetup?.front.id == 2 {
+                FirstOrderNote().invalidate(reason: .actionPerformed)
+            }
+        }
     }
 
     @ViewBuilder

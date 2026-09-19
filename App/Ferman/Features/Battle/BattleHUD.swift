@@ -71,6 +71,8 @@ struct BattleTriggerStrip: View {
     var unitTypes: [UnitTypeID] = []
     var selectedUnitType: UnitTypeID?
     var onSelectUnitType: (UnitTypeID) -> Void = { _ in }
+    /// The evaluating pen slides from order to order rather than blinking between them.
+    @Namespace private var penSpace
 
     var body: some View {
         VStack(alignment: .leading, spacing: FermanSpacing.xs) {
@@ -79,14 +81,16 @@ struct BattleTriggerStrip: View {
             }
             ForEach(0..<max(reservedRowCount, rows.count), id: \.self) { index in
                 if index < rows.count {
-                    TriggerRowView(row: rows[index])
+                    TriggerRowView(row: rows[index], penSpace: penSpace)
                 } else {
-                    TriggerRowView(row: .init(id: index, priority: index + 1, fraction: 0, count: 0, isSpark: false))
+                    TriggerRowView(
+                        row: .init(id: index, priority: index + 1, fraction: 0, count: 0, isSpark: false), penSpace: penSpace)
                         .hidden()
                         .accessibilityHidden(true)
                 }
             }
         }
+        .animation(.easeInOut(duration: 0.14), value: rows.map(\.pen))
         .padding(.horizontal, FermanSpacing.md)
         .padding(.vertical, FermanSpacing.sm)
         .background(Color.slate)
@@ -128,6 +132,7 @@ struct BattleTriggerStrip: View {
 /// as the order slip, brief §4.4), a thin live bar and its count.
 private struct TriggerRowView: View {
     let row: BattleModel.TriggerRow
+    let penSpace: Namespace.ID
     /// A fixed badge that still grows with Dynamic Type — a bare `Circle` takes all the height it's offered.
     @ScaledMetric(relativeTo: .caption) private var badgeSize: CGFloat = 20
 
@@ -143,11 +148,24 @@ private struct TriggerRowView: View {
                     .foregroundStyle(row.isSpark ? Color.spark : Color.paper.opacity(0.75))
             }
             .frame(width: badgeSize, height: badgeSize)
+            // The pen sits in the strip's margin, pointing at the order it's reading.
+            .overlay(alignment: .leading) {
+                if row.pen == .reading || row.pen == .holds {
+                    Image(systemName: "pencil")
+                        .font(.system(size: 12, weight: .bold))
+                        .rotationEffect(.degrees(-135))
+                        .foregroundStyle(row.pen == .holds ? Color.brass : Color.paper.opacity(0.8))
+                        .matchedGeometryEffect(id: "pen", in: penSpace)
+                        .offset(x: -15)
+                        .accessibilityHidden(true)
+                }
+            }
 
             VStack(alignment: .leading, spacing: 3) {
                 Text(
                     "\(Text(row.condition).foregroundStyle(Color.paper.opacity(0.7))) \(Text(row.action).bold().foregroundStyle(row.isSpark ? Color.spark : Color.paper))"
                 )
+                .strikethrough(row.pen == .passed, color: Color.paper.opacity(0.6))
                 .font(FermanFont.caption())
                 .lineLimit(1)
                 .truncationMode(.middle)
@@ -169,9 +187,19 @@ private struct TriggerRowView: View {
                 .foregroundStyle(row.isSpark ? Color.spark : Color.paper.opacity(0.75))
                 .frame(minWidth: 26, alignment: .trailing)
         }
+        .opacity(row.pen == .passed ? 0.6 : 1)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(String(localized: "\(row.priority). emir. \(row.condition) \(row.action)"))
-        .accessibilityValue(String(localized: "\(row.count) kez tetiklendi"))
+        .accessibilityValue(accessibilityValue)
+    }
+
+    private var accessibilityValue: String {
+        let count = String(localized: "\(row.count) kez tetiklendi")
+        switch row.pen {
+        case .passed: return count + ", " + String(localized: "koşulu tutmadı")
+        case .holds: return count + ", " + String(localized: "şu an uygulanıyor")
+        case .reading, nil: return count
+        }
     }
 }
 

@@ -16,7 +16,8 @@ final class BattleScene: SKScene {
     private let projection: BoardProjection
     private let motion: FigureMotion
     private let soundscape: BattleSoundscape
-    var onUnitTapped: ((UnitID) -> Void)?
+    /// A figure was tapped — or, with `nil`, empty sand.
+    var onUnitTapped: ((UnitID?) -> Void)?
     /// The order a player unit is following right now, for the tapped unit's bubble. Words come from the
     /// app (`BattleModel.currentOrder(of:)`); the scene only draws them.
     var currentOrder: ((UnitID) -> OrderStack.Item?)?
@@ -215,7 +216,10 @@ final class BattleScene: SKScene {
         guard let touch = touches.first else { return }
         let point = touch.location(in: self)
         deselect()
-        guard let unitNode = nearestUnit(to: point) else { return }
+        guard let unitNode = nearestUnit(to: point) else {
+            onUnitTapped?(nil)
+            return
+        }
         onUnitTapped?(unitNode.unitID)
         // Only the player's figures carry orders the player wrote — an enemy tap just closes the bubble.
         guard unitNode.team == .player else { return }

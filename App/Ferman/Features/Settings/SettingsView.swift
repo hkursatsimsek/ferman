@@ -22,6 +22,19 @@ struct SettingsView: View {
                     SpeedControl(selection: $model.defaultSpeed)
                 }
 
+                // Once asked for, the button gives way to a line saying when — rather than sitting there
+                // disabled, which SwiftUI fades below readable contrast (G12).
+                if model.tutorialNotesWillReturn {
+                    Text(String(localized: "İlk üç cephenin kalem notları, oyunu bir sonraki açışında yeniden görünecek."))
+                        .font(FermanFont.caption())
+                        .foregroundStyle(Color.paper.opacity(0.8))
+                } else {
+                    Button(String(localized: "Öğretici notlarını yeniden göster")) {
+                        model.showTutorialNotesAgain()
+                    }
+                    .buttonStyle(FermanButton.Outline())
+                }
+
                 Text(String(localized: "Titreşim ve azaltılmış hareket, cihazının kendi ayarlarına uyar."))
                     .font(FermanFont.caption())
                     .foregroundStyle(Color.paper.opacity(0.7))

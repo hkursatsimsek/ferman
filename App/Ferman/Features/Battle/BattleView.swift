@@ -1,6 +1,7 @@
 import FermanCore
 import FermanReplay
 import SwiftUI
+import TipKit
 
 /// Full-screen sand table, no player controls (design brief §4.5). Plays the "savaşı başlat"
 /// choreography (§3.5) once, then shows the running battle. `BattleScene` (F1.4) draws frames; this
@@ -19,11 +20,14 @@ struct BattleView: View {
     /// through it when there is one.
     @Environment(AppRouter.self) private var router: AppRouter?
     var onShowResult: (BattleResult) -> Void = { _ in }
+    /// The campaign front this battle is on, for its pencil note (G13); `nil` off the campaign.
+    let tutorialFront: Int?
 
     init(
         config: BattleConfig, orders: [OrderStack.Item], phrases: [UnitTypeID: [OrderStack.Item]] = [:],
-        onShowResult: @escaping (BattleResult) -> Void = { _ in }
+        tutorialFront: Int? = nil, onShowResult: @escaping (BattleResult) -> Void = { _ in }
     ) {
+        self.tutorialFront = tutorialFront
         _model = State(
             initialValue: BattleModel(config: config, orders: orders, phrases: phrases, audio: AudioService.shared))
         self.onShowResult = onShowResult
@@ -56,6 +60,15 @@ struct BattleView: View {
 
                 sandTable
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // Laid on the near edge of the table, over the player's own zone, not between the
+                    // table and the strip — so neither moves when the note is closed.
+                    .overlay(alignment: .bottom) {
+                        if tutorialFront == 3, isShowingBattle {
+                            TipView(PenNote())
+                                .tipViewStyle(PencilNoteStyle())
+                                .padding(FermanSpacing.md)
+                        }
+                    }
 
                 BattleTriggerStrip(
                     rows: model.triggerRows, reservedRowCount: model.reservedTriggerRowCount,
@@ -113,6 +126,9 @@ struct BattleView: View {
         }
         // In battle only the player's own orders and the result reach the hand (ART-DIRECTION §7).
         .sensoryFeedback(SoundEffect.order.feel?.feedback ?? .selection, trigger: model.orderFeedbackPulse)
+        .onChange(of: model.evaluation != nil) { _, evaluating in
+            if evaluating { PenNote().invalidate(reason: .actionPerformed) }
+        }
         .sensoryFeedback(SoundEffect.slip.feel?.feedback ?? .selection, trigger: model.clock?.isFinished) { _, finished in
             finished == true
         }

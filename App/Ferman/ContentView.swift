@@ -132,8 +132,10 @@ struct ContentView: View {
                 contentLoadFailed
             }
         case .battle(let config, let front):
-            BattleView(config: config, orders: orderStackItems(for: config), phrases: orderPhrases(for: config)) {
-                result in
+            BattleView(
+                config: config, orders: orderStackItems(for: config), phrases: orderPhrases(for: config),
+                tutorialFront: front?.id
+            ) { result in
                 if let front {
                     do {
                         try progress?.recordBattle(levelID: front.id, config: config, result: result)

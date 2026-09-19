@@ -1,5 +1,6 @@
 import FermanCore
 import SwiftUI
+import TipKit
 
 /// OrduKurulumu (design brief §4.3). The whole upright table (D26), the same baked picture the battle
 /// draws, scrolled to the player's zone at the bottom; the enemy's iron figures stand at the top.
@@ -14,6 +15,12 @@ struct ArmySetupView: View {
     var body: some View {
         VStack(spacing: 0) {
             header
+            if front.id == 1 {
+                TipView(DeployNote())
+                    .tipViewStyle(PencilNoteStyle())
+                    .padding(.horizontal, FermanSpacing.md)
+                    .padding(.bottom, FermanSpacing.sm)
+            }
             board
                 .frame(maxHeight: .infinity)
             if let chosen = model.chosenTrayUnit.flatMap(model.unitType) {

@@ -9,7 +9,7 @@ struct BattleSceneView: View {
     let config: BattleConfig
     let timeline: ReplayTimeline
     let clock: ReplayClock
-    var onUnitTapped: ((UnitID) -> Void)?
+    var onUnitTapped: ((UnitID?) -> Void)?
     var currentOrder: ((UnitID) -> OrderStack.Item?)?
     /// `nil` (the default) keeps the table silent — only the battle screen itself is heard.
     var audio: (any AudioPlaying)?
@@ -19,7 +19,7 @@ struct BattleSceneView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(
-        config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID) -> Void)? = nil,
+        config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID?) -> Void)? = nil,
         currentOrder: ((UnitID) -> OrderStack.Item?)? = nil, audio: (any AudioPlaying)? = nil,
         onPlayerOrder: (() -> Void)? = nil
     ) {

@@ -11,6 +11,10 @@ import SwiftUI
 struct FermanApp: App {
     @Environment(\.scenePhase) private var scenePhase
 
+    init() {
+        TutorialNotes.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             ContentView()
