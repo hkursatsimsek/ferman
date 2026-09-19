@@ -54,7 +54,7 @@ final class AudioService: AudioPlaying {
     }
 
     func play(_ effect: SoundEffect) {
-        guard let player = players[effect] else { return }
+        guard GameSettings.soundEnabled, let player = players[effect] else { return }
         player.currentTime = 0
         player.play()
     }

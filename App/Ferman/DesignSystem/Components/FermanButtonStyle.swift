@@ -71,6 +71,17 @@ enum FermanButton {
         }
     }
 
+    /// A whole row as the button (menu rows, campaign pins). Draws the label exactly as given, also when
+    /// disabled: `.plain` fades a disabled label to ~2.5:1 contrast, which made a locked row unreadable
+    /// rather than merely unavailable (accessibility audit, G12). The row says it's locked in its own
+    /// words and marks; `.disabled` still stops the tap and tells VoiceOver.
+    struct Row: ButtonStyle {
+        func makeBody(configuration: Configuration) -> some View {
+            configuration.label
+                .opacity(configuration.isPressed ? 0.7 : 1)
+        }
+    }
+
     /// Larger outline chip, used for standalone secondary prompts ("Hazır emir setlerini gör").
     struct Chip: ButtonStyle {
         func makeBody(configuration: Configuration) -> some View {

@@ -33,14 +33,21 @@ final class AccessibilityAuditUITests: XCTestCase {
     /// front title) as separate issues — confirmed unchanged across a clean rebuild, so it isn't
     /// build staleness. `ArmySetupView`'s tray items use the identical pattern and do pass, so this
     /// isn't universal; it wasn't chased further than that.
-    private static let homeKnownIssueLabels: Set<String> = ["Arena", "3 maç bekliyor", "Emir Kütüphanesi", "Ayarlar"]
+    ///
+    /// G12 correction: the home rows' reports were partly real. Their locked rows were `.plain`-styled
+    /// disabled buttons, which SwiftUI fades to ~2.5:1 contrast (pixel-sampled) — `FermanButton.Row`
+    /// now draws them as given, and the home screen passes with no exceptions. The campaign's caption
+    /// labels ("N. Cephe") on their dark slips pixel-sample at 7.0–7.2:1 (G12, after the same fix), so
+    /// those reports remain the tool limitation described above.
+    private static let homeKnownIssueLabels: Set<String> = []
     private static let campaignKnownIssueLabels: Set<String> = [
-        "1. Cephe", "2. Cephe", "4. Cephe", "5. Cephe", "Son Hat", "Demir Kapı",
+        "1. Cephe", "2. Cephe", "4. Cephe", "5. Cephe", "8. Cephe", "Son Hat", "Demir Kapı",
     ]
 
     @MainActor
     func testHomeScreenHasNoAccessibilityIssues() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox"]
         app.launch()
         XCTAssertTrue(app.buttons["home.seferberlik"].waitForExistence(timeout: 2))
         try auditAndReport(app, knownIssueLabels: Self.homeKnownIssueLabels)
@@ -49,15 +56,24 @@ final class AccessibilityAuditUITests: XCTestCase {
     @MainActor
     func testCampaignScreenHasNoAccessibilityIssues() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox"]
         app.launch()
         app.buttons["home.seferberlik"].tap()
         XCTAssertTrue(app.buttons["campaign.front.3"].waitForExistence(timeout: 2))
+        // The line opens scrolled to the current front, which can leave a pin half under the opaque
+        // navigation bar — the audit then samples the bar's pixels for that pin's contrast. Audit the
+        // line at rest at its top instead, where nothing sits under the bar (G12).
+        app.swipeDown()
+        app.swipeDown()
+        // Let the scroll view's bounce settle — auditing mid-bounce samples moving text.
+        _ = XCTWaiter.wait(for: [XCTestExpectation(description: "scroll settles")], timeout: 1.5)
         try auditAndReport(app, knownIssueLabels: Self.campaignKnownIssueLabels)
     }
 
     @MainActor
     func testArmySetupScreenHasNoAccessibilityIssues() throws {
         let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox"]
         app.launch()
         app.buttons["home.seferberlik"].tap()
         XCTAssertTrue(app.buttons["campaign.front.3"].waitForExistence(timeout: 2))

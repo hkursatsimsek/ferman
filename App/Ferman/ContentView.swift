@@ -15,6 +15,12 @@ struct ContentView: View {
 
     @State private var router = AppRouter()
     private let catalog: ContentCatalog?
+    /// Persisted progress (D14): which fronts are won, every battle fought. `nil` only if the store
+    /// can't open — then every front is left open rather than locking the player out.
+    @State private var progress: ProgressStore?
+    /// `-uiTestSandbox`: an in-memory store and every front open, so UI tests start from the same
+    /// place every run instead of whatever the last run left on the simulator's disk.
+    private let isSandbox = ProcessInfo.processInfo.arguments.contains("-uiTestSandbox")
 
     init() {
         do {
@@ -23,6 +29,23 @@ struct ContentView: View {
             Self.logger.critical("Failed to load bundled content: \(error, privacy: .public)")
             catalog = nil
         }
+        do {
+            _progress = State(initialValue: try ProgressStore(inMemory: isSandbox))
+        } catch {
+            Self.logger.error("Progress store unavailable: \(error, privacy: .public)")
+            _progress = State(initialValue: nil)
+        }
+    }
+
+    private func fronts(_ catalog: ContentCatalog) -> [CampaignFront] {
+        CampaignFront.fronts(
+            from: catalog, bestOutcome: { progress?.progress(forLevel: $0)?.bestOutcome },
+            unlockAll: isSandbox || progress == nil)
+    }
+
+    /// The most recent battle on record, to lay out on the home screen's table.
+    private func lastBattle(_ catalog: ContentCatalog) -> BattleRecordSnapshot? {
+        catalog.levels.flatMap { progress?.battleRecords(forLevel: $0.id) ?? [] }.max { $0.createdAt < $1.createdAt }
     }
 
     var body: some View {
@@ -37,6 +60,15 @@ struct ContentView: View {
             RulePickerSheet(
                 mode: .add, constraints: .unrestricted, availableUnitTypes: ["mizrakci", "okcu", "suvari", "kalkan"],
                 ability: .volley)
+        } else if let catalog, UserDefaults.standard.bool(forKey: "uiTestCampaign") {
+            // `-uiTestCampaign YES`: the campaign line straight away, with the store's real progress.
+            NavigationStack(path: $router.path) {
+                destination(for: .campaign, catalog: catalog)
+                    .navigationDestination(for: Route.self) { route in
+                        destination(for: route, catalog: catalog)
+                    }
+            }
+            .environment(router)
         } else if let catalog, let screen = DirectLaunch.current, let front = directLaunchFront(screen, catalog) {
             NavigationStack(path: $router.path) {
                 directLaunchView(screen, front: front, catalog: catalog)
@@ -47,7 +79,10 @@ struct ContentView: View {
             .environment(router)
         } else if let catalog {
             NavigationStack(path: $router.path) {
-                HomeView(model: HomeModel(nextFront: CampaignFront.fronts(from: catalog).first))
+                HomeView(
+                    model: HomeModel(
+                        nextFront: CampaignModel(fronts: fronts(catalog)).currentFront,
+                        lastBattle: lastBattle(catalog).map { ($0.levelID, $0.config) }))
                     .navigationDestination(for: Route.self) { route in
                         destination(for: route, catalog: catalog)
                     }
@@ -62,7 +97,9 @@ struct ContentView: View {
     private func destination(for route: Route, catalog: ContentCatalog) -> some View {
         switch route {
         case .campaign:
-            CampaignView(model: CampaignModel(fronts: CampaignFront.fronts(from: catalog)))
+            CampaignView(model: CampaignModel(fronts: fronts(catalog)), loadFronts: { fronts(catalog) })
+        case .settings:
+            SettingsView(model: SettingsModel())
         case .armySetup(let front):
             if let map = catalog.map(front.map) {
                 ArmySetupView(
@@ -96,11 +133,18 @@ struct ContentView: View {
         case .battle(let config, let front):
             BattleView(config: config, orders: orderStackItems(for: config), phrases: orderPhrases(for: config)) {
                 result in
+                if let front {
+                    do {
+                        try progress?.recordBattle(levelID: front.id, config: config, result: result)
+                    } catch {
+                        Self.logger.error("Couldn't record battle: \(error, privacy: .public)")
+                    }
+                }
                 router.push(.debrief(config, result, front: front))
             }
         case .debrief(let config, let result, let front):
             let next = front.flatMap { current in
-                CampaignFront.fronts(from: catalog).first { $0.id == current.id + 1 }
+                fronts(catalog).first { $0.id == current.id + 1 && $0.state != .locked }
             }
             DebriefView(
                 model: DebriefModel(config: config, result: result),
@@ -171,7 +215,7 @@ struct ContentView: View {
     }
 
     private func directLaunchFront(_ screen: DirectLaunch, _ catalog: ContentCatalog) -> CampaignFront? {
-        CampaignFront.fronts(from: catalog).first { $0.id == screen.level }
+        CampaignFront.fronts(from: catalog, unlockAll: true).first { $0.id == screen.level }
     }
 
     @ViewBuilder

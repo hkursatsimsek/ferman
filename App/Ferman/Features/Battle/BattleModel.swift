@@ -217,6 +217,7 @@ final class BattleModel {
         self.timeline = timeline
         let clock = ReplayClock(tickCount: Int32(result.tickCount) + Self.settleTicks)
         clock.isPlaying = false
+        clock.speed = GameSettings.defaultSpeed
         self.clock = clock
     }
 

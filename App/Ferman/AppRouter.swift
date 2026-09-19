@@ -6,6 +6,7 @@ import Observation
 /// that presents them, matching F1.7's `RuleEditorView`.
 enum Route: Hashable {
     case campaign
+    case settings
     case armySetup(CampaignFront)
     /// The player's placements from `ArmySetup` (no programs yet — those are `RuleEditor`'s job).
     case ruleEditor(CampaignFront, TeamSetup)

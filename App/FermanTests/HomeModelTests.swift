@@ -23,11 +23,22 @@ struct HomeModelTests {
         #expect(model.campaignSubtitle == "Tüm cepheler geçildi")
     }
 
+    /// Arena and the order library aren't built yet (F4.x, F4.8): they say so instead of showing
+    /// invented numbers (the old "3 maç bekliyor"); only Ayarlar leads somewhere.
     @Test
     func secondaryRowsAreArenaLibraryAndSettingsInOrder() {
         let model = HomeModel(nextFront: Self.openFront)
 
         #expect(model.secondaryRows.map(\.id) == ["arena", "library", "settings"])
-        #expect(model.secondaryRows[0].subtitle == "3 maç bekliyor")
+        #expect(model.secondaryRows[0].subtitle == "Sonra açılacak")
+        #expect(model.secondaryRows.map(\.route) == [nil, nil, .settings])
+    }
+
+    @Test
+    func withNoBattleOnRecordThereIsNothingToLayOut() async {
+        let model = HomeModel(nextFront: Self.openFront)
+        await model.loadTableau()
+
+        #expect(model.tableau == nil)
     }
 }

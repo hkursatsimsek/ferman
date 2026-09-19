@@ -12,6 +12,8 @@ final class AppNavigationUITests: XCTestCase {
     @MainActor
     private func launchApp() -> XCUIApplication {
         let app = XCUIApplication()
+        // In-memory progress, every front open: the same starting point every run (G12).
+        app.launchArguments += ["-uiTestSandbox"]
         app.launch()
         return app
     }
@@ -25,11 +27,8 @@ final class AppNavigationUITests: XCTestCase {
         XCTAssertTrue(app.buttons["campaign.front.3"].waitForExistence(timeout: 2))
     }
 
-    /// `CampaignFront.fronts(from:)` (F1.14) makes every real level `.open` — there is no persisted
-    /// "cleared" signal yet to gate a lock/unlock sequence on (`ProgressStore`, F1.11, still isn't
-    /// wired to any screen). The `.locked` mechanism itself is still real and still covered directly
-    /// at the model level, with a fixture that has one (`CampaignModelTests.lockedFrontsCannotBeOpened`);
-    /// this end-to-end check now confirms the opposite: nothing in the shipped content is locked out.
+    /// Under `-uiTestSandbox` every front is open; the real lock/unlock sequence from progress is
+    /// covered at the model level (`CampaignModelTests`, G12).
     @MainActor
     func testNoRealFrontIsLocked() throws {
         let app = launchApp()

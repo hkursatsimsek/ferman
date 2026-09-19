@@ -304,7 +304,7 @@ struct RulePickerSheet: View {
 
     // MARK: - Labels
 
-    private static func conditionKindLabel(_ kind: ConditionKind) -> String {
+    static func conditionKindLabel(_ kind: ConditionKind) -> String {
         switch kind {
         case .enemyWithin: String(localized: "Düşman yakınlığı")
         case .healthBelow: String(localized: "Canım azaldığında")
@@ -321,7 +321,7 @@ struct RulePickerSheet: View {
         }
     }
 
-    private static func actionKindLabel(_ kind: ActionKind) -> String {
+    static func actionKindLabel(_ kind: ActionKind) -> String {
         switch kind {
         case .advance: String(localized: "İlerle")
         case .retreat: String(localized: "Geri çekil")
