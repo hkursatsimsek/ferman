@@ -15,6 +15,31 @@ struct BoardProjectionTests {
         FixedVector2(x: Fixed(column) + .half, y: Fixed(row) + .half)
     }
 
+    /// ART-DIRECTION §3: a contact shadow falls away from the one lamp, further the further out it is.
+    @Test
+    func shadowsFallAwayFromTheLampAndLengthenTowardTheEdge() {
+        let lamp = projection.lampScenePoint
+        let underLamp = projection.shadowOffset(atScenePoint: lamp)
+        #expect(abs(hypot(underLamp.dx, underLamp.dy) - 2) < 0.001)
+
+        let corner = CGPoint(x: 0, y: 0)
+        let atCorner = projection.shadowOffset(atScenePoint: corner)
+        #expect(atCorner.dx < 0 && atCorner.dy < 0)
+        #expect(hypot(atCorner.dx, atCorner.dy) > 3.5 && hypot(atCorner.dx, atCorner.dy) <= 4.0001)
+
+        let north = projection.shadowOffset(atScenePoint: CGPoint(x: lamp.x, y: lamp.y + 200))
+        #expect(abs(north.dx) < 0.001 && north.dy > 0)
+    }
+
+    /// The sand's lit spot and the shadows' source are the same point, a third of the way down the field.
+    @Test
+    func theLampHangsAboveTheFieldsCentre() {
+        let field = projection.fieldRect
+        #expect(projection.lampViewPoint.x == field.midX)
+        #expect(projection.lampViewPoint.y < field.midY)
+        #expect(projection.lampScenePoint.y == projection.boardSize.height - projection.lampViewPoint.y)
+    }
+
     @Test
     func theBoardStandsUpright() {
         #expect(projection.boardSize == CGSize(width: 14 * 32, height: 24 * 32))

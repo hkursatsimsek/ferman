@@ -35,8 +35,10 @@ struct UnitToken: View {
 
     var body: some View {
         ZStack {
+            // The lamp is above the screen here: the shadow falls a little down, clear of the base.
             Image(decorative: UnitArt.shadowName(type: type, fallen: pose == .fallen))
                 .resizable()
+                .offset(y: size.canvas * 0.04)
             Image(decorative: UnitArt.imageName(type: type, team: team, pose: pose))
                 .resizable()
             if isSelected {

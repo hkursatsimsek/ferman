@@ -118,6 +118,7 @@ final class UnitNode: SKNode {
         }
 
         shadow.texture = pose.isFallen ? fallenShadowTexture : shadowTexture
+        shadow.position = CGPoint(x: pose.shadowOffset.dx, y: pose.shadowOffset.dy)
         shadow.zRotation = pose.rotation
         shadow.alpha = 1 - 0.35 * pose.lift
         shadow.setScale(1 - 0.06 * pose.lift)

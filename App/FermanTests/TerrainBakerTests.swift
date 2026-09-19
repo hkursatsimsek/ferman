@@ -38,6 +38,15 @@ struct TerrainBakerTests {
             < pixels.luminance(atPoint: CGPoint(x: open.midX, y: open.midY), scale: 2) - 0.1)
     }
 
+    /// Forest is dressed with model trees (`TerrainSprites`): darker than open sand, not left bare.
+    @Test
+    func forestIsDressedWithTrees() throws {
+        let pixels = try Pixels(Self.bake())
+        let forest = Self.projection.viewRect(column: 4, row: 0)
+        let open = Self.projection.viewRect(column: 1, row: 1)
+        #expect(pixels.meanLuminance(in: forest, scale: 2) < pixels.meanLuminance(in: open, scale: 2) - 0.05)
+    }
+
     @Test
     func theRimIsDarkerThanTheSand() throws {
         let pixels = try Pixels(Self.bake())
@@ -72,6 +81,22 @@ private struct Pixels {
         }
         try #require(drawn)
         bytes = buffer
+    }
+
+    func meanLuminance(in rect: CGRect, scale: CGFloat) -> Double {
+        var total = 0.0
+        var count = 0
+        var y = rect.minY
+        while y < rect.maxY {
+            var x = rect.minX
+            while x < rect.maxX {
+                total += luminance(atPoint: CGPoint(x: x, y: y), scale: scale)
+                count += 1
+                x += 1
+            }
+            y += 1
+        }
+        return count == 0 ? 0 : total / Double(count)
     }
 
     /// Rec. 709 luma in 0...1 at a point in view space (points, y down).

@@ -38,6 +38,24 @@ struct UnitArtTests {
     }
 
     @Test
+    func arrowsComeFromTheSameAtlas() {
+        #expect(UIImage(named: UnitArt.arrowName) != nil)
+        #expect(UIImage(named: UnitArt.arrowShadowName) != nil)
+    }
+
+    /// Every tree and stone variant `TerrainSprites` asks for — a missing one would silently thin out a
+    /// forest rather than fail.
+    @Test
+    func theTableDressingIsBundled() {
+        let sprites = TerrainSprites.bundled
+        #expect(sprites.trees.count == 4)
+        #expect(sprites.stones.count == 3)
+        for tree in sprites.trees {
+            #expect(tree.image.width == Int(TerrainSprites.treeCanvasPoints * 3) || tree.image.width == Int(TerrainSprites.treeCanvasPoints * 2))
+        }
+    }
+
+    @Test
     func namesFollowTypeMaterialAndPose() {
         #expect(UnitArt.imageName(type: "okcu", team: .player, pose: .base) == "okcu-brass-base")
         #expect(UnitArt.imageName(type: "kalkan", team: .enemy, pose: .fallen) == "kalkan-iron-fallen")

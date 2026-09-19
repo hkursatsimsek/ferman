@@ -98,11 +98,15 @@ final class BattleScene: SKScene {
 
     /// Arrows fly above the standing figures, their shadows on the table below them.
     private func buildArrowPool() {
+        // From the figures' atlas, so a volley batches with the army instead of adding draw calls.
+        let atlas = SKTextureAtlas(named: UnitArt.atlasName)
+        let arrowTexture = atlas.textureNamed(UnitArt.arrowName)
+        let shadowTexture = atlas.textureNamed(UnitArt.arrowShadowName)
         arrowPool = (0..<Self.arrowPoolSize).map { _ in
-            let arrow = SKSpriteNode(texture: EffectTextures.arrow)
+            let arrow = SKSpriteNode(texture: arrowTexture)
             arrow.zPosition = 2.5
             arrow.isHidden = true
-            let shadow = SKSpriteNode(texture: EffectTextures.arrowShadow)
+            let shadow = SKSpriteNode(texture: shadowTexture)
             shadow.zPosition = 0.8
             shadow.isHidden = true
             addChild(shadow)

@@ -1,8 +1,8 @@
 import SpriteKit
 import UIKit
 
-/// Small battle effects drawn once with Core Graphics — simple enough shapes that they don't need the
-/// figure pipeline (`Tools/figures/`), and generated rather than shipped as images.
+/// Small battle effects drawn once with Core Graphics — flat marks (a spark, a seal, a label) rather than
+/// objects on the table, so they don't go through the figure pipeline (`Tools/figures/`).
 enum EffectTextures {
     /// The rule spark (brief §3.2): white streaks, tinted spark cyan by the sprite, added onto the table.
     static let spark: SKTexture = texture(size: 40) { context, size in
@@ -54,24 +54,6 @@ enum EffectTextures {
                 at: CGPoint(x: (size - textSize.width) / 2, y: (size - textSize.height) / 2), withAttributes: attributes)
             UIGraphicsPopContext()
         }
-    }
-
-    /// An arrow, pointing up like the figures (+Y), shaft of raw wood-grey with a pale fletching.
-    static let arrow: SKTexture = texture(width: 4, height: 16) { context, _ in
-        context.setFillColor(UIColor(red: 0x2A / 255, green: 0x26 / 255, blue: 0x22 / 255, alpha: 1).cgColor)
-        context.fill(CGRect(x: 1.5, y: 3, width: 1, height: 11))
-        context.move(to: CGPoint(x: 2, y: 0))
-        context.addLine(to: CGPoint(x: 3.6, y: 3.4))
-        context.addLine(to: CGPoint(x: 0.4, y: 3.4))
-        context.closePath()
-        context.fillPath()
-        context.setFillColor(UIColor(red: 0xD6 / 255, green: 0xD0 / 255, blue: 0xC2 / 255, alpha: 1).cgColor)
-        context.fill(CGRect(x: 0.4, y: 12.5, width: 3.2, height: 3))
-    }
-
-    static let arrowShadow: SKTexture = texture(width: 4, height: 16) { context, _ in
-        context.setFillColor(UIColor(red: 0x0F / 255, green: 0x16 / 255, blue: 0x1B / 255, alpha: 0.35).cgColor)
-        context.fill(CGRect(x: 1.2, y: 1, width: 1.6, height: 14))
     }
 
     /// The tapped unit's bubble (brief §4.5): "şu an uyguluyor" over the order's number and bold action,

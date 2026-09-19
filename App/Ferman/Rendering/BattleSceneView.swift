@@ -27,12 +27,17 @@ struct BattleSceneView: View {
         _scene = State(initialValue: BattleScene(config: config, timeline: timeline, clock: clock))
     }
 
+    /// `-showsDrawCount YES`: SpriteKit's draw-call and node counters over the table — how G5's "the
+    /// whole army in a few draw calls" is checked on a device or simulator.
+    private static let debugOptions: SpriteView.DebugOptions =
+        UserDefaults.standard.bool(forKey: "showsDrawCount") ? [.showsDrawCount, .showsNodeCount, .showsFPS] : []
+
     var body: some View {
         // Locks the view's own aspect ratio to the (upright, D26) board's before SpriteKit ever
         // scales anything, so the sand table lands centered (SwiftUI centers a smaller child in its
         // parent by default) instead of pinned to whichever corner `SKScene.anchorPoint` happens to
         // place the scene's origin at.
-        SpriteView(scene: scene, options: [.ignoresSiblingOrder])
+        SpriteView(scene: scene, options: [.ignoresSiblingOrder], debugOptions: Self.debugOptions)
             .onAppear {
                 scene.onUnitTapped = onUnitTapped
                 scene.currentOrder = currentOrder

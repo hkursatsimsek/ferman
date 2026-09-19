@@ -63,6 +63,31 @@ nonisolated struct BoardProjection: Sendable, Equatable {
         boardSize.width / boardSize.height
     }
 
+    // MARK: - The lamp
+
+    /// Where the one lamp hangs (brief §3.1): a little above the field's centre on screen. The sand's
+    /// light falls off from here, and every contact shadow on the table is cast away from it.
+    var lampViewPoint: CGPoint {
+        CGPoint(x: fieldRect.midX, y: fieldRect.minY + fieldRect.height * 0.34)
+    }
+
+    var lampScenePoint: CGPoint {
+        CGPoint(x: lampViewPoint.x, y: boardSize.height - lampViewPoint.y)
+    }
+
+    /// How far a contact shadow falls from what casts it, at a scene point: `near` right under the lamp,
+    /// growing to `far` at the table's farthest corner (ART-DIRECTION §3, 1.5–3 pt on screen).
+    func shadowOffset(atScenePoint point: CGPoint, near: CGFloat = 2, far: CGFloat = 4) -> CGVector {
+        let lamp = lampScenePoint
+        let away = CGVector(dx: point.x - lamp.x, dy: point.y - lamp.y)
+        let distance = hypot(away.dx, away.dy)
+        let reach = max(hypot(max(lamp.x, boardSize.width - lamp.x), max(lamp.y, boardSize.height - lamp.y)), 1)
+        let length = near + (far - near) * min(1, distance / reach)
+        // Right under the lamp the shadow still has to go somewhere: down the table, like the rest.
+        guard distance > 0.5 else { return CGVector(dx: 0, dy: -length) }
+        return CGVector(dx: away.dx / distance * length, dy: away.dy / distance * length)
+    }
+
     // MARK: - SpriteKit (origin bottom-left, y up)
 
     func scenePoint(_ position: FixedVector2) -> CGPoint {

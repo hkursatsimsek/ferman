@@ -14,9 +14,9 @@ nonisolated enum UnitPose: String, CaseIterable, Sendable {
 }
 
 /// Names of the unit images in `Assets.xcassets/Units.spriteatlas` (D24, D25). The names follow from a
-/// rule rather than generated code, so the Blender renders (`Tools/figures/`) can overwrite the Core
-/// Graphics placeholders (`Tools/figures/placeholders.swift`) file for file without touching Swift.
-/// Shared by SwiftUI (`UnitToken`, via `Image`) and SpriteKit (`UnitNode`, via the atlas).
+/// rule rather than generated code: `Tools/figures/figures.py` renders every one of them in Blender and
+/// writes it under exactly this name. Shared by SwiftUI (`UnitToken`, via `Image`) and SpriteKit
+/// (`UnitNode`, via the atlas).
 nonisolated enum UnitArt {
     static let atlasName = "Units"
 
@@ -26,6 +26,9 @@ nonisolated enum UnitArt {
     static let baseDiameterPoints: CGFloat = 17.6
 
     static let selectionRingName = "ring-selection"
+    /// An arrow in flight, facing up like the figures, and the shadow it throws on the table.
+    static let arrowName = "arrow"
+    static let arrowShadowName = "shadow-arrow"
 
     static func imageName(type: UnitTypeID, team: Team, pose: UnitPose) -> String {
         "\(type.rawValue)-\(team.artMaterial)-\(pose.rawValue)"

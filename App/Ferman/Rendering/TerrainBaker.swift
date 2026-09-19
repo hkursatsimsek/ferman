@@ -5,8 +5,9 @@ import FermanCore
 /// (`Image`) alike — the table under the figures is the same picture on both screens.
 ///
 /// Everything comes from the sand-table vocabulary (ART-DIRECTION §5): a cold lamp-lit sand bed in a
-/// dark rim, hills drawn with Lehmann's slope hachures, model-tree tufts for forest, a dark resin
-/// channel for water, loose stones for rubble, a barely-there cell grid. Placement jitter is hashed
+/// dark rim, hills drawn with Lehmann's slope hachures, model trees for forest, a dark resin channel for
+/// water, loose stones for rubble, a barely-there cell grid. Trees and stones are Blender renders
+/// (`TerrainSprites`), each casting its shadow away from the lamp. Placement jitter is hashed
 /// from cell coordinates — no randomness, so the same map always bakes the same bytes.
 ///
 /// `nonisolated`: pure Core Graphics, safe to run off the main actor.
@@ -15,7 +16,9 @@ nonisolated enum TerrainBaker {
     /// an upright board at on a phone.
     static let battlePixelsPerPoint: CGFloat = 2
 
-    static func bake(map: BattleMap, projection: BoardProjection, pixelsPerPoint: CGFloat) -> CGImage? {
+    static func bake(
+        map: BattleMap, projection: BoardProjection, pixelsPerPoint: CGFloat, sprites: TerrainSprites = .bundled
+    ) -> CGImage? {
         let size = projection.boardSize
         let pixelWidth = Int((size.width * pixelsPerPoint).rounded())
         let pixelHeight = Int((size.height * pixelsPerPoint).rounded())
@@ -31,7 +34,7 @@ nonisolated enum TerrainBaker {
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1, y: -1)
 
-        var painter = Painter(context: context, map: map, projection: projection)
+        var painter = Painter(context: context, map: map, projection: projection, sprites: sprites)
         painter.paint()
         return context.makeImage()
     }
@@ -47,12 +50,8 @@ nonisolated private enum TablePalette {
     static let sandEdge = color(0x454E49)
     static let ink = color(0x0F161B)
     static let paper = color(0xD6D0C2)
-    static let treeLight = color(0x5B685F)
-    static let treeDark = color(0x333F38)
     static let resin = color(0x1B272D)
     static let resinGlint = color(0x8FAAB2)
-    static let stoneLight = color(0x847E77)
-    static let stoneDark = color(0x57524C)
 
     static func color(_ hex: UInt32, alpha: CGFloat = 1) -> CGColor {
         CGColor(
@@ -67,6 +66,7 @@ nonisolated private struct Painter {
     let context: CGContext
     let map: BattleMap
     let projection: BoardProjection
+    let sprites: TerrainSprites
 
     private var cell: CGFloat { projection.pointsPerCell }
 
@@ -123,7 +123,7 @@ nonisolated private struct Painter {
         let field = projection.fieldRect
         context.saveGState()
         context.clip(to: field)
-        let center = CGPoint(x: field.midX, y: field.minY + field.height * 0.34)
+        let center = projection.lampViewPoint
         let radius = field.width * 0.7
         context.translateBy(x: center.x, y: center.y)
         context.scaleBy(x: 1, y: (field.height * 0.5) / radius)
@@ -248,66 +248,52 @@ nonisolated private struct Painter {
     }
 
     private func paintRubble() {
+        guard !sprites.stones.isEmpty else { return }
         for spot in cells(of: .rubble) {
             let rect = projection.viewRect(column: spot.column, row: spot.row)
-            for stone in 0..<7 {
+            for cluster in 0..<4 {
                 let center = CGPoint(
-                    x: rect.minX + (0.15 + 0.7 * noise(spot.column, spot.row, 500 + stone)) * rect.width,
-                    y: rect.minY + (0.15 + 0.7 * noise(spot.column, spot.row, 520 + stone)) * rect.height)
-                let radius = 1.6 + 1.8 * noise(spot.column, spot.row, 540 + stone)
-                let path = CGMutablePath()
-                for corner in 0..<5 {
-                    let angle = CGFloat(corner) / 5 * 2 * .pi + noise(spot.column, spot.row, 560 + stone * 5 + corner)
-                    let length = radius * (0.7 + 0.3 * noise(spot.column, spot.row, 600 + stone * 5 + corner))
-                    let point = CGPoint(x: center.x + cos(angle) * length, y: center.y + sin(angle) * length)
-                    if corner == 0 { path.move(to: point) } else { path.addLine(to: point) }
-                }
-                path.closeSubpath()
-                shadowed { context in
-                    context.addPath(path)
-                    context.setFillColor(stone % 2 == 0 ? TablePalette.stoneLight : TablePalette.stoneDark)
-                    context.fillPath()
-                }
-                context.addPath(path)
-                context.setStrokeColor(TablePalette.ink.copy(alpha: 0.45) ?? TablePalette.ink)
-                context.setLineWidth(0.5)
-                context.strokePath()
+                    x: rect.minX + (0.2 + 0.6 * noise(spot.column, spot.row, 500 + cluster)) * rect.width,
+                    y: rect.minY + (0.2 + 0.6 * noise(spot.column, spot.row, 520 + cluster)) * rect.height)
+                let variant = Int(noise(spot.column, spot.row, 540 + cluster) * CGFloat(sprites.stones.count))
+                let side = TerrainSprites.stonesCanvasPoints * (1.2 + 0.6 * noise(spot.column, spot.row, 560 + cluster))
+                draw(
+                    sprites.stones[min(variant, sprites.stones.count - 1)], centeredAt: center, side: side,
+                    turn: noise(spot.column, spot.row, 580 + cluster) * 2 * .pi)
             }
         }
     }
 
-    /// Model-railway trees: dark tufts with a lit top, each casting a small shadow on the sand.
+    /// Model trees, a few to a cell, each throwing its shadow away from the lamp before any crown is
+    /// drawn — so no tree's shadow falls across a neighbour's crown.
     private func paintForest() {
+        guard !sprites.trees.isEmpty else { return }
+        var trees: [(sprite: TerrainSprites.Tree, center: CGPoint, side: CGFloat, turn: CGFloat)] = []
         for spot in cells(of: .forest) {
             let rect = projection.viewRect(column: spot.column, row: spot.row)
-            let count = 3 + Int(noise(spot.column, spot.row, 700) * 3)
-            for tuft in 0..<count {
+            let count = 2 + Int(noise(spot.column, spot.row, 700) * 2.99)
+            for tree in 0..<count {
                 let center = CGPoint(
-                    x: rect.minX + (0.2 + 0.6 * noise(spot.column, spot.row, 710 + tuft)) * rect.width,
-                    y: rect.minY + (0.2 + 0.6 * noise(spot.column, spot.row, 730 + tuft)) * rect.height)
-                let radius = 4 + 3.5 * noise(spot.column, spot.row, 750 + tuft)
-                let circle = CGRect(x: center.x - radius, y: center.y - radius, width: radius * 2, height: radius * 2)
-                shadowed { context in
-                    context.setFillColor(TablePalette.treeDark)
-                    context.fillEllipse(in: circle)
-                }
-                context.saveGState()
-                context.addEllipse(in: circle)
-                context.clip()
-                if let gradient = CGGradient(
-                    colorsSpace: CGColorSpace(name: CGColorSpace.sRGB),
-                    colors: [TablePalette.treeLight, TablePalette.treeDark] as CFArray, locations: [0, 1])
-                {
-                    context.drawRadialGradient(
-                        gradient, startCenter: CGPoint(x: center.x, y: center.y - radius * 0.2), startRadius: 0,
-                        endCenter: center, endRadius: radius, options: [])
-                }
-                context.restoreGState()
-                context.addEllipse(in: circle)
-                context.setStrokeColor(TablePalette.ink.copy(alpha: 0.35) ?? TablePalette.ink)
-                context.setLineWidth(0.6)
-                context.strokePath()
+                    x: rect.minX + (0.2 + 0.6 * noise(spot.column, spot.row, 710 + tree)) * rect.width,
+                    y: rect.minY + (0.2 + 0.6 * noise(spot.column, spot.row, 730 + tree)) * rect.height)
+                let crown = 5 + 3 * noise(spot.column, spot.row, 750 + tree)
+                let variant = Int(noise(spot.column, spot.row, 770 + tree) * CGFloat(sprites.trees.count))
+                trees.append(
+                    (
+                        sprites.trees[min(variant, sprites.trees.count - 1)], center,
+                        TerrainSprites.treeCanvasPoints * crown / TerrainSprites.treeCrownPoints,
+                        noise(spot.column, spot.row, 790 + tree) * 2 * .pi
+                    ))
             }
+        }
+        for tree in trees {
+            let offset = shadowOffset(at: tree.center, near: 1.5, far: 3)
+            draw(
+                tree.sprite.shadow, centeredAt: CGPoint(x: tree.center.x + offset.dx, y: tree.center.y + offset.dy),
+                side: tree.side, turn: tree.turn)
+        }
+        for tree in trees {
+            draw(tree.sprite.image, centeredAt: tree.center, side: tree.side, turn: tree.turn)
         }
     }
 
@@ -367,12 +353,23 @@ nonisolated private struct Painter {
         context.restoreGState()
     }
 
-    /// Draws with a soft contact shadow straight under it — the lamp is overhead (ART-DIRECTION §3).
-    private func shadowed(_ draw: (CGContext) -> Void) {
+    /// A top-down sprite, turned about its centre. The context is y-down, so the image is flipped back
+    /// upright first — a mirrored sprite would still look like a tree, but its lighting would not match.
+    private func draw(_ image: CGImage, centeredAt center: CGPoint, side: CGFloat, turn: CGFloat) {
         context.saveGState()
-        context.setShadow(offset: CGSize(width: 0, height: -1), blur: 2.5, color: TablePalette.ink.copy(alpha: 0.55))
-        draw(context)
+        context.translateBy(x: center.x, y: center.y)
+        context.rotate(by: turn)
+        context.scaleBy(x: 1, y: -1)
+        context.interpolationQuality = .high
+        context.draw(image, in: CGRect(x: -side / 2, y: -side / 2, width: side, height: side))
         context.restoreGState()
+    }
+
+    /// `BoardProjection.shadowOffset` in this context's y-down points.
+    private func shadowOffset(at point: CGPoint, near: CGFloat, far: CGFloat) -> CGVector {
+        let scene = CGPoint(x: point.x, y: projection.boardSize.height - point.y)
+        let offset = projection.shadowOffset(atScenePoint: scene, near: near, far: far)
+        return CGVector(dx: offset.dx, dy: -offset.dy)
     }
 
     /// Connected groups of one terrain kind (4-neighbourhood), each in row-major order.

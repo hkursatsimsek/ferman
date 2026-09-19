@@ -15,6 +15,8 @@ nonisolated struct FigurePose: Equatable, Sendable {
 
     /// Where the figure stands on the table, in scene points — lunges and knockback included.
     var position: CGPoint
+    /// Where its contact shadow falls, relative to `position`: away from the lamp (ART-DIRECTION §3).
+    var shadowOffset: CGVector
     /// `zRotation` for art that faces up (+Y).
     var rotation: CGFloat
     /// 0…1: how far off the table the hand has lifted the miniature mid-step.
@@ -189,6 +191,7 @@ nonisolated struct FigureMotion: Sendable {
         private let abilityDurationTicks: Double
         private let restingHeading: CGFloat
         private let cellPoints: CGFloat
+        private let projection: BoardProjection
 
         init(
             track: UnitTrack, projection: BoardProjection, sampleIntervalTicks: Double, abilityDurationTicks: Double,
@@ -200,6 +203,7 @@ nonisolated struct FigureMotion: Sendable {
             self.sampleIntervalTicks = sampleIntervalTicks
             self.abilityDurationTicks = abilityDurationTicks
             self.cellPoints = projection.pointsPerCell
+            self.projection = projection
             // Upright board (D26): the player's army faces up the table, the enemy's down it.
             self.restingHeading = track.team == .player ? .pi / 2 : -.pi / 2
             sampleTicks = track.path.map { Double($0.tick) }
@@ -362,7 +366,7 @@ nonisolated struct FigureMotion: Sendable {
             }
 
             return FigurePose(
-                position: position, rotation: rotation, lift: lift, tilt: tilt, stretch: stretch, squash: squash,
+                position: position, shadowOffset: projection.shadowOffset(atScenePoint: position), rotation: rotation, lift: lift, tilt: tilt, stretch: stretch, squash: squash,
                 pulse: pulse,
                 pose: pose, flash: flash, dim: dim, isFallen: isFallen, spark: spark, seal: seal)
         }
