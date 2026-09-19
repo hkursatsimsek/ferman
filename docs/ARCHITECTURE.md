@@ -240,7 +240,8 @@ struct RuleEditorView: View {
   - Kum masası ışığı `SKShader` (radyal düşüş); ızgara ve arazi `TerrainBaker`'ın harita başına bir kez pişirdiği texture'dır (SwiftUI Ordu Kurulumu da aynı görüntüyü kullanır).
   - Masa dikey çizilir, oyuncu altta (D26). Sim koordinatı ↔ görünüm noktası dönüşümü yalnızca `BoardProjection`'dadır.
   - Figürler `SKSpriteNode`, dokular tek atlastan (`UnitArt`, D24/D25). Pozlar `FigurePose` ile replay zamanından hesaplanır; durum tutan `SKAction` ve tohumsuz rastgelelik kullanılmaz, böylece seek, hız ve `ClipRenderer` aynı kareyi üretir (D27).
-  - Kıvılcım: `ruleActivated` olayında önceden yüklenmiş `SKEmitterNode` tetiklenir — yalnızca oyuncu birimleri için (D27). Vuruş parlaması kâğıt rengidir, kıvılcım rengi değil.
+  - Kıvılcım: `ruleActivated` sonrasında figürün üstünde çakan bir sprite ve emir numarasını gösteren küçük bir mühür — yalnızca oyuncu birimleri için (D27). `SKEmitterNode` kullanılmaz: tohumsuz parçacıklar seek ve klipte aynı kareyi üretmez; kıvılcım da diğer her şey gibi zamanın saf fonksiyonudur (`FigureMotion`). Vuruş parlaması kâğıt rengidir, kıvılcım rengi değil.
+  - Oklar: okçu saldırıları replay geleceği bildiği için uçuş süresi kadar önce fırlatılır ve `attack` tick'inde iner (`FigureMotion.arrows(atTick:)`, 64'lük havuz).
   - Dokunma: hit-test ile birim bulunur, `BattleModel`'e bildirilir, SwiftUI etiketi gösterilir ("şu an uyguluyor").
 - **SwiftUI köprüsü**
   - `SpriteView(scene:preferredFramesPerSecond: 60)`.

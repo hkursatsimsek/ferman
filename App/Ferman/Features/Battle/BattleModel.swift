@@ -42,6 +42,9 @@ final class BattleModel {
     /// How long a trigger bar glows after its order fires, matched to `BattleScene`'s spark particle
     /// lifetime so the sand table and the strip flash in step.
     static let sparkGlowTicks: Int32 = 10
+    /// Replay time past the battle's last tick, so the final blows land visibly: the battle ends the tick
+    /// its last unit dies, and without this the last figure to fall would freeze mid-tip (D27).
+    nonisolated static let settleTicks: Int32 = 15
 
     let config: BattleConfig
     /// What to stamp into view before the battle starts. Already-formatted text: this model
@@ -163,7 +166,7 @@ final class BattleModel {
         self.result = result
         let timeline = ReplayTimeline(result: result)
         self.timeline = timeline
-        let clock = ReplayClock(tickCount: Int32(result.tickCount))
+        let clock = ReplayClock(tickCount: Int32(result.tickCount) + Self.settleTicks)
         clock.isPlaying = false
         self.clock = clock
     }

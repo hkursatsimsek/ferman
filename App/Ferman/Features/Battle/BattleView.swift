@@ -94,7 +94,7 @@ struct BattleView: View {
     @ViewBuilder
     private var sandTable: some View {
         if let clock = model.clock, let timeline = model.timeline {
-            BattleSceneView(map: model.config.map, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit)
+            BattleSceneView(config: model.config, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit)
                 .scaleEffect(sceneScale)
                 .brightness(sceneBrightness)
         } else {

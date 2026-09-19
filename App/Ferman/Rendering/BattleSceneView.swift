@@ -6,19 +6,22 @@ import SwiftUI
 /// Hosts `BattleScene` in SwiftUI. `BattleView` (F1.5) composes this with the
 /// top bar, trigger bars and speed control; this file only wires the scene up.
 struct BattleSceneView: View {
-    let map: BattleMap
+    let config: BattleConfig
     let timeline: ReplayTimeline
     let clock: ReplayClock
     var onUnitTapped: ((UnitID) -> Void)?
 
     @State private var scene: BattleScene
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(map: BattleMap, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID) -> Void)? = nil) {
-        self.map = map
+    init(
+        config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID) -> Void)? = nil
+    ) {
+        self.config = config
         self.timeline = timeline
         self.clock = clock
         self.onUnitTapped = onUnitTapped
-        _scene = State(initialValue: BattleScene(map: map, timeline: timeline, clock: clock))
+        _scene = State(initialValue: BattleScene(config: config, timeline: timeline, clock: clock))
     }
 
     var body: some View {
@@ -27,8 +30,12 @@ struct BattleSceneView: View {
         // parent by default) instead of pinned to whichever corner `SKScene.anchorPoint` happens to
         // place the scene's origin at.
         SpriteView(scene: scene, options: [.ignoresSiblingOrder])
-            .onAppear { scene.onUnitTapped = onUnitTapped }
-            .aspectRatio(BoardProjection.table(for: map).aspectRatio, contentMode: .fit)
+            .onAppear {
+                scene.onUnitTapped = onUnitTapped
+                scene.reduceMotion = reduceMotion
+            }
+            .onChange(of: reduceMotion) { _, newValue in scene.reduceMotion = newValue }
+            .aspectRatio(BoardProjection.table(for: config.map).aspectRatio, contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

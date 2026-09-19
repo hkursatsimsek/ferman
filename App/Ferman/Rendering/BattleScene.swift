@@ -4,36 +4,42 @@ import SpriteKit
 import UIKit
 import os
 
-/// Draws `ReplayFrame`s. Knows nothing about conditions, actions or why a unit
-/// is where it is — only where it is (CLAUDE.md rule 4).
+/// Draws the replay. Knows nothing about conditions, actions or why a unit is where it is — only
+/// where it is and what just happened to it (CLAUDE.md rule 4).
+///
+/// Every frame is a pure function of the clock's replay time (D27): each figure's pose comes from
+/// `FigureMotion`, arrows included, and nothing here accumulates animation state. Seeking, speed changes
+/// and an offline `SKRenderer` clip (D15) all land on the same picture.
 final class BattleScene: SKScene {
     private let timeline: ReplayTimeline
     private let clock: ReplayClock
     private let projection: BoardProjection
+    private let motion: FigureMotion
     var onUnitTapped: ((UnitID) -> Void)?
+    /// Keeps the hand-moved flourishes (hops, lunges, knockback, tremble) off; poses and flashes stay.
+    var reduceMotion = false
 
     private var unitNodes: [UnitID: UnitNode] = [:]
-    private var eventsByTick: [Int32: [BattleEvent]] = [:]
-    private var lastProcessedTick: Int32 = -1
+    private var arrowPool: [(arrow: SKSpriteNode, shadow: SKSpriteNode)] = []
     private var lastUpdateTime: TimeInterval?
-
-    private var sparkPool: [SKEmitterNode] = []
-    private var nextSparkIndex = 0
     private let tappedUnitLabel: SKLabelNode
+
+    private static let arrowPoolSize = 64
 
     private let signposter = OSSignposter(
         subsystem: Bundle.main.bundleIdentifier ?? "com.hksimsek.FERMAN", category: "BattleScene")
 
-    init(map: BattleMap, timeline: ReplayTimeline, clock: ReplayClock) {
+    init(config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock) {
         self.timeline = timeline
         self.clock = clock
-        self.projection = BoardProjection.table(for: map)
+        let projection = BoardProjection.table(for: config.map)
+        self.projection = projection
+        self.motion = FigureMotion(result: timeline.result, config: config, projection: projection)
         tappedUnitLabel = Self.makeTappedUnitLabel()
 
         // Upright (D26): the landscape map is drawn a quarter turn counter-clockwise, player at the
         // bottom — every position below goes through `projection`.
-        let sceneSize = projection.boardSize
-        super.init(size: sceneSize)
+        super.init(size: projection.boardSize)
 
         // `.aspectFit`: the sand table (design brief §4.5 — "Tam ekran kum masası") must show the
         // whole battlefield at once. `anchorPoint` stays `.zero`, so every node position in this file
@@ -43,11 +49,11 @@ final class BattleScene: SKScene {
         scaleMode = .aspectFit
         isUserInteractionEnabled = true
 
-        addChild(Self.makeSandTable(map: map, projection: projection))
+        addChild(Self.makeSandTable(map: config.map, projection: projection))
         addChild(tappedUnitLabel)
-        buildEventIndex()
         buildUnitPool()
-        buildSparkPool()
+        buildArrowPool()
+        drawFrame()
     }
 
     @available(*, unavailable)
@@ -84,70 +90,29 @@ final class BattleScene: SKScene {
         return label
     }
 
-    private func buildEventIndex() {
-        for event in timeline.result.events {
-            eventsByTick[event.tick, default: []].append(event)
-        }
-    }
-
     private func buildUnitPool() {
-        for event in timeline.result.events {
-            guard case .spawn(let unit, let type, let team, _) = event.kind else { continue }
-            let node = UnitNode(unitID: unit, type: type, team: team)
-            node.isHidden = true
-            node.zPosition = 1
-            unitNodes[unit] = node
+        for unitID in motion.unitIDs {
+            guard let track = motion.figures[unitID]?.track else { continue }
+            let node = UnitNode(unitID: unitID, type: track.unitType, team: track.team)
+            unitNodes[unitID] = node
             addChild(node)
         }
     }
 
-    private func buildSparkPool() {
-        sparkPool = (0..<6).map { _ in Self.makeSparkEmitter() }
-        for emitter in sparkPool {
-            emitter.isHidden = true
-            addChild(emitter)
+    /// Arrows fly above the standing figures, their shadows on the table below them.
+    private func buildArrowPool() {
+        arrowPool = (0..<Self.arrowPoolSize).map { _ in
+            let arrow = SKSpriteNode(texture: EffectTextures.arrow)
+            arrow.zPosition = 2.5
+            arrow.isHidden = true
+            let shadow = SKSpriteNode(texture: EffectTextures.arrowShadow)
+            shadow.zPosition = 0.8
+            shadow.isHidden = true
+            addChild(shadow)
+            addChild(arrow)
+            return (arrow, shadow)
         }
     }
-
-    private static func makeSparkEmitter() -> SKEmitterNode {
-        let emitter = SKEmitterNode()
-        emitter.particleTexture = SKTexture(image: sparkParticleImage)
-        emitter.particleBirthRate = 400
-        emitter.numParticlesToEmit = 14
-        emitter.particleLifetime = 0.35
-        emitter.particleLifetimeRange = 0.15
-        emitter.particleSpeed = 60
-        emitter.particleSpeedRange = 30
-        emitter.emissionAngle = 0
-        emitter.emissionAngleRange = .pi * 2
-        emitter.particleScale = 0.5
-        emitter.particleScaleRange = 0.2
-        emitter.particleAlpha = 1
-        emitter.particleAlphaSpeed = -3
-        emitter.particleColor = SKColor(red: 0x6F / 255, green: 0xE3 / 255, blue: 0xF5 / 255, alpha: 1)
-        emitter.particleColorBlendFactor = 1
-        emitter.particleBlendMode = .add
-        emitter.zPosition = 5
-        return emitter
-    }
-
-    private static let sparkParticleImage: UIImage = {
-        let diameter: CGFloat = 16
-        let renderer = UIGraphicsImageRenderer(size: CGSize(width: diameter, height: diameter))
-        return renderer.image { context in
-            let colors = [UIColor.white.cgColor, UIColor.white.withAlphaComponent(0).cgColor]
-            guard
-                let gradient = CGGradient(
-                    colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors as CFArray, locations: [0, 1])
-            else { return }
-            context.cgContext.drawRadialGradient(
-                gradient,
-                startCenter: CGPoint(x: diameter / 2, y: diameter / 2), startRadius: 0,
-                endCenter: CGPoint(x: diameter / 2, y: diameter / 2), endRadius: diameter / 2,
-                options: []
-            )
-        }
-    }()
 
     // MARK: - Frame loop
 
@@ -160,52 +125,32 @@ final class BattleScene: SKScene {
         defer { signposter.endInterval("update", state) }
 
         clock.advance(by: currentTime - previous)
-        applyEventsSinceLastFrame()
-        applyInterpolatedPositions()
+        drawFrame()
     }
 
-    private func applyEventsSinceLastFrame() {
-        let upperTick = clock.currentTick
-        guard upperTick > lastProcessedTick else { return }
-        var tick = lastProcessedTick + 1
-        while tick <= upperTick {
-            for event in eventsByTick[tick] ?? [] {
-                handle(event)
-            }
-            tick += 1
-        }
-        lastProcessedTick = upperTick
-    }
-
-    private func handle(_ event: BattleEvent) {
-        guard case .ruleActivated(let unit, _) = event.kind else { return }
-        fireSpark(on: unit)
-    }
-
-    private func fireSpark(on unit: UnitID) {
-        guard let node = unitNodes[unit] else { return }
-        let emitter = sparkPool[nextSparkIndex]
-        nextSparkIndex = (nextSparkIndex + 1) % sparkPool.count
-        emitter.position = node.position
-        emitter.isHidden = false
-        emitter.resetSimulation()
-    }
-
-    private func applyInterpolatedPositions() {
-        let baseTick = clock.currentTick
-        let fraction = CGFloat(clock.fractionalTick - Double(baseTick))
-        let current = timeline.frame(at: baseTick)
-        let next = timeline.frame(at: baseTick + 1)
-
+    private func drawFrame() {
+        let tick = clock.fractionalTick
         for (unitID, node) in unitNodes {
-            guard current.livingUnits.contains(unitID), let currentPosition = current.positions[unitID] else {
-                node.isHidden = true
+            guard let pose = motion.pose(of: unitID, atTick: tick, reduceMotion: reduceMotion) else { continue }
+            node.apply(pose)
+        }
+
+        let arrows = motion.arrows(atTick: tick)
+        for (index, sprites) in arrowPool.enumerated() {
+            guard index < arrows.count else {
+                sprites.arrow.isHidden = true
+                sprites.shadow.isHidden = true
                 continue
             }
-            node.isHidden = false
-            let from = projection.scenePoint(currentPosition)
-            let to = next.positions[unitID].map(projection.scenePoint) ?? from
-            node.position = from.interpolated(to: to, fraction: fraction)
+            let arrow = arrows[index]
+            sprites.arrow.isHidden = false
+            sprites.arrow.position = arrow.position
+            sprites.arrow.zRotation = arrow.rotation
+            sprites.arrow.setScale(1 + 0.25 * arrow.height)
+            sprites.shadow.isHidden = false
+            sprites.shadow.position = arrow.groundPosition
+            sprites.shadow.zRotation = arrow.rotation
+            sprites.shadow.alpha = 1 - 0.5 * arrow.height
         }
     }
 
@@ -222,11 +167,12 @@ final class BattleScene: SKScene {
         showLabel(for: unitNode)
     }
 
-    /// The closest visible figure within `UnitNode.touchRadius` — a figure is too small to hit by its
+    /// The closest standing figure within `UnitNode.touchRadius` — a figure is too small to hit by its
     /// pixels, and a tap between two of them should still pick one.
     private func nearestUnit(to point: CGPoint) -> UnitNode? {
+        let tick = clock.currentTick
         var nearest: (node: UnitNode, distance: CGFloat)?
-        for node in unitNodes.values where !node.isHidden {
+        for (unitID, node) in unitNodes where motion.figures[unitID]?.track.isAlive(at: tick) ?? false {
             let distance = hypot(node.position.x - point.x, node.position.y - point.y)
             guard distance <= UnitNode.touchRadius else { continue }
             if nearest.map({ distance < $0.distance }) ?? true {
