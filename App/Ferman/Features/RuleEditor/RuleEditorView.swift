@@ -71,8 +71,16 @@ struct RuleEditorView: View {
                         reorderableStack
                     }
                     defaultCard
+                    if model.orders.count >= 2, dialTarget == nil {
+                        Text(String(localized: "Pusulayı yukarı taşımak önceliğini artırır."))
+                            .font(FermanFont.caption())
+                            .foregroundStyle(Color.paper.opacity(0.65))
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.top, FermanSpacing.xs)
+                    }
                 }
                 .padding(FermanSpacing.md)
+                .animation(.easeOut(duration: 0.2), value: dialTarget)
             }
 
             if model.canAddRule {
@@ -206,9 +214,19 @@ struct RuleEditorView: View {
     private var reorderableStack: some View {
         VStack(spacing: FermanSpacing.md - 2) {
             ForEach(model.orders) { item in
-                orderCardView(for: item)
-                    .accessibilityAction(named: Text("Yukarı taşı")) { model.moveUp(item.id) }
-                    .accessibilityAction(named: Text("Aşağı taşı")) { model.moveDown(item.id) }
+                VStack(spacing: FermanSpacing.xs) {
+                    orderCardView(for: item)
+                        .accessibilityAction(named: Text("Yukarı taşı")) { model.moveUp(item.id) }
+                        .accessibilityAction(named: Text("Aşağı taşı")) { model.moveDown(item.id) }
+                        .accessibilityAction(named: Text("Sil")) { model.removeRule(item.id) }
+                    if dialTarget == item.id, let parameter = model.numericParameter(for: item.id) {
+                        dialPanel(for: item, parameter: parameter)
+                            .transition(.opacity.combined(with: .move(edge: .top)))
+                    }
+                }
+                // While one order's dial is open the others step back (design mock), so it's clear
+                // which slip is being written on.
+                .opacity(dialTarget == nil || dialTarget == item.id ? 1 : 0.5)
             }
             .reorderable()
         }
@@ -227,22 +245,10 @@ struct RuleEditorView: View {
             priority: priority,
             condition: OrderPhraseFormatter.condition(item.rule.condition),
             action: OrderPhraseFormatter.action(item.rule.action, ability: model.ability(for: model.selectedUnitType)),
-            state: isEditingDial ? .editing : model.state(for: item)
+            state: isEditingDial ? .editing : model.state(for: item),
+            foldedUnder: model.foldedUnder[item.id],
+            highlightsParameter: model.numericParameter(for: item.id) != nil
         )
-        .overlay(alignment: .top) {
-            if isEditingDial, let parameter = model.numericParameter(for: item.id) {
-                ParameterDial(
-                    label: String(localized: "Değer"), unit: "",
-                    value: Binding(
-                        get: { parameter.value },
-                        set: { model.setNumericParameter($0, for: item.id) }
-                    ),
-                    range: parameter.range
-                )
-                .offset(y: -70)
-                .zIndex(1)
-            }
-        }
         .onTapGesture {
             if model.numericParameter(for: item.id) != nil {
                 dialTarget = dialTarget == item.id ? nil : item.id
@@ -260,17 +266,52 @@ struct RuleEditorView: View {
         }
     }
 
-    private var defaultCard: some View {
-        OrderCard(
-            priority: model.orders.count + 1,
-            condition: OrderPhraseFormatter.condition(.always),
-            action: OrderPhraseFormatter.action(
-                model.defaultRule.rule.action, ability: model.ability(for: model.selectedUnitType)),
-            state: .isDefault
-        )
-        .onTapGesture {
-            sheet = .editDefaultAction
+    /// The dial opens right under its slip (design mock), with the two other things one reaches for
+    /// while there: rewriting the whole order, or striking it.
+    private func dialPanel(for item: EditableRule, parameter: (value: Int, range: ClosedRange<Int>)) -> some View {
+        VStack(spacing: FermanSpacing.xs) {
+            ParameterDial(
+                label: RulePickerSheet.parameterLabel(for: item.rule.condition.kind),
+                unit: RulePickerSheet.parameterUnit(for: item.rule.condition.kind),
+                value: Binding(
+                    get: { parameter.value },
+                    set: { model.setNumericParameter($0, for: item.id) }
+                ),
+                range: parameter.range
+            )
+            HStack {
+                Button(String(localized: "Emri düzenle")) {
+                    dialTarget = nil
+                    sheet = .editRule(item.id)
+                }
+                .buttonStyle(FermanButton.Ghost())
+                Spacer()
+                Button(String(localized: "Sil"), role: .destructive) {
+                    dialTarget = nil
+                    model.removeRule(item.id)
+                }
+                .buttonStyle(FermanButton.Ghost())
+            }
         }
+    }
+
+    private var defaultCard: some View {
+        VStack(alignment: .leading, spacing: FermanSpacing.xxs) {
+            OrderCard(
+                priority: model.orders.count + 1,
+                condition: OrderPhraseFormatter.condition(.always),
+                action: OrderPhraseFormatter.action(
+                    model.defaultRule.rule.action, ability: model.ability(for: model.selectedUnitType)),
+                state: .isDefault
+            )
+            .onTapGesture {
+                sheet = .editDefaultAction
+            }
+            Text(String(localized: "Varsayılan emir her zaman yığının sonundadır."))
+                .font(FermanFont.caption())
+                .foregroundStyle(Color.paper.opacity(0.65))
+        }
+        .opacity(dialTarget == nil ? 1 : 0.5)
     }
 
     @ViewBuilder
@@ -313,17 +354,20 @@ struct RuleEditorView: View {
         case .add:
             RulePickerSheet(
                 mode: .add, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
+                ability: model.ability(for: model.selectedUnitType),
                 onConfirmRule: { draft in Task { await model.addRule(draft) } })
         case .editRule(let id):
             if let item = model.orders.first(where: { $0.id == id }) {
                 RulePickerSheet(
                     mode: .editRule, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
+                    ability: model.ability(for: model.selectedUnitType),
                     initialRule: item.rule,
                     onConfirmRule: { draft in Task { await model.updateRule(id, to: draft) } })
             }
         case .editDefaultAction:
             RulePickerSheet(
                 mode: .editDefaultAction, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
+                ability: model.ability(for: model.selectedUnitType),
                 initialRule: model.defaultRule.rule,
                 onConfirmDefaultAction: { action in model.updateDefaultAction(action) })
         }

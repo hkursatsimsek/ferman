@@ -179,6 +179,17 @@ final class RuleEditorModel {
         defaultRuleByUnitType[selectedUnitType] ?? EditableRule(rule: Rule(condition: .always, action: .advance))
     }
 
+    /// For each of the selected type's orders, the priority (1-based) of an earlier order that always
+    /// decides first — the order is folded under it and will never run (`RuleReachability`).
+    var foldedUnder: [EditableRule.ID: Int] {
+        let program = RuleProgram(unitType: selectedUnitType, rules: orders.map(\.rule) + [defaultRule.rule])
+        var result: [EditableRule.ID: Int] = [:]
+        for (index, folding) in RuleReachability.foldingRules(in: program).enumerated() where index < orders.count {
+            if let folding { result[orders[index].id] = folding + 1 }
+        }
+        return result
+    }
+
     func ability(for unitType: UnitTypeID) -> Ability? {
         catalog.first { $0.id == unitType }?.ability
     }

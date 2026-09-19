@@ -2,9 +2,8 @@ import XCTest
 
 /// Exercises the selector-based order editor end to end (F1.7 done-definition: "ekle / sırala /
 /// düzenle"). Reaches `RuleEditorView` through the `-uiTestRuleEditor` launch argument since no
-/// real navigation exists yet (F1.9). A `Picker` inside a `Form` renders as a row labeled
-/// "<field>, <current value>" that pushes a list of options; tapping an option selects it and pops
-/// back — every picker interaction below follows that shape.
+/// real navigation exists yet (F1.9). The order form (G9) shows every condition and action as a
+/// button labeled with its plain word, so choosing one is a single tap on that label.
 final class RuleEditorUITests: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
@@ -36,11 +35,17 @@ final class RuleEditorUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["düşman 1 kareden yakınsa"].waitForExistence(timeout: 2))
 
         app.staticTexts["düşman 1 kareden yakınsa"].tap()
-        let candidateTwo = app.staticTexts["parameterDial.candidate.2"]
-        XCTAssertTrue(candidateTwo.waitForExistence(timeout: 2))
-        candidateTwo.tap()
+        // The dial is one adjustable element to VoiceOver; turning it is a sideways drag.
+        let dial = app.descendants(matching: .any)["parameterDial"]
+        XCTAssertTrue(dial.waitForExistence(timeout: 2))
+        dial.swipeLeft()
 
-        XCTAssertTrue(app.staticTexts["düşman 2 kareden yakınsa"].waitForExistence(timeout: 2))
+        let turned = app.staticTexts.matching(
+            NSPredicate(
+                format: "label BEGINSWITH 'düşman ' AND label ENDSWITH ' kareden yakınsa' AND label != 'düşman 1 kareden yakınsa'"
+            )
+        ).firstMatch
+        XCTAssertTrue(turned.waitForExistence(timeout: 2))
     }
 
     @MainActor
@@ -49,7 +54,6 @@ final class RuleEditorUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["İLERLE"].waitForExistence(timeout: 2))
 
         app.staticTexts["başka durumda"].tap()
-        app.buttons["Eylem, İlerle"].tap()
         app.buttons["Yerinde kal"].tap()
         app.buttons["Kaydet"].tap()
 

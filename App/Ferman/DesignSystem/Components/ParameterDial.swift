@@ -1,12 +1,17 @@
 import SwiftUI
 
-/// ParametreKadranı — opens on top of the order card that owns it, never on
-/// a separate screen. The five-up carousel is the whole interaction (design brief §4.4).
+/// ParametreKadranı — opens right under the order card that owns it, never on a separate screen
+/// (design brief §4.4). Drag the numbers sideways to turn it — a step per notch, so 10 → 40 is one
+/// flick instead of fifteen taps — or tap a neighbouring number.
 struct ParameterDial: View {
     let label: String
     let unit: String
     @Binding var value: Int
     let range: ClosedRange<Int>
+
+    /// Points of drag per step.
+    private static let notch: CGFloat = 18
+    @State private var dragStartValue: Int?
 
     private var window: [Int] { (-2...2).map { value + $0 } }
 
@@ -25,6 +30,32 @@ struct ParameterDial: View {
                 HStack(alignment: .bottom, spacing: FermanSpacing.md) {
                     ForEach(window, id: \.self) { candidate in
                         valueText(for: candidate)
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .contentShape(Rectangle())
+                // Like a wheel: dragging left brings the larger numbers in from the right.
+                .gesture(
+                    DragGesture(minimumDistance: 6)
+                        .onChanged { drag in
+                            let start = dragStartValue ?? value
+                            dragStartValue = start
+                            let steps = Int((-drag.translation.width / Self.notch).rounded())
+                            let turned = min(max(start + steps, range.lowerBound), range.upperBound)
+                            if turned != value { value = turned }
+                        }
+                        .onEnded { _ in dragStartValue = nil }
+                )
+                .sensoryFeedback(.selection, trigger: value)
+                .accessibilityElement(children: .ignore)
+                .accessibilityIdentifier("parameterDial")
+                .accessibilityLabel(label)
+                .accessibilityValue(unit.isEmpty ? "\(value)" : "\(value) \(unit)")
+                .accessibilityAdjustableAction { direction in
+                    switch direction {
+                    case .increment: value = min(value + 1, range.upperBound)
+                    case .decrement: value = max(value - 1, range.lowerBound)
+                    @unknown default: break
                     }
                 }
 

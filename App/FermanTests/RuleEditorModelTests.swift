@@ -254,6 +254,23 @@ struct RuleEditorModelTests {
 
         #expect(model.battleBlocker == .invalidOrder(unitType: Self.shield, priority: 2))
     }
+
+    @Test
+    func anOrderCoveredByAnEarlierOneIsFoldedUnderIt() {
+        let program = RuleProgram(
+            unitType: Self.archer,
+            rules: [
+                Rule(condition: .enemyWithin(cells: 5), action: .retreat),
+                Rule(condition: .healthBelow(percent: 30), action: .takeCover),
+                Rule(condition: .enemyWithin(cells: 3), action: .hold),
+                Rule(condition: .always, action: .advance),
+            ])
+        let model = Self.makeModel(initialPrograms: [program])
+
+        #expect(model.foldedUnder[model.orders[2].id] == 1)
+        #expect(model.foldedUnder[model.orders[0].id] == nil)
+        #expect(model.foldedUnder[model.orders[1].id] == nil)
+    }
 }
 
 private enum Fixture {

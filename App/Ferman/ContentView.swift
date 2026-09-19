@@ -31,6 +31,12 @@ struct ContentView: View {
         // that doesn't need to walk Home -> Campaign -> ArmySetup first.
         if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
+        } else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditorSample") {
+            RuleEditorView(model: Self.ruleEditorFixture(programs: Self.sampleOrders))
+        } else if ProcessInfo.processInfo.arguments.contains("-uiTestRulePicker") {
+            RulePickerSheet(
+                mode: .add, constraints: .unrestricted, availableUnitTypes: ["mizrakci", "okcu", "suvari", "kalkan"],
+                ability: .volley)
         } else if let catalog, let screen = DirectLaunch.current, let front = directLaunchFront(screen, catalog) {
             NavigationStack(path: $router.path) {
                 directLaunchView(screen, front: front, catalog: catalog)
@@ -184,7 +190,19 @@ struct ContentView: View {
             .background(Color.ink)
     }
 
-    private static func ruleEditorFixture() -> RuleEditorModel {
+    /// A filled stack for screenshots: the archer's second order is folded under its first.
+    private static let sampleOrders = [
+        RuleProgram(
+            unitType: "okcu",
+            rules: [
+                Rule(condition: .enemyWithin(cells: 4), action: .retreat),
+                Rule(condition: .healthBelow(percent: 35), action: .takeCover),
+                Rule(condition: .enemyWithin(cells: 2), action: .hold),
+                Rule(condition: .always, action: .advance),
+            ])
+    ]
+
+    private static func ruleEditorFixture(programs: [RuleProgram] = []) -> RuleEditorModel {
         let archer: UnitTypeID = "okcu"
         let shield: UnitTypeID = "kalkan"
         let catalog: [UnitType] = [
@@ -196,7 +214,8 @@ struct ContentView: View {
                 damage: 8, attackIntervalTicks: 30, armor: 4, moraleMax: 120, counters: [], ability: .shieldWall),
         ]
         return RuleEditorModel(
-            unitTypes: [archer, shield], catalog: catalog, constraints: .unrestricted, audio: AudioService.shared)
+            unitTypes: [archer, shield], catalog: catalog, constraints: .unrestricted, initialPrograms: programs,
+            audio: AudioService.shared)
     }
 }
 

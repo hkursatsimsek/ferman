@@ -17,6 +17,8 @@ struct RulePickerSheet: View {
     /// The *enemy's* unit types — every unit-type parameter here (`targetInRange`, `nearestEnemyType`,
     /// `focusFire`) names an enemy unit (`RuleEditorModel.enemyUnitTypes`).
     let availableUnitTypes: [UnitTypeID]
+    /// The unit's own ability — `useAbility` reads as it ("YÜKLEN", "KALKAN DUVARI") in the preview.
+    let ability: Ability?
     var onConfirmRule: (RuleDraft) -> Void = { _ in }
     var onConfirmDefaultAction: (Action) -> Void = { _ in }
 
@@ -32,6 +34,7 @@ struct RulePickerSheet: View {
         mode: Mode,
         constraints: RuleConstraints,
         availableUnitTypes: [UnitTypeID],
+        ability: Ability? = nil,
         initialRule: Rule? = nil,
         onConfirmRule: @escaping (RuleDraft) -> Void = { _ in },
         onConfirmDefaultAction: @escaping (Action) -> Void = { _ in }
@@ -39,6 +42,7 @@ struct RulePickerSheet: View {
         self.mode = mode
         self.constraints = constraints
         self.availableUnitTypes = availableUnitTypes
+        self.ability = ability
         self.onConfirmRule = onConfirmRule
         self.onConfirmDefaultAction = onConfirmDefaultAction
 
@@ -62,35 +66,46 @@ struct RulePickerSheet: View {
 
     var body: some View {
         NavigationStack {
-            Form {
-                if mode != .editDefaultAction {
-                    Section("Koşul") {
-                        Picker("Koşul", selection: $conditionKind) {
-                            ForEach(constraints.availableConditions.filter { $0 != .always }, id: \.self) { kind in
-                                Text(Self.conditionKindLabel(kind)).tag(kind)
-                            }
-                        }
-                        conditionParameterControl
-                    }
-                }
+            ScrollView {
+                VStack(alignment: .leading, spacing: FermanSpacing.lg) {
+                    // The order being written, as the slip it will become — "bunu ben de yazabilirim"
+                    // (brief §9) starts with seeing your words, not a form.
+                    OrderCard(
+                        priority: 1, condition: OrderPhraseFormatter.condition(buildCondition()),
+                        action: OrderPhraseFormatter.action(buildAction(), ability: ability), state: .editing)
+                        .accessibilityLabel(String(localized: "Yazılan emir"))
 
-                Section("Eylem") {
-                    Picker("Eylem", selection: $actionKind) {
-                        ForEach(constraints.availableActions, id: \.self) { kind in
-                            Text(Self.actionKindLabel(kind)).tag(kind)
+                    if mode != .editDefaultAction {
+                        section(String(localized: "Ne zaman?")) {
+                            choiceGrid(constraints.availableConditions.filter { $0 != .always }) { kind in
+                                ChoiceCard(
+                                    symbol: Self.conditionSymbol(kind), label: Self.conditionKindLabel(kind),
+                                    isSelected: conditionKind == kind
+                                ) { conditionKind = kind }
+                            }
+                            conditionParameterControl
                         }
                     }
-                    if actionKind == .focusFire {
-                        Picker("Hedef", selection: $actionUnitType) {
-                            Text("En yakın / en zayıf").tag(UnitTypeID?.none)
-                            ForEach(availableUnitTypes, id: \.self) { unitType in
-                                Text(Self.unitTypeLabel(unitType)).tag(UnitTypeID?.some(unitType))
-                            }
+
+                    section(String(localized: "Ne yapsın?")) {
+                        choiceGrid(constraints.availableActions) { kind in
+                            ChoiceCard(
+                                symbol: Self.actionSymbol(kind), label: Self.actionKindLabel(kind),
+                                isSelected: actionKind == kind
+                            ) { actionKind = kind }
+                        }
+                        if actionKind == .focusFire {
+                            unitTypeChips(
+                                selection: actionUnitType, includesAny: true,
+                                select: { actionUnitType = $0 })
                         }
                     }
                 }
+                .padding(FermanSpacing.md)
             }
+            .background(Color.ink)
             .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Vazgeç") { dismiss() }
@@ -99,6 +114,33 @@ struct RulePickerSheet: View {
                     Button(confirmTitle) { confirm() }
                 }
             }
+            .onChange(of: conditionKind) { _, kind in
+                // A new kind has its own range: carry the number over only if it still fits.
+                if let range = Self.numericRange(of: kind), !range.contains(numericValue) {
+                    numericValue = Self.defaultNumericValue(for: kind)
+                }
+            }
+        }
+    }
+
+    private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+        VStack(alignment: .leading, spacing: FermanSpacing.sm) {
+            Text(title)
+                .font(FermanFont.sectionTitle())
+                .tracking(FermanFont.Tracking.sectionTitle)
+                .foregroundStyle(Color.paper)
+            content()
+        }
+    }
+
+    private func choiceGrid<Kind: Hashable, Cell: View>(
+        _ kinds: [Kind], @ViewBuilder cell: @escaping (Kind) -> Cell
+    ) -> some View {
+        LazyVGrid(
+            columns: [GridItem(.flexible(), spacing: FermanSpacing.sm), GridItem(.flexible(), spacing: FermanSpacing.sm)],
+            spacing: FermanSpacing.sm
+        ) {
+            ForEach(kinds, id: \.self) { cell($0) }
         }
     }
 
@@ -112,17 +154,57 @@ struct RulePickerSheet: View {
                 label: Self.parameterLabel(for: conditionKind), unit: Self.parameterUnit(for: conditionKind),
                 value: $numericValue, range: range)
         case .unitType:
-            Picker(Self.parameterLabel(for: conditionKind), selection: $conditionUnitType) {
-                ForEach(availableUnitTypes, id: \.self) { unitType in
-                    Text(Self.unitTypeLabel(unitType)).tag(unitType)
-                }
-            }
+            unitTypeChips(selection: conditionUnitType, includesAny: false, select: { conditionUnitType = $0 ?? "" })
         case .terrain:
-            Picker(Self.parameterLabel(for: conditionKind), selection: $conditionTerrain) {
+            HStack(spacing: FermanSpacing.sm) {
                 ForEach(Terrain.allCases.filter { $0 != .water }, id: \.self) { terrain in
-                    Text(Self.terrainLabel(terrain)).tag(terrain)
+                    Button(Self.terrainLabel(terrain)) { conditionTerrain = terrain }
+                        .buttonStyle(ChipStyle(isSelected: conditionTerrain == terrain))
                 }
             }
+        }
+    }
+
+    /// The enemy's unit types as iron figures — conditions and `focusFire` both name an enemy unit.
+    private func unitTypeChips(
+        selection: UnitTypeID?, includesAny: Bool, select: @escaping (UnitTypeID?) -> Void
+    ) -> some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: FermanSpacing.sm) {
+                if includesAny {
+                    Button(String(localized: "En yakın / en zayıf")) { select(nil) }
+                        .buttonStyle(ChipStyle(isSelected: selection == nil))
+                }
+                ForEach(availableUnitTypes, id: \.self) { unitType in
+                    Button {
+                        select(unitType)
+                    } label: {
+                        HStack(spacing: FermanSpacing.xxs) {
+                            UnitToken(type: unitType, team: .enemy, size: .chip)
+                            Text(Self.unitTypeLabel(unitType))
+                        }
+                    }
+                    .buttonStyle(ChipStyle(isSelected: selection == unitType))
+                    .accessibilityLabel(Self.unitTypeLabel(unitType))
+                }
+            }
+        }
+    }
+
+    private func buildCondition() -> Condition {
+        switch conditionKind {
+        case .enemyWithin: .enemyWithin(cells: numericValue)
+        case .healthBelow: .healthBelow(percent: numericValue)
+        case .allyCountBelow: .allyCountBelow(count: numericValue)
+        case .isFlanked: .isFlanked
+        case .targetInRange: .targetInRange(conditionUnitType)
+        case .timeAfter: .timeAfter(seconds: numericValue)
+        case .nearestEnemyType: .nearestEnemyType(conditionUnitType)
+        case .moraleBelow: .moraleBelow(percent: numericValue)
+        case .terrainIs: .terrainIs(conditionTerrain)
+        case .commanderDead: .commanderDead
+        case .enemyDensityAbove: .enemyDensityAbove(count: numericValue)
+        case .always: .always
         }
     }
 
@@ -206,6 +288,13 @@ struct RulePickerSheet: View {
         return nil
     }
 
+    private static func numericRange(of kind: ConditionKind) -> ClosedRange<Int>? {
+        switch kind.parameter {
+        case .cells(let range), .percent(let range), .count(let range), .seconds(let range): range
+        default: nil
+        }
+    }
+
     private static func defaultNumericValue(for kind: ConditionKind) -> Int {
         switch kind.parameter {
         case .cells(let range), .percent(let range), .count(let range), .seconds(let range): range.lowerBound
@@ -248,7 +337,7 @@ struct RulePickerSheet: View {
         }
     }
 
-    private static func parameterLabel(for kind: ConditionKind) -> String {
+    static func parameterLabel(for kind: ConditionKind) -> String {
         switch kind.parameter {
         case .cells: String(localized: "Mesafe")
         case .percent: String(localized: "Eşik")
@@ -260,13 +349,48 @@ struct RulePickerSheet: View {
         }
     }
 
-    private static func parameterUnit(for kind: ConditionKind) -> String {
+    static func parameterUnit(for kind: ConditionKind) -> String {
         switch kind.parameter {
         case .cells: String(localized: "kare")
         case .percent: "%"
         case .count: String(localized: "adet")
         case .seconds: String(localized: "sn")
         default: ""
+        }
+    }
+
+    // MARK: - Pictograms
+
+    private static func conditionSymbol(_ kind: ConditionKind) -> String {
+        switch kind {
+        case .enemyWithin: "scope"
+        case .healthBelow: "heart"
+        case .allyCountBelow: "person.2"
+        case .isFlanked: "arrow.left.and.right"
+        case .targetInRange: "target"
+        case .timeAfter: "hourglass"
+        case .nearestEnemyType: "eye"
+        case .moraleBelow: "flag"
+        case .terrainIs: "mountain.2"
+        case .commanderDead: "crown"
+        case .enemyDensityAbove: "circle.grid.3x3"
+        case .always: "arrow.uturn.down"
+        }
+    }
+
+    private static func actionSymbol(_ kind: ActionKind) -> String {
+        switch kind {
+        case .advance: "arrow.up"
+        case .retreat: "arrow.down"
+        case .hold: "hand.raised"
+        case .focusFire: "scope"
+        case .flankLeft: "arrow.turn.up.left"
+        case .flankRight: "arrow.turn.up.right"
+        case .regroup: "arrow.triangle.merge"
+        case .useAbility: "burst"
+        case .takeCover: "shield"
+        case .guardCommander: "crown"
+        case .scatter: "arrow.up.and.down.and.arrow.left.and.right"
         }
     }
 
@@ -288,4 +412,62 @@ struct RulePickerSheet: View {
 #Preview("RulePickerSheet — ekle", traits: .sizeThatFitsLayout) {
     RulePickerSheet(mode: .add, constraints: .unrestricted, availableUnitTypes: ["okcu", "mizrakci"])
         .preferredColorScheme(.dark)
+}
+
+/// One choice on the order form: a pictogram and a plain word. Chosen, it turns to paper — the slip
+/// being written — rather than lighting up like a switch.
+private struct ChoiceCard: View {
+    let symbol: String
+    let label: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: FermanSpacing.xs) {
+                Image(systemName: symbol)
+                    .font(.system(size: 15, weight: .medium))
+                    .frame(width: 22)
+                Text(label)
+                    .font(FermanFont.caption())
+                    .multilineTextAlignment(.leading)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .foregroundStyle(isSelected ? Color.paperInk : Color.paper)
+            .padding(.horizontal, FermanSpacing.sm)
+            .padding(.vertical, FermanSpacing.sm)
+            .frame(maxWidth: .infinity, minHeight: 44)
+            .background(
+                isSelected ? Color.paper : Color.slateRaised,
+                in: RoundedRectangle(cornerRadius: FermanRadius.orderCard))
+            .overlay(
+                RoundedRectangle(cornerRadius: FermanRadius.orderCard)
+                    .strokeBorder(isSelected ? Color.brass : Color.paper.opacity(0.12), lineWidth: isSelected ? 1.5 : 1))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
+}
+
+private struct ChipStyle: ButtonStyle {
+    let isSelected: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .font(FermanFont.caption())
+            .foregroundStyle(isSelected ? Color.paperInk : Color.paper)
+            .padding(.horizontal, FermanSpacing.sm)
+            .padding(.vertical, FermanSpacing.xs)
+            .frame(minHeight: 44)
+            .background(
+                isSelected ? Color.paper : Color.slateRaised,
+                in: RoundedRectangle(cornerRadius: FermanRadius.button))
+            .overlay(
+                RoundedRectangle(cornerRadius: FermanRadius.button)
+                    .strokeBorder(isSelected ? Color.brass : Color.paper.opacity(0.12), lineWidth: 1))
+            .opacity(configuration.isPressed ? 0.8 : 1)
+            .accessibilityAddTraits(isSelected ? [.isSelected] : [])
+    }
 }

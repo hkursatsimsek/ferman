@@ -30,6 +30,8 @@ struct OrderStack: View {
     /// Items at or past this index keep their place in the layout but stay invisible — a stack that
     /// is still being stamped in grows card by card without the cards above it shifting.
     var revealedCount: Int = .max
+    /// Revealed cards carry the ink seal — the stack being sealed before battle (brief §3.5).
+    var sealsRevealed = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: FermanSpacing.md - 2) {
@@ -41,9 +43,12 @@ struct OrderStack: View {
                         .padding(.top, index == 0 ? 0 : FermanSpacing.sm)
                         .opacity(index < revealedCount ? 1 : 0)
                 }
-                OrderCard(priority: item.priority, condition: item.condition, action: item.action, state: item.state)
-                    .opacity(index < revealedCount ? 1 : 0)
-                    .scaleEffect(index < revealedCount ? 1 : 1.06)
+                OrderCard(
+                    priority: item.priority, condition: item.condition, action: item.action, state: item.state,
+                    isSealed: sealsRevealed && index < revealedCount
+                )
+                .opacity(index < revealedCount ? 1 : 0)
+                .scaleEffect(index < revealedCount ? 1 : 1.06)
             }
         }
     }

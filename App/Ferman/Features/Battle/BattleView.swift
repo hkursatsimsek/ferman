@@ -189,7 +189,7 @@ struct BattleView: View {
     /// the screen.
     private func orderStackOverlay(stampedCount: Int) -> some View {
         GeometryReader { proxy in
-            OrderStack(items: model.orders, revealedCount: stampedCount)
+            OrderStack(items: model.orders, revealedCount: stampedCount, sealsRevealed: true)
                 .padding(FermanSpacing.lg)
                 .fixedSize(horizontal: false, vertical: true)
                 .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { orderStackHeight = $0 }
