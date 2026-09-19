@@ -69,7 +69,8 @@ struct ContentView: View {
                     front: front,
                     model: ArmySetupModel(
                         map: map, catalog: catalog.units, totalBudget: front.playerBudget,
-                        constraintBadge: front.constraintBadge))
+                        constraintBadge: front.constraintBadge,
+                        enemyPlacements: catalog.level(front.id)?.enemy.placements ?? []))
             } else {
                 contentLoadFailed
             }
@@ -178,7 +179,20 @@ struct ContentView: View {
                 contentLoadFailed
             }
         case .armySetup:
-            destination(for: .armySetup(front), catalog: catalog)
+            // `-uiTestArmySetupPlaced YES`: the zone already holds the level's reference army and a tray
+            // unit is in hand, so a screenshot shows placed figures and the unit brief.
+            if UserDefaults.standard.bool(forKey: "uiTestArmySetupPlaced"), let level = catalog.level(front.id),
+                let map = catalog.map(front.map)
+            {
+                let model = ArmySetupModel(
+                    map: map, catalog: catalog.units, totalBudget: front.playerBudget,
+                    constraintBadge: front.constraintBadge, enemyPlacements: level.enemy.placements,
+                    initialPlacements: level.referenceSolution.placements)
+                let _ = model.chooseTrayUnit(catalog.units.first?.id ?? "")
+                ArmySetupView(front: front, model: model)
+            } else {
+                destination(for: .armySetup(front), catalog: catalog)
+            }
         }
     }
 

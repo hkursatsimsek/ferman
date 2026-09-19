@@ -121,6 +121,66 @@ struct ArmySetupModelTests {
         #expect(model.isOverBudget == true)
     }
 
+    // MARK: - Faz 1.5 G10
+
+    @Test
+    func aChosenTrayUnitIsPlacedByTappingACell() throws {
+        let model = try Self.makeModel()
+        model.chooseTrayUnit(Self.archer)
+
+        #expect(model.tapCell(0) == true)
+        #expect(model.placement(at: 0)?.unitType == Self.archer)
+        // The choice stays, so a line of archers is a row of taps.
+        #expect(model.chosenTrayUnit == Self.archer)
+        #expect(model.tapCell(4) == true)
+        #expect(model.placements.count == 2)
+    }
+
+    @Test
+    func tappingWithNothingChosenOnlySelectsAPlacedUnit() throws {
+        let model = try Self.makeModel()
+        model.place(Self.archer, at: 0)
+
+        #expect(model.tapCell(4) == false)
+        #expect(model.placements.count == 1)
+        #expect(model.tapCell(0) == false)
+        #expect(model.selectedPlacementID == model.placement(at: 0)?.id)
+    }
+
+    @Test
+    func choosingTheSameTrayUnitAgainPutsItBack() throws {
+        let model = try Self.makeModel()
+        model.chooseTrayUnit(Self.archer)
+        model.chooseTrayUnit(Self.archer)
+
+        #expect(model.chosenTrayUnit == nil)
+    }
+
+    @Test
+    func aPlacedUnitMovesToAFreeCellInTheZone() throws {
+        let model = try Self.makeModel()
+        model.place(Self.archer, at: 0)
+        model.place(Self.shield, at: 4)
+        let archer = try #require(model.placement(at: 0))
+
+        #expect(model.move(archer.id, to: 8) == true)
+        #expect(model.placement(at: 8)?.id == archer.id)
+        #expect(model.placement(at: 0) == nil)
+        // Occupied or outside the zone: refused, nothing moves.
+        #expect(model.move(archer.id, to: 4) == false)
+        #expect(model.move(archer.id, to: 3) == false)
+        #expect(model.placement(at: 8)?.id == archer.id)
+    }
+
+    @Test
+    func theEnemysPlacementsAreKeptForDisplay() throws {
+        let model = ArmySetupModel(
+            map: try Self.map(), catalog: Self.catalog, totalBudget: 100,
+            enemyPlacements: [UnitPlacement(type: Self.shield, cell: 3)])
+
+        #expect(model.enemyPlacements.map(\.type) == [Self.shield])
+    }
+
     @Test
     func onlyOneUnitCanBeCommanderAtATime() throws {
         let model = try Self.makeModel()

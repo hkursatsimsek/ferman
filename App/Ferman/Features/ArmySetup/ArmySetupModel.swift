@@ -29,7 +29,8 @@ struct ArmyConstraintBadge: Sendable, Hashable {
 }
 
 /// Placing units in the player's zone and picking a commander before writing orders (design brief
-/// §4.3). Only the player's zone is shown, never the enemy's.
+/// §4.3). The whole upright table is shown (D26) — the enemy's figures stand at the top, unless a
+/// level hides them (Sis, F3.2).
 @Observable
 @MainActor
 final class ArmySetupModel {
@@ -37,30 +38,37 @@ final class ArmySetupModel {
     let catalog: [UnitType]
     let totalBudget: Int
     let constraintBadge: ArmyConstraintBadge?
+    /// Where the enemy stands — shown, not editable.
+    let enemyPlacements: [UnitPlacement]
 
-    /// The player zone's bounding rectangle — the "sol üçte biri" of the sand table the brief
-    /// describes, not the whole map.
+    /// The player zone's bounding rectangle — the part of the table the brief's §4.3 is about; the
+    /// view marks it out and scrolls to it.
     let gridColumns: ClosedRange<Int>
     let gridRows: ClosedRange<Int>
 
-    /// The deployment zone's patch of the baked sand table (`TerrainBaker`) — the same picture the
-    /// battle draws under these cells, so the ground a unit is placed on is the ground it fights on.
-    let zoneTableImage: CGImage?
+    /// The baked sand table (`TerrainBaker`) — the same picture the battle draws, so the ground a unit
+    /// is placed on is the ground it fights on.
+    let tableImage: CGImage?
 
     private(set) var placements: [ArmyPlacement]
     var selectedPlacementID: ArmyPlacement.ID?
+    /// The tray unit picked up for tap-to-place — a second way to place besides dragging, and the one
+    /// that works without fine drag control (Apple HIG: offer a non-drag alternative).
+    private(set) var chosenTrayUnit: UnitTypeID?
 
     init(
         map: BattleMap,
         catalog: [UnitType],
         totalBudget: Int,
         constraintBadge: ArmyConstraintBadge? = nil,
+        enemyPlacements: [UnitPlacement] = [],
         initialPlacements: [UnitPlacement] = []
     ) {
         self.map = map
         self.catalog = catalog
         self.totalBudget = totalBudget
         self.constraintBadge = constraintBadge
+        self.enemyPlacements = enemyPlacements
         self.placements = initialPlacements.map {
             ArmyPlacement(unitType: $0.type, cell: $0.cell, isCommander: $0.isCommander)
         }
@@ -70,20 +78,8 @@ final class ArmySetupModel {
         let rows = coordinates.map(\.row)
         self.gridColumns = (columns.min() ?? 0)...(columns.max() ?? 0)
         self.gridRows = (rows.min() ?? 0)...(rows.max() ?? 0)
-        self.zoneTableImage = Self.zoneImage(map: map, columns: gridColumns, rows: gridRows)
-    }
-
-    private static func zoneImage(map: BattleMap, columns: ClosedRange<Int>, rows: ClosedRange<Int>) -> CGImage? {
-        let projection = BoardProjection.table(for: map)
-        let scale = TerrainBaker.battlePixelsPerPoint
-        guard let table = TerrainBaker.bake(map: map, projection: projection, pixelsPerPoint: scale) else {
-            return nil
-        }
-        let corner = projection.viewRect(column: columns.upperBound, row: rows.lowerBound)
-        let opposite = projection.viewRect(column: columns.lowerBound, row: rows.upperBound)
-        let zone = corner.union(opposite)
-        return table.cropping(
-            to: CGRect(x: zone.minX * scale, y: zone.minY * scale, width: zone.width * scale, height: zone.height * scale))
+        self.tableImage = TerrainBaker.bake(
+            map: map, projection: .table(for: map), pixelsPerPoint: TerrainBaker.battlePixelsPerPoint)
     }
 
     // MARK: - Derived state
@@ -137,6 +133,31 @@ final class ArmySetupModel {
     func place(_ unitType: UnitTypeID, at cell: Int) -> Bool {
         guard canPlace(at: cell), canAfford(unitType) else { return false }
         placements.append(ArmyPlacement(unitType: unitType, cell: cell))
+        return true
+    }
+
+    /// Picks a tray unit up for tap-to-place, or puts it back if it was already in hand.
+    func chooseTrayUnit(_ unitType: UnitTypeID) {
+        chosenTrayUnit = chosenTrayUnit == unitType ? nil : unitType
+    }
+
+    /// A tap on a zone cell: places the chosen tray unit on an empty cell, or selects the unit already
+    /// standing there. Returns whether a unit was placed.
+    @discardableResult
+    func tapCell(_ cell: Int) -> Bool {
+        if let placed = placement(at: cell) {
+            toggleSelection(placed.id)
+            return false
+        }
+        guard let chosenTrayUnit else { return false }
+        return place(chosenTrayUnit, at: cell)
+    }
+
+    /// Moves a placed unit to another free cell of the zone. Returns whether it moved.
+    @discardableResult
+    func move(_ id: ArmyPlacement.ID, to cell: Int) -> Bool {
+        guard canPlace(at: cell), let index = placements.firstIndex(where: { $0.id == id }) else { return false }
+        placements[index].cell = cell
         return true
     }
 
