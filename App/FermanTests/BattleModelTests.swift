@@ -78,6 +78,36 @@ struct BattleModelTests {
         #expect(model.selectedUnitType == Fixture.archer)
     }
 
+    /// At 4× a burst of orders would buzz continuously; the hand feels at most one every 220 ms.
+    @Test
+    func orderHapticsAreRateLimited() throws {
+        let model = BattleModel(config: try Fixture.config(), orders: [])
+        let start = ContinuousClock.now
+        model.noteOrderCue(at: start)
+        model.noteOrderCue(at: start + .milliseconds(100))
+        #expect(model.orderFeedbackPulse == 1)
+        model.noteOrderCue(at: start + .milliseconds(250))
+        #expect(model.orderFeedbackPulse == 2)
+    }
+
+    /// The result slip lands with one strike for how it went — a bowl for a win, a knock for a loss.
+    @Test
+    func theResultSlipIsHeardWithHowItWent() async throws {
+        let audio = RecordingAudio()
+        let model = BattleModel(config: try Fixture.config(), orders: [], audio: audio)
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+        let outcome = try #require(model.result?.outcome)
+        model.resultSlipLanded()
+        let strike: [SoundEffect] =
+            switch outcome {
+            case .playerWin: [.victory]
+            case .enemyWin: [.defeat]
+            case .draw: []
+            }
+        #expect(audio.played == [.slip] + strike)
+    }
+
     @Test
     func aPlayerUnitsCurrentOrderIsTheOneItLastTookUp() async throws {
         let model = BattleModel(

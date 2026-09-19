@@ -15,12 +15,17 @@ final class BattleScene: SKScene {
     private let clock: ReplayClock
     private let projection: BoardProjection
     private let motion: FigureMotion
+    private let soundscape: BattleSoundscape
     var onUnitTapped: ((UnitID) -> Void)?
     /// The order a player unit is following right now, for the tapped unit's bubble. Words come from the
     /// app (`BattleModel.currentOrder(of:)`); the scene only draws them.
     var currentOrder: ((UnitID) -> OrderStack.Item?)?
     /// Keeps the hand-moved flourishes (hops, lunges, knockback, tremble) off; poses and flashes stay.
     var reduceMotion = false
+    /// Where the battle's sounds go; `nil` keeps the scene silent (the debrief's photograph, home's table).
+    var audio: (any AudioPlaying)?
+    /// One of the player's orders just took effect — for a haptic, which the scene doesn't own.
+    var onPlayerOrder: (() -> Void)?
 
     private var unitNodes: [UnitID: UnitNode] = [:]
     private var arrowPool: [(arrow: SKSpriteNode, shadow: SKSpriteNode)] = []
@@ -39,7 +44,9 @@ final class BattleScene: SKScene {
         self.clock = clock
         let projection = BoardProjection.table(for: config.map)
         self.projection = projection
-        self.motion = FigureMotion(result: timeline.result, config: config, projection: projection)
+        let motion = FigureMotion(result: timeline.result, config: config, projection: projection)
+        self.motion = motion
+        self.soundscape = BattleSoundscape(result: timeline.result, config: config, motion: motion, projection: projection)
         // Upright (D26): the landscape map is drawn a quarter turn counter-clockwise, player at the
         // bottom — every position below goes through `projection`.
         super.init(size: projection.boardSize)
@@ -125,8 +132,22 @@ final class BattleScene: SKScene {
         let state = signposter.beginInterval("update", id: signpostID)
         defer { signposter.endInterval("update", state) }
 
+        let before = clock.fractionalTick
         clock.advance(by: currentTime - previous)
         drawFrame()
+        playSounds(after: before, through: clock.fractionalTick)
+    }
+
+    /// Whatever the replay just passed over (`BattleSoundscape`). A seek jumps the clock by more than a
+    /// frame's worth, so it plays nothing.
+    private func playSounds(after before: Double, through now: Double) {
+        guard let audio else { return }
+        var playerOrder = false
+        for cue in soundscape.cues(after: before, through: now) {
+            audio.play(cue.effect, pan: cue.pan, volume: cue.volume)
+            playerOrder = playerOrder || cue.isPlayerOrder
+        }
+        if playerOrder { onPlayerOrder?() }
     }
 
     private func drawFrame() {

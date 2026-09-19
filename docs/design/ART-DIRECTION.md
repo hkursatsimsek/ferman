@@ -110,6 +110,14 @@ Kaynak: yalnızca CC0 ya da sentez; her dosya `App/Ferman/Sounds/SOURCES.md`'de 
 
 Haptik: kâğıt = yumuşak, metal = sert, damga = orta. Savaşta yalnızca oyuncu kural tetiklenmesi (hız sınırlı) ve sonuç.
 
+**Uygulama (G14):** sesler `Tools/sounds/synthesize.py` ile sentezlenir (tarifler `App/Ferman/Sounds/SOURCES.md`).
+Tablodakilerin yanında her eylemin kendi sesi vardır: mevzini koru = ahşap "tok", hedefe odaklan = iki vuruş, toplan /
+dağıl = toplanan / saçılan çakıllar, kanat = yana savrulan kum (o yana kaydırılmış), komutanı koru = küçük pirinç çan;
+yetenekler (kirpi duvarı, kalkan duvarı, hücum) ve moral çöküşü (masada titreyen figür) de duyulur. Savaş sesi
+`BattleSoundscape`'te sonuçtan bir kez hesaplanır, replay zamanının fonksiyonudur (D27): ileri-geri sarma ses
+çalmaz, aynı pencerede bir sesten en fazla iki tane çalar, her ses masadaki yerine göre sağa/sola kayar. Düşmanın
+emirleri sessizdir (kıvılcımı olmadığı gibi). Ortamda gece karargâh odası döngüsü çalar (uygulama öndeyken).
+
 ## 8. Doğal dil girişinin görsel dili (Faz 2 — yalnızca tarif)
 
 Oyuncunun söylediği ya da yazdığı emir, boş bir pusulaya bir kâtip eliyle **mürekkeple yazılır**. Belirsiz kısım

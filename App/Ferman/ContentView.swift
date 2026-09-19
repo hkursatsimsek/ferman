@@ -99,7 +99,7 @@ struct ContentView: View {
         case .campaign:
             CampaignView(model: CampaignModel(fronts: fronts(catalog)), loadFronts: { fronts(catalog) })
         case .settings:
-            SettingsView(model: SettingsModel())
+            SettingsView(model: SettingsModel(audio: AudioService.shared))
         case .armySetup(let front):
             if let map = catalog.map(front.map) {
                 ArmySetupView(
@@ -107,7 +107,8 @@ struct ContentView: View {
                     model: ArmySetupModel(
                         map: map, catalog: catalog.units, totalBudget: front.playerBudget,
                         constraintBadge: front.constraintBadge,
-                        enemyPlacements: catalog.level(front.id)?.enemy.placements ?? []))
+                        enemyPlacements: catalog.level(front.id)?.enemy.placements ?? [],
+                        audio: AudioService.shared))
             } else {
                 contentLoadFailed
             }

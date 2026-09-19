@@ -27,7 +27,7 @@ struct ArmySetupView: View {
         }
         .background(Color.ink)
         .animation(.easeOut(duration: 0.2), value: model.chosenTrayUnit)
-        .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.8), trigger: model.placements.count)
+        .sensoryFeedback(SoundEffect.place.feel?.feedback ?? .selection, trigger: model.setDownCount)
     }
 
     // At least one placement showing before this appears, rather than showing it disabled from the

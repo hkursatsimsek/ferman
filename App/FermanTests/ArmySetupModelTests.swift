@@ -23,11 +23,27 @@ struct ArmySetupModelTests {
     }
 
     private static func makeModel(
-        totalBudget: Int = 100, constraintBadge: ArmyConstraintBadge? = nil, initialPlacements: [UnitPlacement] = []
+        totalBudget: Int = 100, constraintBadge: ArmyConstraintBadge? = nil, initialPlacements: [UnitPlacement] = [],
+        audio: any AudioPlaying = SilentAudioPlaying()
     ) throws -> ArmySetupModel {
         ArmySetupModel(
             map: try map(), catalog: catalog, totalBudget: totalBudget, constraintBadge: constraintBadge,
-            initialPlacements: initialPlacements)
+            initialPlacements: initialPlacements, audio: audio)
+    }
+
+    /// ART-DIRECTION §7: a figure set down clinks — placed or moved — and a refused drop makes no sound.
+    @Test
+    func settingAFigureDownIsHeard() throws {
+        let audio = RecordingAudio()
+        let model = try Self.makeModel(totalBudget: 40, audio: audio)
+        let zone = model.map.zone(for: .player)
+        #expect(model.place(Self.archer, at: zone[0]))
+        #expect(!model.place(Self.archer, at: zone[0]))
+        #expect(!model.place(Self.shield, at: zone[1]))
+        let placed = try #require(model.placements.first)
+        #expect(model.move(placed.id, to: zone[2]))
+        #expect(audio.played == [.place, .place])
+        #expect(model.setDownCount == 2)
     }
 
     @Test

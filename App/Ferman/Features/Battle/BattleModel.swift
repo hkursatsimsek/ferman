@@ -65,14 +65,23 @@ final class BattleModel {
     private(set) var result: BattleResult?
     private(set) var triggerRows: [TriggerRow] = []
     private(set) var selectedUnitType: UnitTypeID?
+    /// Counts the player's orders taking effect, as far as the hand should feel them — the view's haptic
+    /// trigger. Rate-limited: at 4× a burst of orders would otherwise be one long buzz (ART-DIRECTION §7).
+    private(set) var orderFeedbackPulse = 0
 
     /// Rows the trigger strip reserves: the longest of the player's programs, default order included.
     var reservedTriggerRowCount: Int {
         config.player.programs.map(\.rules.count).max() ?? 0
     }
 
+    /// Shortest gap between two order haptics.
+    static let orderFeedbackInterval: Duration = .milliseconds(220)
+
     private let runner: BattleRunner
-    private let audio: any AudioPlaying
+    /// The battle's sound: the choreography's stamps and result slip here, the table's own cues in
+    /// `BattleScene`.
+    let audio: any AudioPlaying
+    private var lastOrderFeedback: ContinuousClock.Instant?
     private var isSkipping = false
     private var runTask: Task<Void, Never>?
     private var samplingTask: Task<Void, Never>?
@@ -168,6 +177,23 @@ final class BattleModel {
             let items = phrases[unitType], ruleIndex < items.count
         else { return nil }
         return items[ruleIndex]
+    }
+
+    /// One of the player's orders took effect on the table (`BattleScene.onPlayerOrder`).
+    func noteOrderCue(at instant: ContinuousClock.Instant = .now) {
+        if let last = lastOrderFeedback, instant - last < Self.orderFeedbackInterval { return }
+        lastOrderFeedback = instant
+        orderFeedbackPulse += 1
+    }
+
+    /// The result slip dropped onto the table — and under it, one strike for how it went.
+    func resultSlipLanded() {
+        audio.play(.slip)
+        switch result?.outcome {
+        case .playerWin: audio.play(.victory)
+        case .enemyWin: audio.play(.defeat)
+        case .draw, nil: break
+        }
     }
 
     // MARK: - Choreography

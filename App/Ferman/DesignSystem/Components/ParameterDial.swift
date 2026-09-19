@@ -12,6 +12,7 @@ struct ParameterDial: View {
     /// Points of drag per step.
     private static let notch: CGFloat = 18
     @State private var dragStartValue: Int?
+    @Environment(\.audio) private var audio
 
     private var window: [Int] { (-2...2).map { value + $0 } }
 
@@ -47,6 +48,7 @@ struct ParameterDial: View {
                         .onEnded { _ in dragStartValue = nil }
                 )
                 .sensoryFeedback(.selection, trigger: value)
+                .onChange(of: value) { audio.play(.dial) }
                 .accessibilityElement(children: .ignore)
                 .accessibilityIdentifier("parameterDial")
                 .accessibilityLabel(label)

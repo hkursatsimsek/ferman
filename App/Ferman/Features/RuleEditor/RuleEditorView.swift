@@ -233,7 +233,7 @@ struct RuleEditorView: View {
         .reorderContainer(for: EditableRule.self) { difference in
             model.move(difference)
         }
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.6), trigger: model.orders)
+        .sensoryFeedback(SoundEffect.paper.feel?.feedback ?? .selection, trigger: model.orders)
     }
 
     @ViewBuilder

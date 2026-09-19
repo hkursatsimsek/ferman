@@ -23,17 +23,22 @@ enum GameSettings {
 @MainActor
 final class SettingsModel {
     private let defaults: UserDefaults
+    private let audio: any AudioPlaying
 
     var soundEnabled: Bool {
-        didSet { defaults.set(soundEnabled, forKey: GameSettings.soundKey) }
+        didSet {
+            defaults.set(soundEnabled, forKey: GameSettings.soundKey)
+            audio.soundSettingDidChange()
+        }
     }
 
     var defaultSpeed: BattleSpeed {
         didSet { defaults.set(defaultSpeed.rawValue, forKey: GameSettings.speedKey) }
     }
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, audio: any AudioPlaying = SilentAudioPlaying()) {
         self.defaults = defaults
+        self.audio = audio
         soundEnabled = defaults.object(forKey: GameSettings.soundKey) as? Bool ?? true
         defaultSpeed = BattleSpeed(rawValue: defaults.integer(forKey: GameSettings.speedKey)) ?? .x1
     }

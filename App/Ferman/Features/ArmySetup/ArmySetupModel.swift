@@ -56,14 +56,22 @@ final class ArmySetupModel {
     /// that works without fine drag control (Apple HIG: offer a non-drag alternative).
     private(set) var chosenTrayUnit: UnitTypeID?
 
+    /// Counts figures set down on the table — placed or moved — for the view's haptic.
+    private(set) var setDownCount = 0
+
+    /// A figure set down (or moved) clinks on the table (ART-DIRECTION §7, "Figür bırakma: Metal").
+    private let audio: any AudioPlaying
+
     init(
         map: BattleMap,
         catalog: [UnitType],
         totalBudget: Int,
         constraintBadge: ArmyConstraintBadge? = nil,
         enemyPlacements: [UnitPlacement] = [],
-        initialPlacements: [UnitPlacement] = []
+        initialPlacements: [UnitPlacement] = [],
+        audio: any AudioPlaying = SilentAudioPlaying()
     ) {
+        self.audio = audio
         self.map = map
         self.catalog = catalog
         self.totalBudget = totalBudget
@@ -133,6 +141,7 @@ final class ArmySetupModel {
     func place(_ unitType: UnitTypeID, at cell: Int) -> Bool {
         guard canPlace(at: cell), canAfford(unitType) else { return false }
         placements.append(ArmyPlacement(unitType: unitType, cell: cell))
+        setDown()
         return true
     }
 
@@ -158,7 +167,13 @@ final class ArmySetupModel {
     func move(_ id: ArmyPlacement.ID, to cell: Int) -> Bool {
         guard canPlace(at: cell), let index = placements.firstIndex(where: { $0.id == id }) else { return false }
         placements[index].cell = cell
+        setDown()
         return true
+    }
+
+    private func setDown() {
+        setDownCount += 1
+        audio.play(.place)
     }
 
     func remove(_ id: ArmyPlacement.ID) {

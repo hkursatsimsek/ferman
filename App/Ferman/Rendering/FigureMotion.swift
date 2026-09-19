@@ -82,7 +82,9 @@ nonisolated enum MotionStyle {
 nonisolated struct FigureMotion: Sendable {
     let figures: [UnitID: Figure]
     let unitIDs: [UnitID]
-    private let arrows: [Arrow]
+    /// Every arrow of the battle, by launch time — what `arrows(atTick:)` draws and `BattleSoundscape`
+    /// hears (released at launch, landing on the attack tick).
+    let flights: [ArrowFlight]
     private let maxArrowFlight: Double
     private let ticksPerSecond: Double
 
@@ -106,7 +108,7 @@ nonisolated struct FigureMotion: Sendable {
         self.figures = figures
         self.unitIDs = tracks.tracks.map(\.unit)
 
-        var arrows: [Arrow] = []
+        var arrows: [ArrowFlight] = []
         for track in tracks.tracks {
             guard let archer = figures[track.unit], archer.isRanged else { continue }
             for strike in track.strikesMade {
@@ -117,12 +119,12 @@ nonisolated struct FigureMotion: Sendable {
                 let cells = hypot(to.x - from.x, to.y - from.y) / projection.pointsPerCell
                 let flightSeconds = min(0.45, max(0.2, Double(cells) * 0.05))
                 arrows.append(
-                    Arrow(
+                    ArrowFlight(
                         launchTick: landTick - flightSeconds * ticksPerSecond, landTick: landTick, from: from, to: to,
                         arcHeight: 6 + cells * 1.2))
             }
         }
-        self.arrows = arrows.sorted { $0.launchTick < $1.launchTick }
+        self.flights = arrows.sorted { $0.launchTick < $1.launchTick }
         self.maxArrowFlight = 0.45 * ticksPerSecond
     }
 
@@ -136,15 +138,15 @@ nonisolated struct FigureMotion: Sendable {
     /// so the hit and the arrow's arrival are the same frame (the simulation applies ranged damage at once).
     func arrows(atTick tick: Double) -> [ArrowPose] {
         var low = 0
-        var high = arrows.count
+        var high = flights.count
         while low < high {
             let middle = (low + high) / 2
-            if arrows[middle].launchTick < tick - maxArrowFlight { low = middle + 1 } else { high = middle }
+            if flights[middle].launchTick < tick - maxArrowFlight { low = middle + 1 } else { high = middle }
         }
         var result: [ArrowPose] = []
         var index = low
-        while index < arrows.count, arrows[index].launchTick <= tick {
-            if let pose = arrows[index].pose(atTick: tick) { result.append(pose) }
+        while index < flights.count, flights[index].launchTick <= tick {
+            if let pose = flights[index].pose(atTick: tick) { result.append(pose) }
             index += 1
         }
         return result
@@ -152,9 +154,11 @@ nonisolated struct FigureMotion: Sendable {
 
     // MARK: - Arrow
 
-    private struct Arrow: Sendable {
+    struct ArrowFlight: Sendable {
+        /// Fractional replay ticks.
         let launchTick: Double
         let landTick: Double
+        /// Scene points: the archer's and the target's ground points on the landing tick.
         let from: CGPoint
         let to: CGPoint
         let arcHeight: CGFloat

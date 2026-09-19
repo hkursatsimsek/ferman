@@ -108,7 +108,13 @@ struct BattleView: View {
         // player on a frozen sand table waiting for a manual "Sonuç" tap.
         .onChange(of: model.clock?.isPlaying) { _, isPlaying in
             guard model.phase == .playing, isPlaying == false, model.clock?.isFinished == true else { return }
+            model.resultSlipLanded()
             showResult(delayed: true)
+        }
+        // In battle only the player's own orders and the result reach the hand (ART-DIRECTION §7).
+        .sensoryFeedback(SoundEffect.order.feel?.feedback ?? .selection, trigger: model.orderFeedbackPulse)
+        .sensoryFeedback(SoundEffect.slip.feel?.feedback ?? .selection, trigger: model.clock?.isFinished) { _, finished in
+            finished == true
         }
     }
 
@@ -122,7 +128,8 @@ struct BattleView: View {
         if let clock = model.clock, let timeline = model.timeline {
             BattleSceneView(
                 config: model.config, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit,
-                currentOrder: { model.currentOrder(of: $0) })
+                currentOrder: { model.currentOrder(of: $0) }, audio: model.audio,
+                onPlayerOrder: { model.noteOrderCue() })
                 .scaleEffect(sceneScale)
                 .brightness(sceneBrightness)
         } else {
@@ -204,7 +211,7 @@ struct BattleView: View {
                 .scaleEffect(min(1, proxy.size.height / max(orderStackHeight, 1)))
                 .frame(width: proxy.size.width, height: proxy.size.height)
         }
-        .sensoryFeedback(.impact(weight: .light, intensity: 0.7), trigger: stampedCount)
+        .sensoryFeedback(SoundEffect.stamp.feel?.feedback ?? .selection, trigger: stampedCount)
     }
 }
 

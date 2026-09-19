@@ -9,9 +9,16 @@ import SwiftUI
 
 @main
 struct FermanApp: App {
+    @Environment(\.scenePhase) private var scenePhase
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(\.audio, AudioService.shared)
+        }
+        // The war room's ambience runs while the game is in front, under every screen (ART-DIRECTION §7).
+        .onChange(of: scenePhase, initial: true) { _, phase in
+            AudioService.shared.setAmbience(phase == .active)
         }
     }
 }
