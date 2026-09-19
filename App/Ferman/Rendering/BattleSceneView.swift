@@ -10,17 +10,20 @@ struct BattleSceneView: View {
     let timeline: ReplayTimeline
     let clock: ReplayClock
     var onUnitTapped: ((UnitID) -> Void)?
+    var currentOrder: ((UnitID) -> OrderStack.Item?)?
 
     @State private var scene: BattleScene
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(
-        config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID) -> Void)? = nil
+        config: BattleConfig, timeline: ReplayTimeline, clock: ReplayClock, onUnitTapped: ((UnitID) -> Void)? = nil,
+        currentOrder: ((UnitID) -> OrderStack.Item?)? = nil
     ) {
         self.config = config
         self.timeline = timeline
         self.clock = clock
         self.onUnitTapped = onUnitTapped
+        self.currentOrder = currentOrder
         _scene = State(initialValue: BattleScene(config: config, timeline: timeline, clock: clock))
     }
 
@@ -32,6 +35,7 @@ struct BattleSceneView: View {
         SpriteView(scene: scene, options: [.ignoresSiblingOrder])
             .onAppear {
                 scene.onUnitTapped = onUnitTapped
+                scene.currentOrder = currentOrder
                 scene.reduceMotion = reduceMotion
             }
             .onChange(of: reduceMotion) { _, newValue in scene.reduceMotion = newValue }

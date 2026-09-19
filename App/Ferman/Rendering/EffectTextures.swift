@@ -74,6 +74,55 @@ enum EffectTextures {
         context.fill(CGRect(x: 1.2, y: 1, width: 1.6, height: 14))
     }
 
+    /// The tapped unit's bubble (brief §4.5): "şu an uyguluyor" over the order's number and bold action,
+    /// on a dark slip. Drawn when the text changes, not every frame.
+    static func orderBubble(caption: String, priority: Int, action: String) -> SKTexture {
+        let captionFont = UIFont(name: "PublicSans-Regular", size: 9) ?? .systemFont(ofSize: 9)
+        let actionFont = UIFont(name: "PublicSans-Bold", size: 11) ?? .boldSystemFont(ofSize: 11)
+        let numberFont = UIFont(name: "ArchivoNarrow-SemiBold", size: 10) ?? .systemFont(ofSize: 10, weight: .semibold)
+        let paper = UIColor(red: 0xD6 / 255, green: 0xD0 / 255, blue: 0xC2 / 255, alpha: 1)
+        let captionText = caption as NSString
+        let actionText = action as NSString
+        let captionAttributes: [NSAttributedString.Key: Any] = [.font: captionFont, .foregroundColor: paper.withAlphaComponent(0.65)]
+        let actionAttributes: [NSAttributedString.Key: Any] = [.font: actionFont, .foregroundColor: paper]
+        let captionSize = captionText.size(withAttributes: captionAttributes)
+        let actionSize = actionText.size(withAttributes: actionAttributes)
+        let badge: CGFloat = 13
+        let padding: CGFloat = 6
+        let width = max(captionSize.width, badge + 4 + actionSize.width) + padding * 2
+        let height = captionSize.height + max(badge, actionSize.height) + padding * 2 + 1
+        let tail: CGFloat = 4
+
+        return texture(width: width, height: height + tail) { context, _ in
+            let slip = CGRect(x: 0, y: 0, width: width, height: height)
+            context.setFillColor(UIColor(red: 0x0F / 255, green: 0x16 / 255, blue: 0x1B / 255, alpha: 0.92).cgColor)
+            context.addPath(CGPath(roundedRect: slip, cornerWidth: 4, cornerHeight: 4, transform: nil))
+            context.move(to: CGPoint(x: width / 2 - tail, y: height))
+            context.addLine(to: CGPoint(x: width / 2, y: height + tail))
+            context.addLine(to: CGPoint(x: width / 2 + tail, y: height))
+            context.fillPath()
+
+            UIGraphicsPushContext(context)
+            captionText.draw(at: CGPoint(x: padding, y: padding), withAttributes: captionAttributes)
+            let rowY = padding + captionSize.height + 1
+            let disc = CGRect(x: padding, y: rowY + (max(badge, actionSize.height) - badge) / 2, width: badge, height: badge)
+            context.setFillColor(UIColor(red: 0x9A / 255, green: 0x7B / 255, blue: 0x3F / 255, alpha: 1).cgColor)
+            context.fillEllipse(in: disc)
+            let number = "\(priority)" as NSString
+            let numberAttributes: [NSAttributedString.Key: Any] = [
+                .font: numberFont, .foregroundColor: UIColor(red: 0x0F / 255, green: 0x16 / 255, blue: 0x1B / 255, alpha: 1),
+            ]
+            let numberSize = number.size(withAttributes: numberAttributes)
+            number.draw(
+                at: CGPoint(x: disc.midX - numberSize.width / 2, y: disc.midY - numberSize.height / 2),
+                withAttributes: numberAttributes)
+            actionText.draw(
+                at: CGPoint(x: disc.maxX + 4, y: rowY + (max(badge, actionSize.height) - actionSize.height) / 2),
+                withAttributes: actionAttributes)
+            UIGraphicsPopContext()
+        }
+    }
+
     // MARK: -
 
     private static func texture(size: CGFloat, draw: (CGContext, CGFloat) -> Void) -> SKTexture {

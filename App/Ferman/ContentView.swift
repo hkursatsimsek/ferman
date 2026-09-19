@@ -87,7 +87,8 @@ struct ContentView: View {
                 contentLoadFailed
             }
         case .battle(let config):
-            BattleView(config: config, orders: orderStackItems(for: config)) { result in
+            BattleView(config: config, orders: orderStackItems(for: config), phrases: orderPhrases(for: config)) {
+                result in
                 router.push(.debrief(config, result))
             }
         case .debrief(let config, let result):
@@ -103,10 +104,18 @@ struct ContentView: View {
     /// target) has to happen here rather than in `OrderPhraseFormatter`, which stays `nonisolated`
     /// on purpose.
     private func orderStackItems(for config: BattleConfig) -> [OrderStack.Item] {
-        config.player.programs.flatMap { program in
+        let phrases = orderPhrases(for: config)
+        return config.player.programs.flatMap { phrases[$0.unitType] ?? [] }
+    }
+
+    /// Each of the player's programs as order cards, by unit type (the trigger strip, the tapped unit's
+    /// bubble, and — flattened — the intro's stamped stack).
+    private func orderPhrases(for config: BattleConfig) -> [UnitTypeID: [OrderStack.Item]] {
+        var phrases: [UnitTypeID: [OrderStack.Item]] = [:]
+        for program in config.player.programs {
             let ability = config.unitCatalog.first { $0.id == program.unitType }?.ability
             let heading = OrderPhraseFormatter.unitTypeName(program.unitType)
-            return program.rules.enumerated().map { index, rule in
+            phrases[program.unitType] = program.rules.enumerated().map { index, rule in
                 OrderStack.Item(
                     priority: index + 1,
                     condition: OrderPhraseFormatter.condition(rule.condition),
@@ -115,6 +124,7 @@ struct ContentView: View {
                     groupTitle: heading)
             }
         }
+        return phrases
     }
 
     // MARK: - Direct launch (UI tests, screenshots)

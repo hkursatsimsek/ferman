@@ -7,6 +7,8 @@ enum UnitTokenSize: Equatable {
     case onTable(cellSize: CGFloat)
     case tray
     case result
+    /// Beside a label in a tab or chip.
+    case chip
 
     /// Side of the square canvas the figure is drawn in (base centred, weapons reaching out).
     var canvas: CGFloat {
@@ -14,6 +16,7 @@ enum UnitTokenSize: Equatable {
         case .onTable(let cellSize): cellSize * UnitArt.canvasPoints / BoardProjection.scenePointsPerCell
         case .tray: 64
         case .result: 48
+        case .chip: 30
         }
     }
 }

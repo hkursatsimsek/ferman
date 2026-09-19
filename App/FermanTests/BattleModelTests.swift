@@ -1,4 +1,5 @@
 import FermanCore
+import FermanReplay
 import Testing
 
 @testable import Ferman
@@ -52,6 +53,49 @@ struct BattleModelTests {
         model.selectUnit(UnitID(rawValue: 999))
 
         #expect(model.selectedUnitType == before)
+    }
+
+    @Test
+    func triggerRowsCarryTheOrdersWords() async throws {
+        let model = BattleModel(
+            config: try Fixture.config(), orders: Fixture.orders, phrases: [Fixture.archer: Fixture.orders])
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+
+        #expect(model.triggerRows.map(\.condition) == ["düşman 2 kareden yakınsa", "başka durumda"])
+        #expect(model.triggerRows.map(\.action) == ["GERİ ÇEKİL", "İLERLE"])
+        #expect(model.triggerRows.map(\.isDefault) == [false, true])
+    }
+
+    @Test
+    func onlyUnitTypesWithAProgramCanBeSelected() async throws {
+        let model = BattleModel(config: try Fixture.config(), orders: Fixture.orders)
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+
+        #expect(model.playerUnitTypes == [Fixture.archer])
+        model.selectUnitType(Fixture.shield)
+        #expect(model.selectedUnitType == Fixture.archer)
+    }
+
+    @Test
+    func aPlayerUnitsCurrentOrderIsTheOneItLastTookUp() async throws {
+        let model = BattleModel(
+            config: try Fixture.config(), orders: Fixture.orders, phrases: [Fixture.archer: Fixture.orders])
+        model.start(reduceMotion: true)
+        try await Fixture.waitUntilPlaying(model)
+        let timeline = try #require(model.timeline)
+        let clock = try #require(model.clock)
+        let firstOrder = try #require(
+            timeline.result.events.first {
+                if case .ruleActivated(UnitID(rawValue: 0), _) = $0.kind { true } else { false }
+            })
+        clock.seek(to: firstOrder.tick)
+
+        let current = try #require(model.currentOrder(of: UnitID(rawValue: 0)))
+        #expect(Fixture.orders.contains { $0.action == current.action })
+        // The enemy's units get no bubble.
+        #expect(model.currentOrder(of: UnitID(rawValue: 1)) == nil)
     }
 }
 

@@ -16,13 +16,18 @@ final class BattleScene: SKScene {
     private let projection: BoardProjection
     private let motion: FigureMotion
     var onUnitTapped: ((UnitID) -> Void)?
+    /// The order a player unit is following right now, for the tapped unit's bubble. Words come from the
+    /// app (`BattleModel.currentOrder(of:)`); the scene only draws them.
+    var currentOrder: ((UnitID) -> OrderStack.Item?)?
     /// Keeps the hand-moved flourishes (hops, lunges, knockback, tremble) off; poses and flashes stay.
     var reduceMotion = false
 
     private var unitNodes: [UnitID: UnitNode] = [:]
     private var arrowPool: [(arrow: SKSpriteNode, shadow: SKSpriteNode)] = []
     private var lastUpdateTime: TimeInterval?
-    private let tappedUnitLabel: SKLabelNode
+    private var selectedUnit: UnitID?
+    private let orderBubble = SKSpriteNode()
+    private var orderBubbleKey: String?
 
     private static let arrowPoolSize = 64
 
@@ -35,8 +40,6 @@ final class BattleScene: SKScene {
         let projection = BoardProjection.table(for: config.map)
         self.projection = projection
         self.motion = FigureMotion(result: timeline.result, config: config, projection: projection)
-        tappedUnitLabel = Self.makeTappedUnitLabel()
-
         // Upright (D26): the landscape map is drawn a quarter turn counter-clockwise, player at the
         // bottom — every position below goes through `projection`.
         super.init(size: projection.boardSize)
@@ -50,7 +53,10 @@ final class BattleScene: SKScene {
         isUserInteractionEnabled = true
 
         addChild(Self.makeSandTable(map: config.map, projection: projection))
-        addChild(tappedUnitLabel)
+        orderBubble.zPosition = 10
+        orderBubble.anchorPoint = CGPoint(x: 0.5, y: 0)
+        orderBubble.isHidden = true
+        addChild(orderBubble)
         buildUnitPool()
         buildArrowPool()
         drawFrame()
@@ -79,15 +85,6 @@ final class BattleScene: SKScene {
         node.position = .zero
         node.zPosition = -1
         return node
-    }
-
-    private static func makeTappedUnitLabel() -> SKLabelNode {
-        let label = SKLabelNode(fontNamed: "Archivo-Medium")
-        label.fontSize = 12
-        label.fontColor = SKColor(red: 0xD6 / 255, green: 0xD0 / 255, blue: 0xC2 / 255, alpha: 1)
-        label.isHidden = true
-        label.zPosition = 10
-        return label
     }
 
     private func buildUnitPool() {
@@ -152,6 +149,39 @@ final class BattleScene: SKScene {
             sprites.shadow.zRotation = arrow.rotation
             sprites.shadow.alpha = 1 - 0.5 * arrow.height
         }
+
+        updateOrderBubble()
+    }
+
+    /// Follows the selected figure; says which order it's on, redrawn only when that changes.
+    private func updateOrderBubble() {
+        guard let unit = selectedUnit, let node = unitNodes[unit],
+            motion.figures[unit]?.track.isAlive(at: clock.currentTick) ?? false
+        else {
+            deselect()
+            return
+        }
+        guard let order = currentOrder?(unit) else {
+            orderBubble.isHidden = true
+            return
+        }
+        let key = "\(order.priority)|\(order.action)"
+        if key != orderBubbleKey {
+            orderBubbleKey = key
+            let texture = EffectTextures.orderBubble(
+                caption: String(localized: "şu an uyguluyor"), priority: order.priority, action: order.action)
+            orderBubble.texture = texture
+            orderBubble.size = texture.size()
+        }
+        orderBubble.isHidden = false
+        orderBubble.position = CGPoint(x: node.position.x, y: node.position.y + UnitArt.canvasPoints * 0.4)
+    }
+
+    private func deselect() {
+        if let unit = selectedUnit { unitNodes[unit]?.isSelected = false }
+        selectedUnit = nil
+        orderBubble.isHidden = true
+        orderBubbleKey = nil
     }
 
     // MARK: - Touch
@@ -159,12 +189,14 @@ final class BattleScene: SKScene {
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let point = touch.location(in: self)
-        guard let unitNode = nearestUnit(to: point) else {
-            tappedUnitLabel.isHidden = true
-            return
-        }
+        deselect()
+        guard let unitNode = nearestUnit(to: point) else { return }
         onUnitTapped?(unitNode.unitID)
-        showLabel(for: unitNode)
+        // Only the player's figures carry orders the player wrote — an enemy tap just closes the bubble.
+        guard unitNode.team == .player else { return }
+        selectedUnit = unitNode.unitID
+        unitNode.isSelected = true
+        updateOrderBubble()
     }
 
     /// The closest standing figure within `UnitNode.touchRadius` — a figure is too small to hit by its
@@ -180,14 +212,5 @@ final class BattleScene: SKScene {
             }
         }
         return nearest?.node
-    }
-
-    private func showLabel(for node: UnitNode) {
-        let frame = timeline.frame(at: clock.currentTick)
-        let ruleIndex = frame.activeRuleIndex[node.unitID]
-        let unitType = frame.unitTypes[node.unitID]?.rawValue ?? "?"
-        tappedUnitLabel.text = ruleIndex.map { "\(unitType) · \($0 + 1). emir" } ?? unitType
-        tappedUnitLabel.position = CGPoint(x: node.position.x, y: node.position.y + UnitArt.canvasPoints / 2)
-        tappedUnitLabel.isHidden = false
     }
 }

@@ -20,13 +20,17 @@ final class BattleModel {
         case playing
     }
 
-    /// A trigger strip row (brief §4.5) — how often one order has fired, and whether it just did.
+    /// A trigger strip row (brief §4.5) — which order, how often it has fired, and whether it just did.
     struct TriggerRow: Identifiable, Equatable {
         let id: Int
         let priority: Int
         let fraction: Double
         let count: Int
         let isSpark: Bool
+        /// The order's words (`OrderPhraseFormatter`), empty when none were handed in.
+        var condition: String = ""
+        var action: String = ""
+        var isDefault: Bool = false
     }
 
     static let stampInterval: Duration = .milliseconds(60)
@@ -51,6 +55,9 @@ final class BattleModel {
     /// sequences an animation, it doesn't know `Condition`/`Action` (that's `OrderPhraseFormatter`,
     /// F1.7's job).
     let orders: [OrderStack.Item]
+    /// Each of the player's programs as formatted cards, by unit type — the trigger strip's and the
+    /// tapped unit's words. Formatted by the caller for the same reason as `orders`.
+    let phrases: [UnitTypeID: [OrderStack.Item]]
 
     private(set) var phase: Phase
     private(set) var clock: ReplayClock?
@@ -71,11 +78,12 @@ final class BattleModel {
     private var samplingTask: Task<Void, Never>?
 
     init(
-        config: BattleConfig, orders: [OrderStack.Item], runner: BattleRunner = BattleRunner(),
-        audio: any AudioPlaying = SilentAudioPlaying()
+        config: BattleConfig, orders: [OrderStack.Item], phrases: [UnitTypeID: [OrderStack.Item]] = [:],
+        runner: BattleRunner = BattleRunner(), audio: any AudioPlaying = SilentAudioPlaying()
     ) {
         self.config = config
         self.orders = orders
+        self.phrases = phrases
         self.runner = runner
         self.audio = audio
         self.phase = orders.isEmpty ? .slidingAway : .stamping(stampedCount: 0)
@@ -119,19 +127,48 @@ final class BattleModel {
         startSampling()
     }
 
+    /// The unit types with a program of their own — the trigger strip's tabs.
+    var playerUnitTypes: [UnitTypeID] {
+        config.player.programs.map(\.unitType)
+    }
+
     /// Switches the trigger strip to the tapped unit's program, if it's one of the player's own.
     func selectUnit(_ unitID: UnitID) {
         guard let timeline, let clock else { return }
         let frame = timeline.frame(at: clock.currentTick)
         guard frame.teams[unitID] == .player, let unitType = frame.unitTypes[unitID] else { return }
+        selectUnitType(unitType)
+    }
+
+    func selectUnitType(_ unitType: UnitTypeID) {
+        guard config.player.program(for: unitType) != nil else { return }
         selectedUnitType = unitType
         refreshTriggerRows()
+    }
+
+    /// The order a player unit is following right now — what the tapped unit's bubble says (brief §4.5,
+    /// "şu an uyguluyor"). `nil` for the enemy's units, the dead, and before any order has fired.
+    func currentOrder(of unitID: UnitID) -> OrderStack.Item? {
+        guard let timeline, let clock else { return nil }
+        let frame = timeline.frame(at: clock.currentTick)
+        guard frame.teams[unitID] == .player, frame.livingUnits.contains(unitID),
+            let unitType = frame.unitTypes[unitID], let ruleIndex = frame.activeRuleIndex[unitID],
+            let items = phrases[unitType], ruleIndex < items.count
+        else { return nil }
+        return items[ruleIndex]
     }
 
     // MARK: - Choreography
 
     private func runChoreography() async {
-        async let resultTask = runner.run(config)
+        // The battle is simulated while the orders are stamped, and installed the moment it's ready, so
+        // the (still distant, dimmed) sand table is already there under the stamps and the camera's
+        // descent onto it is something the player actually sees (brief §3.5).
+        let simulation = Task { [runner, config] in await runner.run(config) }
+        let installation = Task { [weak self] in
+            let result = await simulation.value
+            self?.installResult(result)
+        }
 
         for index in orders.indices {
             phase = .stamping(stampedCount: index + 1)
@@ -141,8 +178,8 @@ final class BattleModel {
         phase = .slidingAway
         await sleepStep(Self.slideAwayDuration)
 
+        await installation.value
         phase = .cameraDescending
-        installResult(await resultTask)
         await sleepStep(Self.cameraDescendDuration)
 
         phase = .lampFlicker
@@ -208,6 +245,7 @@ final class BattleModel {
             in: timeline.fireCounts(upTo: max(0, tick - Self.sparkGlowTicks)), team: .player, unitType: unitType)
         let total = max(1, counts.reduce(0, +))
 
+        let words = phrases[unitType] ?? []
         triggerRows = program.rules.indices.map { index in
             let count = index < counts.count ? counts[index] : 0
             let priorCount = index < priorCounts.count ? priorCounts[index] : 0
@@ -216,7 +254,10 @@ final class BattleModel {
                 priority: index + 1,
                 fraction: Double(count) / Double(total),
                 count: count,
-                isSpark: count > priorCount
+                isSpark: count > priorCount,
+                condition: index < words.count ? words[index].condition : "",
+                action: index < words.count ? words[index].action : "",
+                isDefault: index == program.rules.count - 1
             )
         }
     }

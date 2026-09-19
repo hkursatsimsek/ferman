@@ -17,10 +17,17 @@ struct BattleView: View {
     @Environment(\.dismiss) private var dismiss
     var onShowResult: (BattleResult) -> Void = { _ in }
 
-    init(config: BattleConfig, orders: [OrderStack.Item], onShowResult: @escaping (BattleResult) -> Void = { _ in }) {
-        _model = State(initialValue: BattleModel(config: config, orders: orders, audio: AudioService.shared))
+    init(
+        config: BattleConfig, orders: [OrderStack.Item], phrases: [UnitTypeID: [OrderStack.Item]] = [:],
+        onShowResult: @escaping (BattleResult) -> Void = { _ in }
+    ) {
+        _model = State(
+            initialValue: BattleModel(config: config, orders: orders, phrases: phrases, audio: AudioService.shared))
         self.onShowResult = onShowResult
     }
+
+    /// How long the result slip lies on the table before the debrief takes over — long enough to read.
+    private static let resultSlipDwell: Duration = .milliseconds(1_600)
 
     var body: some View {
         ZStack {
@@ -47,18 +54,29 @@ struct BattleView: View {
                 sandTable
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-                BattleTriggerStrip(rows: model.triggerRows, reservedRowCount: model.reservedTriggerRowCount)
-                    .opacity(isShowingBattle ? 1 : 0)
+                BattleTriggerStrip(
+                    rows: model.triggerRows, reservedRowCount: model.reservedTriggerRowCount,
+                    unitTypes: model.playerUnitTypes, selectedUnitType: model.selectedUnitType,
+                    onSelectUnitType: { model.selectUnitType($0) }
+                )
+                .opacity(isShowingBattle ? 1 : 0)
                     .accessibilityHidden(!isShowingBattle)
             }
 
-            if model.phase == .lampFlicker {
-                Color.white.opacity(0.25).ignoresSafeArea()
-            }
-
             choreographyOverlay
+
+            if isShowingBattle, model.clock?.isFinished == true, let result = model.result {
+                BattleResultSlip(title: DebriefInsightFormatter.title(for: result.outcome))
+                    .transition(
+                        reduceMotion
+                            ? .opacity
+                            : .asymmetric(
+                                insertion: .scale(scale: 1.18).combined(with: .opacity), removal: .opacity))
+                    .onTapGesture { showResult(delayed: false) }
+            }
         }
         .animation(reduceMotion ? .easeInOut(duration: 0.15) : .easeInOut(duration: 0.5), value: model.phase)
+        .animation(reduceMotion ? .easeInOut(duration: 0.15) : .spring(duration: 0.35), value: model.clock?.isFinished)
         // The system bar would sit over the sand table and offer a back button mid-intro; the HUD's
         // own back button takes its place once the battle is playing.
         .toolbar(.hidden, for: .navigationBar)
@@ -94,7 +112,9 @@ struct BattleView: View {
     @ViewBuilder
     private var sandTable: some View {
         if let clock = model.clock, let timeline = model.timeline {
-            BattleSceneView(config: model.config, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit)
+            BattleSceneView(
+                config: model.config, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit,
+                currentOrder: { model.currentOrder(of: $0) })
                 .scaleEffect(sceneScale)
                 .brightness(sceneBrightness)
         } else {
@@ -113,7 +133,12 @@ struct BattleView: View {
             return
         }
         Task {
-            try? await Task.sleep(for: .milliseconds(700))
+            try? await Task.sleep(for: Self.resultSlipDwell)
+            // A restart during the dwell means the player chose to keep watching.
+            guard model.clock?.isFinished == true else {
+                hasShownResult = false
+                return
+            }
             onShowResult(result)
         }
     }
@@ -126,10 +151,12 @@ struct BattleView: View {
         Binding(get: { model.clock?.speed ?? .x1 }, set: { model.clock?.speed = $0 })
     }
 
+    /// Brief §3.5, "kamera kum masasına iner": under the stamped orders the table sits far and dim; it
+    /// comes up to full size as the camera descends, then the lamp dips once before the battle starts.
     private var sceneScale: CGFloat {
         guard !reduceMotion else { return 1 }
         switch model.phase {
-        case .stamping, .slidingAway: return 0.92
+        case .stamping, .slidingAway: return 0.84
         default: return 1
         }
     }
@@ -137,7 +164,8 @@ struct BattleView: View {
     private var sceneBrightness: Double {
         guard !reduceMotion else { return 0 }
         switch model.phase {
-        case .stamping, .slidingAway: return -0.25
+        case .stamping, .slidingAway: return -0.3
+        case .lampFlicker: return -0.14
         default: return 0
         }
     }
@@ -169,5 +197,24 @@ struct BattleView: View {
                 .frame(width: proxy.size.width, height: proxy.size.height)
         }
         .sensoryFeedback(.impact(weight: .light, intensity: 0.7), trigger: stampedCount)
+    }
+}
+
+/// The outcome laid on the table as a paper slip when the battle ends (brief §4.5): the calm officer's
+/// one line (brief §7), the same words the debrief opens with. Tap to go straight to the debrief.
+private struct BattleResultSlip: View {
+    let title: String
+
+    var body: some View {
+        Text(title)
+            .font(FermanFont.screenTitle())
+            .tracking(FermanFont.Tracking.screenTitle)
+            .foregroundStyle(Color.paperInk)
+            .padding(.horizontal, FermanSpacing.xl)
+            .padding(.vertical, FermanSpacing.lg)
+            .background(Color.paper, in: RoundedRectangle(cornerRadius: FermanRadius.orderCard))
+            .rotationEffect(.degrees(-1.5))
+            .shadow(color: .black.opacity(0.45), radius: 10, y: 6)
+            .accessibilityAddTraits(.isButton)
     }
 }
