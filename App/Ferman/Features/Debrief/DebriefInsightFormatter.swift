@@ -18,12 +18,23 @@ nonisolated enum DebriefInsightFormatter {
     /// point of view (why you won: the enemy broke; why you lost: your line broke) and phrases it. A
     /// draw, or a battle with no clean cluster, falls back to a generic sentence about `endReason`.
     static func diagnosis(insights: [DebriefInsight], outcome: BattleOutcome, endReason: EndReason) -> String {
-        guard outcome != .draw else {
+        guard let best = diagnosedCluster(insights: insights, outcome: outcome) else {
             return fallback(outcome: outcome, endReason: endReason)
         }
-        let relevantTeam: Team = outcome == .playerWin ? .enemy : .player
-        let describesOpponent = outcome == .playerWin
+        return clusterSentence(best.insight, describesOpponent: outcome == .playerWin)
+    }
 
+    /// The tick the diagnosis sentence is about — where "O anı izle" takes the replay. `nil` when the
+    /// sentence is a fallback that names no moment.
+    static func diagnosisMoment(insights: [DebriefInsight], outcome: BattleOutcome) -> Int32? {
+        diagnosedCluster(insights: insights, outcome: outcome)?.tick
+    }
+
+    private static func diagnosedCluster(
+        insights: [DebriefInsight], outcome: BattleOutcome
+    ) -> (tick: Int32, insight: DebriefInsight)? {
+        guard outcome != .draw else { return nil }
+        let relevantTeam: Team = outcome == .playerWin ? .enemy : .player
         let candidates: [(count: Int, tick: Int32, insight: DebriefInsight)] = insights.compactMap { insight in
             switch insight {
             case .deathCluster(let team, _, let tick, let unitIDs, _) where team == relevantTeam:
@@ -34,11 +45,19 @@ nonisolated enum DebriefInsightFormatter {
                 nil
             }
         }
-        guard let best = candidates.max(by: { $0.count == $1.count ? $0.tick < $1.tick : $0.count < $1.count })
-        else {
-            return fallback(outcome: outcome, endReason: endReason)
+        return candidates.max { $0.count == $1.count ? $0.tick < $1.tick : $0.count < $1.count }
+            .map { ($0.tick, $0.insight) }
+    }
+
+    /// A note under a unit type's orders when one of them took most of its decisions — "the archers
+    /// were really just running away" is a finding in itself.
+    static func dominantNote(insights: [DebriefInsight], unitType: UnitTypeID) -> String? {
+        for insight in insights {
+            if case .dominantRule(.player, unitType, let ruleIndex, _, _) = insight {
+                return String(localized: "Tetiklenmelerin çoğu \(ruleIndex + 1). emirde.")
+            }
         }
-        return clusterSentence(best.insight, describesOpponent: describesOpponent)
+        return nil
     }
 
     private static func clusterSentence(_ insight: DebriefInsight, describesOpponent: Bool) -> String {

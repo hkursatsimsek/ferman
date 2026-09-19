@@ -112,7 +112,7 @@ struct RuleEditorView: View {
                             .frame(maxWidth: .infinity)
                     }
                     Button(String(localized: "Savaşı Başlat")) {
-                        router?.push(.battle(battleConfig(battleSetup)))
+                        router?.push(.battle(battleConfig(battleSetup), front: battleSetup.front))
                     }
                     .buttonStyle(FermanButton.Primary())
                     .disabled(model.battleBlocker != nil)

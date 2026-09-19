@@ -1,4 +1,5 @@
 import FermanCore
+import FermanReplay
 import Testing
 
 @testable import Ferman
@@ -51,6 +52,65 @@ struct DebriefModelTests {
         return BattleResult(
             outcome: .enemyWin, endReason: .elimination, tickCount: 400, events: spawns + deaths,
             ruleFireCounts: ruleFireCounts, survivorsPlayer: 1, survivorsEnemy: 1, checksum: 0)
+    }
+
+    // MARK: - Faz 1.5 G11
+
+    @Test
+    func theDiagnosisPointsAtTheMomentItDescribes() throws {
+        let result = Self.defeatResult(ruleFireCounts: [
+            RuleFireCounts(team: .player, unitType: Self.archer, counts: [14, 0, 5])
+        ])
+        let model = DebriefModel(config: try Self.config(), result: result)
+
+        #expect(model.momentTick == 360)
+    }
+
+    @Test
+    func aFallbackDiagnosisHasNoMomentToShow() throws {
+        let result = BattleResult(
+            outcome: .draw, endReason: .timeLimit, tickCount: 10, events: [],
+            ruleFireCounts: [RuleFireCounts(team: .player, unitType: Self.archer, counts: [0, 0, 0])],
+            survivorsPlayer: 4, survivorsEnemy: 1, checksum: 0)
+        let model = DebriefModel(config: try Self.config(), result: result)
+
+        #expect(model.momentTick == nil)
+    }
+
+    /// The tape counts only the player's own orders and losses — the enemy's are not the player's logic.
+    @Test
+    func theTapeMarksThePlayersOrdersAndLosses() throws {
+        let spawns =
+            Self.spawnEvents(team: .player, unitType: Self.archer, ids: [0, 1, 2, 3])
+            + Self.spawnEvents(team: .enemy, unitType: Self.spearman, ids: [4])
+        let orders: [BattleEvent] = [
+            BattleEvent(tick: 30, kind: .ruleActivated(UnitID(rawValue: 0), ruleIndex: 0)),
+            BattleEvent(tick: 45, kind: .ruleActivated(UnitID(rawValue: 4), ruleIndex: 0)),
+            BattleEvent(tick: 60, kind: .ruleActivated(UnitID(rawValue: 1), ruleIndex: 2)),
+        ]
+        let deaths: [BattleEvent] = [
+            BattleEvent(tick: 200, kind: .death(UnitID(rawValue: 4))),
+            BattleEvent(tick: 360, kind: .death(UnitID(rawValue: 2))),
+        ]
+        let result = BattleResult(
+            outcome: .enemyWin, endReason: .elimination, tickCount: 400, events: spawns + orders + deaths,
+            ruleFireCounts: [RuleFireCounts(team: .player, unitType: Self.archer, counts: [1, 0, 1])],
+            survivorsPlayer: 3, survivorsEnemy: 0, checksum: 0)
+        let model = DebriefModel(config: try Self.config(), result: result)
+
+        #expect(model.tape.orderTicks == [30, 60])
+        #expect(model.tape.lossTicks == [360])
+        #expect(model.tape.length == 400)
+    }
+
+    @Test
+    func anOrderThatTookMostDecisionsIsNoted() throws {
+        let result = Self.defeatResult(ruleFireCounts: [
+            RuleFireCounts(team: .player, unitType: Self.archer, counts: [14, 0, 5])
+        ])
+        let model = DebriefModel(config: try Self.config(), result: result)
+
+        #expect(model.sections.first?.note == "Tetiklenmelerin çoğu 1. emirde.")
     }
 
     // MARK: - Title

@@ -15,6 +15,9 @@ struct BattleView: View {
     @State private var orderStackHeight: CGFloat = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.dismiss) private var dismiss
+    /// Optional: a direct launch or preview may have no router; the debrief's replay request comes
+    /// through it when there is one.
+    @Environment(AppRouter.self) private var router: AppRouter?
     var onShowResult: (BattleResult) -> Void = { _ in }
 
     init(
@@ -87,7 +90,12 @@ struct BattleView: View {
             // Coming back from the debrief: the result may be shown again (after a restart, or via
             // the "Sonuç" button), and the trigger strip picks up where it stopped.
             hasShownResult = false
-            model.resume()
+            if let tick = router?.replayRequest {
+                router?.replayRequest = nil
+                model.review(from: tick)
+            } else {
+                model.resume()
+            }
         }
         .onDisappear {
             model.stop()

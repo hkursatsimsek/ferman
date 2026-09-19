@@ -93,15 +93,24 @@ struct ContentView: View {
             } else {
                 contentLoadFailed
             }
-        case .battle(let config):
+        case .battle(let config, let front):
             BattleView(config: config, orders: orderStackItems(for: config), phrases: orderPhrases(for: config)) {
                 result in
-                router.push(.debrief(config, result))
+                router.push(.debrief(config, result, front: front))
             }
-        case .debrief(let config, let result):
-            DebriefView(model: DebriefModel(config: config, result: result)) {
-                router.pop(2)
+        case .debrief(let config, let result, let front):
+            let next = front.flatMap { current in
+                CampaignFront.fronts(from: catalog).first { $0.id == current.id + 1 }
             }
+            DebriefView(
+                model: DebriefModel(config: config, result: result),
+                onFixOrders: { router.pop(2) },
+                onReview: { tick in
+                    router.replayRequest = tick
+                    router.pop(1)
+                },
+                onNextFront: next.map { next in { router.path = [.campaign, .armySetup(next)] } }
+            )
         }
     }
 
@@ -174,7 +183,7 @@ struct ContentView: View {
                     map: map, unitCatalog: catalog.units, player: level.referenceSolution, enemy: level.enemy,
                     objective: level.objective, constraints: level.constraints, seed: level.seed,
                     maxTicks: level.maxTicks)
-                destination(for: .battle(config), catalog: catalog)
+                destination(for: .battle(config, front: front), catalog: catalog)
             } else {
                 contentLoadFailed
             }

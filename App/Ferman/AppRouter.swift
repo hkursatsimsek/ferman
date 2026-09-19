@@ -9,14 +9,18 @@ enum Route: Hashable {
     case armySetup(CampaignFront)
     /// The player's placements from `ArmySetup` (no programs yet — those are `RuleEditor`'s job).
     case ruleEditor(CampaignFront, TeamSetup)
-    case battle(BattleConfig)
-    case debrief(BattleConfig, BattleResult)
+    /// `front` is where the battle was fought from — `nil` when there is no campaign front behind it.
+    case battle(BattleConfig, front: CampaignFront?)
+    case debrief(BattleConfig, BattleResult, front: CampaignFront?)
 }
 
 @Observable
 @MainActor
 final class AppRouter {
     var path: [Route] = []
+    /// Set by the debrief's "O anı izle" just before popping back to the battle, which picks it up on
+    /// reappearing and replays from a little before that tick.
+    var replayRequest: Int32?
 
     func push(_ route: Route) {
         path.append(route)

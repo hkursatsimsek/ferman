@@ -127,6 +127,18 @@ final class BattleModel {
         startSampling()
     }
 
+    /// How far before a reviewed moment the replay starts, so the player sees it build up.
+    static let reviewLeadInTicks: Int32 = 60
+
+    /// Replays from a little before `tick` at normal speed — the debrief's "O anı izle".
+    func review(from tick: Int32) {
+        guard let clock else { return }
+        clock.seek(to: max(0, tick - Self.reviewLeadInTicks))
+        clock.speed = .x1
+        clock.isPlaying = true
+        startSampling()
+    }
+
     /// The unit types with a program of their own — the trigger strip's tabs.
     var playerUnitTypes: [UnitTypeID] {
         config.player.programs.map(\.unitType)
