@@ -148,6 +148,14 @@ struct BattleView: View {
                 onPlayerOrder: { model.noteOrderCue() })
                 .scaleEffect(sceneScale)
                 .brightness(sceneBrightness)
+                // SpriteKit carries no accessibility of its own (G15) — this stands in for the whole
+                // table rather than leaving VoiceOver with nothing on it. Scoped to `BattleSceneView`
+                // itself, before the tutorial note is overlaid at the call site below, so the note
+                // keeps its own accessibility content instead of being swallowed by `.ignore` here.
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(String(localized: "Savaş masası"))
+                .accessibilityValue(isShowingBattle ? model.tableAccessibilitySummary : "")
+                .accessibilityHidden(!isShowingBattle)
         } else {
             Color.clear
         }

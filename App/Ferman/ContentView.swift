@@ -21,6 +21,11 @@ struct ContentView: View {
     /// `-uiTestSandbox`: an in-memory store and every front open, so UI tests start from the same
     /// place every run instead of whatever the last run left on the simulator's disk.
     private let isSandbox = ProcessInfo.processInfo.arguments.contains("-uiTestSandbox")
+    /// The launch screen (G15): ink and the wordmark, gone the moment content is ready. Every `-uiTest*`
+    /// entry point skips it outright — none of the 16 existing UI tests wait for it, and it would only
+    /// add a race to their fixed timeouts.
+    @State private var showsLaunch: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init() {
         do {
@@ -35,6 +40,8 @@ struct ContentView: View {
             Self.logger.error("Progress store unavailable: \(error, privacy: .public)")
             _progress = State(initialValue: nil)
         }
+        let isUITest = ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("-uiTest") }
+        _showsLaunch = State(initialValue: !isUITest)
     }
 
     private func fronts(_ catalog: ContentCatalog) -> [CampaignFront] {
@@ -49,10 +56,24 @@ struct ContentView: View {
     }
 
     var body: some View {
+        // G15: ink and the wordmark before anything else, briefly and only outside a UI test
+        // (`showsLaunch` starts `false` there — see `init`).
+        if showsLaunch {
+            LaunchView()
+                .transition(.opacity)
+                .task {
+                    guard !reduceMotion else {
+                        showsLaunch = false
+                        return
+                    }
+                    try? await Task.sleep(for: .milliseconds(900))
+                    withAnimation(.easeOut(duration: 0.35)) { showsLaunch = false }
+                }
+        }
         // FermanUITests still reaches RuleEditorView directly through this launch argument, with a
         // fixed two-unit fixture instead of a real army — a fast, deterministic UI-test entry point
         // that doesn't need to walk Home -> Campaign -> ArmySetup first.
-        if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
+        else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
         } else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditorSample") {
             RuleEditorView(model: Self.ruleEditorFixture(programs: Self.sampleOrders))
@@ -192,12 +213,14 @@ struct ContentView: View {
 
     // MARK: - Direct launch (UI tests, screenshots)
 
-    /// `-uiTestBattle <level>` / `-uiTestArmySetup <level>` open that level's battle (its reference
-    /// solution against its enemy) or army setup directly — a screen a test or a screenshot can reach
-    /// without walking Home → Campaign by touch, which this machine's simulator can't automate.
+    /// `-uiTestBattle <level>` / `-uiTestArmySetup <level>` / `-uiTestDebrief <level>` open that
+    /// level's battle (its reference solution against its enemy), army setup, or debrief directly — a
+    /// screen a test or a screenshot can reach without walking Home → Campaign by touch, which this
+    /// machine's simulator can't automate.
     private enum DirectLaunch {
         case battle(level: Int)
         case armySetup(level: Int)
+        case debrief(level: Int)
 
         static var current: DirectLaunch? {
             let defaults = UserDefaults.standard
@@ -207,12 +230,15 @@ struct ContentView: View {
             if defaults.integer(forKey: "uiTestArmySetup") > 0 {
                 return .armySetup(level: defaults.integer(forKey: "uiTestArmySetup"))
             }
+            if defaults.integer(forKey: "uiTestDebrief") > 0 {
+                return .debrief(level: defaults.integer(forKey: "uiTestDebrief"))
+            }
             return nil
         }
 
         var level: Int {
             switch self {
-            case .battle(let level), .armySetup(let level): level
+            case .battle(let level), .armySetup(let level), .debrief(let level): level
             }
         }
     }
@@ -221,16 +247,30 @@ struct ContentView: View {
         CampaignFront.fronts(from: catalog, unlockAll: true).first { $0.id == screen.level }
     }
 
+    /// The level's reference solution against its enemy, as a `BattleConfig` — shared by the `.battle`
+    /// and `.debrief` direct-launch entries below.
+    private func referenceConfig(front: CampaignFront, catalog: ContentCatalog) -> BattleConfig? {
+        guard let level = catalog.level(front.id), let map = catalog.map(level.map) else { return nil }
+        return BattleConfig(
+            map: map, unitCatalog: catalog.units, player: level.referenceSolution, enemy: level.enemy,
+            objective: level.objective, constraints: level.constraints, seed: level.seed, maxTicks: level.maxTicks)
+    }
+
     @ViewBuilder
     private func directLaunchView(_ screen: DirectLaunch, front: CampaignFront, catalog: ContentCatalog) -> some View {
         switch screen {
         case .battle:
-            if let level = catalog.level(front.id), let map = catalog.map(level.map) {
-                let config = BattleConfig(
-                    map: map, unitCatalog: catalog.units, player: level.referenceSolution, enemy: level.enemy,
-                    objective: level.objective, constraints: level.constraints, seed: level.seed,
-                    maxTicks: level.maxTicks)
+            if let config = referenceConfig(front: front, catalog: catalog) {
                 destination(for: .battle(config, front: front), catalog: catalog)
+            } else {
+                contentLoadFailed
+            }
+        case .debrief:
+            // The reference solution's own result, simulated once and handed straight to the debrief —
+            // `BattleSimulator.run` is a pure, synchronous function (CLAUDE.md rule 4), so this needs
+            // no `BattleRunner`/`Task` indirection the way actually playing a battle does.
+            if let config = referenceConfig(front: front, catalog: catalog) {
+                destination(for: .debrief(config, BattleSimulator.run(config), front: front), catalog: catalog)
             } else {
                 contentLoadFailed
             }

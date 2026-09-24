@@ -99,4 +99,29 @@ final class AccessibilityAuditUITests: XCTestCase {
         // bug, until it can be reproduced against a plain `Text`-only element.
         try auditAndReport(app, knownIssueLabels: ["Okçu", "Kalkanlı"])
     }
+
+    /// `-uiTestBattle <level>`: the level's reference solution against its enemy, straight to the sand
+    /// table — no touch automation available on this machine to walk Home → Campaign → ArmySetup first
+    /// (the same constraint every other direct-launch entry point works around). Waits for "Sonuç"
+    /// (`BattleTopBar`'s always-present result button) rather than anything about the outcome, since the
+    /// intro choreography's length isn't fixed.
+    @MainActor
+    func testBattleScreenHasNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox", "-uiTestBattle", "1"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Sonuç"].waitForExistence(timeout: 8))
+        try auditAndReport(app)
+    }
+
+    /// `-uiTestDebrief <level>`: the same reference battle, already simulated, opened straight on the
+    /// debrief. "Emirlerin" (`DebriefView.ordersSection`'s header) is shown regardless of the outcome.
+    @MainActor
+    func testDebriefScreenHasNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox", "-uiTestDebrief", "1"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Emirlerin"].waitForExistence(timeout: 3))
+        try auditAndReport(app)
+    }
 }
