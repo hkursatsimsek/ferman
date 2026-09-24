@@ -85,6 +85,10 @@ final class BattleModel {
     private(set) var timeline: ReplayTimeline?
     private(set) var result: BattleResult?
     private(set) var triggerRows: [TriggerRow] = []
+    /// What VoiceOver hears for the sand table (G15) — `BattleScene` draws it in SpriteKit, which
+    /// carries no accessibility of its own, so this stands in for it: how many of the player's units
+    /// of each type are still standing, refreshed on the same cadence as `triggerRows`.
+    private(set) var tableAccessibilitySummary: String = ""
     private(set) var selectedUnitType: UnitTypeID?
     /// Counts the player's orders taking effect, as far as the hand should feel them — the view's haptic
     /// trigger. Rate-limited: at 4× a burst of orders would otherwise be one long buzz (ART-DIRECTION §7).
@@ -327,14 +331,18 @@ final class BattleModel {
     }
 
     private func refreshTriggerRows() {
-        guard let timeline, let clock, let unitType = selectedUnitType,
-            let program = config.player.program(for: unitType)
-        else {
+        guard let timeline, let clock else {
+            triggerRows = []
+            tableAccessibilitySummary = ""
+            return
+        }
+        let tick = clock.currentTick
+        tableAccessibilitySummary = Self.tableSummary(of: timeline.frame(at: tick))
+
+        guard let unitType = selectedUnitType, let program = config.player.program(for: unitType) else {
             triggerRows = []
             return
         }
-
-        let tick = clock.currentTick
         followEvaluatedUnit(in: timeline, at: tick)
         let counts = Self.counts(in: timeline.fireCounts(upTo: tick), team: .player, unitType: unitType)
         let priorCounts = Self.counts(
@@ -383,5 +391,19 @@ final class BattleModel {
 
     private static func counts(in entries: [RuleFireCounts], team: Team, unitType: UnitTypeID) -> [Int] {
         entries.first { $0.team == team && $0.unitType == unitType }?.counts ?? []
+    }
+
+    /// "Ayakta: 3 okçu, 2 kalkanlı." — the player's living units by type, sorted for a stable reading
+    /// order (G15's VoiceOver stand-in for the sand table).
+    private static func tableSummary(of frame: ReplayFrame) -> String {
+        var countByType: [UnitTypeID: Int] = [:]
+        for unit in frame.livingUnits where frame.teams[unit] == .player {
+            guard let type = frame.unitTypes[unit] else { continue }
+            countByType[type, default: 0] += 1
+        }
+        guard !countByType.isEmpty else { return String(localized: "Ayakta birliğin kalmadı.") }
+        let parts = countByType.sorted { $0.key.rawValue < $1.key.rawValue }
+            .map { type, count in "\(count) \(OrderPhraseFormatter.unitTypeName(type))" }
+        return String(localized: "Ayakta: \(parts.joined(separator: ", ")).")
     }
 }
