@@ -1,5 +1,6 @@
 import FermanCore
 import Observation
+import SwiftUI
 
 /// Where `NavigationStack(path:)` can go (D12). Only pushed screens live here — each screen's own
 /// contextual sheets (the level info sheet, the rule picker) stay local `@State` next to the view
@@ -32,4 +33,10 @@ final class AppRouter {
     func pop(_ count: Int = 1) {
         path.removeLast(min(count, path.count))
     }
+}
+
+extension EnvironmentValues {
+    /// Where a front's army setup zooms out of: the pin on the campaign line (`CampaignView`) is the
+    /// source, `ContentView`'s `.armySetup` destination the zoom (G15).
+    @Entry var frontTransition: Namespace.ID?
 }

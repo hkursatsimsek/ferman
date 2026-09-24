@@ -4,7 +4,8 @@
 #
 #     blender --background --factory-startup --python Tools/figures/figures.py -- \
 #         --atlas App/Ferman/Assets.xcassets/Units.spriteatlas \
-#         [--terrain App/Ferman/Assets.xcassets/Terrain] [--contact-sheet sheet.png] [--only okcu]
+#         [--terrain App/Ferman/Assets.xcassets/Terrain] [--icon App/Ferman/Assets.xcassets/AppIcon.appiconset] \
+#         [--contact-sheet sheet.png] [--only okcu]
 #
 # Scene units are canvas points: the camera frames a 48 x 48 point square, the figure's base is centred
 # on the origin, the figure faces +Y (up on screen) and +Z points at the camera. Everything the lamp does
@@ -821,6 +822,87 @@ def stones(stage, variant):
             displace.strength = 0.35
 
 
+
+# MARK: - App icon
+
+ICON_PIXELS = 1024
+
+
+def icon_background(pool, rim, pool_radius=0.62):
+    """The lamp's pool of light on the sand, falling off into the dark room (brief §3.1)."""
+    y, x = np.mgrid[0:ICON_PIXELS, 0:ICON_PIXELS]
+    # The lamp hangs a little above centre, as on the battle table.
+    distance = np.hypot((x - ICON_PIXELS * 0.5) / ICON_PIXELS, (y - ICON_PIXELS * 0.44) / ICON_PIXELS)
+    fall = np.clip(distance / pool_radius, 0, 1) ** 1.6
+    # No sand grain: at icon sizes it's invisible, and per-pixel noise made each PNG over a megabyte.
+    return np.array(pool)[None, None, :] * (1 - fall[..., None]) + np.array(rim)[None, None, :] * fall[..., None]
+
+
+def icon_figure(stage):
+    """One brass spearman, turned so the spear crosses the icon — the game in one silhouette."""
+    stage.clear_models()
+    build_figure(stage, "mizrakci", "brass", "round", "strike")
+    pivot = bpy.data.objects.new("turn", None)
+    stage.scene.collection.objects.link(pivot)
+    for obj in [o for o in stage.models() if o.type == "MESH"]:
+        obj.parent = pivot
+    pivot.rotation_euler = (0, 0, math.radians(-42))
+    pivot.location = (-2.8, -2.6, 0)
+    bpy.context.view_layer.update()
+    # Framed large — the base about half the icon, the spear tip just inside the rounded corner — so it
+    # still reads as a figure with a spear at 29 pt.
+    stage.scene.render.resolution_x = ICON_PIXELS
+    stage.scene.render.resolution_y = ICON_PIXELS
+    stage.camera.data.ortho_scale = 36
+    stage.camera.location = (0, 0, 200)
+    figure = stage.render()
+    shadow = stage.render(shadow=True)
+    return figure, shadow
+
+
+def write_icon(folder, name, rgb):
+    image = np.flipud(rgb)
+    alpha = np.ones(image.shape[:2] + (1,))
+    write_png(os.path.join(folder, name), np.round(np.concatenate([encode_srgb(image), alpha], axis=-1) * 255).astype(np.uint8))
+
+
+def app_icon(stage, folder):
+    """AppIcon: default, dark and tinted variants (asset catalog, iOS 18+ appearances). Opaque, no text:
+    the system masks the corners and adds its own glass."""
+    figure, shadow = icon_figure(stage)
+    figure = outlined(figure, 2.4 * ICON_PIXELS / 1024 * 3)
+    shade = shadow_from(shadow, opacity=0.7)
+    # Cast away from the lamp, down and to the right, like every shadow on the table.
+    shift = int(ICON_PIXELS * 0.012)
+    shade = np.roll(np.roll(shade, -shift, axis=0), shift, axis=1)
+
+    def compose(background):
+        over = shade[..., :3] + background * (1 - shade[..., 3:4])
+        return figure[..., :3] + over * (1 - figure[..., 3:4])
+
+    light = compose(icon_background(pool=linear(0x8A978F), rim=linear(0x1B2429)))
+    dark = compose(icon_background(pool=linear(0x3E4843), rim=linear(0x0B1014), pool_radius=0.55))
+    luminance = light[..., 0] * 0.2126 + light[..., 1] * 0.7152 + light[..., 2] * 0.0722
+    # Tinted icons are drawn in greys the system colours: the figure bright, the table falling to black.
+    tinted = np.repeat(np.clip((luminance - 0.02) * 1.25, 0, 1)[..., None], 3, axis=-1)
+
+    os.makedirs(folder, exist_ok=True)
+    write_icon(folder, "AppIcon.png", light)
+    write_icon(folder, "AppIcon-dark.png", dark)
+    write_icon(folder, "AppIcon-tinted.png", tinted)
+    contents = """{
+  "images" : [
+    { "filename" : "AppIcon.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" },
+    { "appearances" : [ { "appearance" : "luminosity", "value" : "dark" } ], "filename" : "AppIcon-dark.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" },
+    { "appearances" : [ { "appearance" : "luminosity", "value" : "tinted" } ], "filename" : "AppIcon-tinted.png", "idiom" : "universal", "platform" : "ios", "size" : "1024x1024" }
+  ],
+  "info" : { "author" : "xcode", "version" : 1 }
+}
+"""
+    with open(os.path.join(folder, "Contents.json"), "w") as handle:
+        handle.write(contents)
+
+
 # MARK: - Contact sheet (the grey-scale legibility check, ART-DIRECTION §3)
 
 def contact_sheet(figures, path, grey):
@@ -852,6 +934,7 @@ def main():
     parser.add_argument("--atlas", required=True)
     parser.add_argument("--terrain")
     parser.add_argument("--contact-sheet")
+    parser.add_argument("--icon", help="path to AppIcon.appiconset")
     parser.add_argument("--only", help="render just this unit type (for iterating on one figure)")
     args = parser.parse_args(argv)
 
@@ -920,6 +1003,10 @@ def main():
             shade = shadow_from(stage.render(shadow=True), opacity=0.5)
             write_imageset(args.terrain, f"terrain-stones-{variant}", image + shade * (1 - image[..., 3:4]))
             print(f"stones {variant}", flush=True)
+
+    if args.icon:
+        app_icon(stage, args.icon)
+        print("app icon", flush=True)
 
     if args.contact_sheet and not args.only:
         contact_sheet(figures, args.contact_sheet, grey=False)

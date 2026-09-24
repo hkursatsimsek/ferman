@@ -14,6 +14,7 @@ struct ContentView: View {
     private static let logger = Logger(subsystem: "com.hksimsek.FERMAN", category: "Content")
 
     @State private var router = AppRouter()
+    @Namespace private var frontTransition
     private let catalog: ContentCatalog?
     /// Persisted progress (D14): which fronts are won, every battle fought. `nil` only if the store
     /// can't open — then every front is left open rather than locking the player out.
@@ -21,11 +22,6 @@ struct ContentView: View {
     /// `-uiTestSandbox`: an in-memory store and every front open, so UI tests start from the same
     /// place every run instead of whatever the last run left on the simulator's disk.
     private let isSandbox = ProcessInfo.processInfo.arguments.contains("-uiTestSandbox")
-    /// The launch screen (G15): ink and the wordmark, gone the moment content is ready. Every `-uiTest*`
-    /// entry point skips it outright — none of the 16 existing UI tests wait for it, and it would only
-    /// add a race to their fixed timeouts.
-    @State private var showsLaunch: Bool
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init() {
         do {
@@ -40,8 +36,6 @@ struct ContentView: View {
             Self.logger.error("Progress store unavailable: \(error, privacy: .public)")
             _progress = State(initialValue: nil)
         }
-        let isUITest = ProcessInfo.processInfo.arguments.contains { $0.hasPrefix("-uiTest") }
-        _showsLaunch = State(initialValue: !isUITest)
     }
 
     private func fronts(_ catalog: ContentCatalog) -> [CampaignFront] {
@@ -56,24 +50,10 @@ struct ContentView: View {
     }
 
     var body: some View {
-        // G15: ink and the wordmark before anything else, briefly and only outside a UI test
-        // (`showsLaunch` starts `false` there — see `init`).
-        if showsLaunch {
-            LaunchView()
-                .transition(.opacity)
-                .task {
-                    guard !reduceMotion else {
-                        showsLaunch = false
-                        return
-                    }
-                    try? await Task.sleep(for: .milliseconds(900))
-                    withAnimation(.easeOut(duration: 0.35)) { showsLaunch = false }
-                }
-        }
         // FermanUITests still reaches RuleEditorView directly through this launch argument, with a
         // fixed two-unit fixture instead of a real army — a fast, deterministic UI-test entry point
         // that doesn't need to walk Home -> Campaign -> ArmySetup first.
-        else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
+        if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditor") {
             RuleEditorView(model: Self.ruleEditorFixture())
         } else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditorSample") {
             RuleEditorView(model: Self.ruleEditorFixture(programs: Self.sampleOrders))
@@ -90,6 +70,7 @@ struct ContentView: View {
                     }
             }
             .environment(router)
+            .environment(\.frontTransition, frontTransition)
         } else if let catalog, let screen = DirectLaunch.current, let front = directLaunchFront(screen, catalog) {
             NavigationStack(path: $router.path) {
                 directLaunchView(screen, front: front, catalog: catalog)
@@ -98,6 +79,7 @@ struct ContentView: View {
                     }
             }
             .environment(router)
+            .environment(\.frontTransition, frontTransition)
         } else if let catalog {
             NavigationStack(path: $router.path) {
                 HomeView(
@@ -109,6 +91,7 @@ struct ContentView: View {
                     }
             }
             .environment(router)
+            .environment(\.frontTransition, frontTransition)
         } else {
             contentLoadFailed
         }
@@ -130,6 +113,8 @@ struct ContentView: View {
                         constraintBadge: front.constraintBadge,
                         enemyPlacements: catalog.level(front.id)?.enemy.placements ?? [],
                         audio: AudioService.shared))
+                // The front's table opens out of its pin on the campaign line.
+                .navigationTransition(.zoom(sourceID: front.id, in: frontTransition))
             } else {
                 contentLoadFailed
             }
@@ -227,11 +212,11 @@ struct ContentView: View {
             if defaults.integer(forKey: "uiTestBattle") > 0 {
                 return .battle(level: defaults.integer(forKey: "uiTestBattle"))
             }
-            if defaults.integer(forKey: "uiTestArmySetup") > 0 {
-                return .armySetup(level: defaults.integer(forKey: "uiTestArmySetup"))
-            }
             if defaults.integer(forKey: "uiTestDebrief") > 0 {
                 return .debrief(level: defaults.integer(forKey: "uiTestDebrief"))
+            }
+            if defaults.integer(forKey: "uiTestArmySetup") > 0 {
+                return .armySetup(level: defaults.integer(forKey: "uiTestArmySetup"))
             }
             return nil
         }
@@ -266,11 +251,11 @@ struct ContentView: View {
                 contentLoadFailed
             }
         case .debrief:
-            // The reference solution's own result, simulated once and handed straight to the debrief —
-            // `BattleSimulator.run` is a pure, synchronous function (CLAUDE.md rule 4), so this needs
-            // no `BattleRunner`/`Task` indirection the way actually playing a battle does.
+            // `-uiTestDebrief <level>`: the reference battle's debrief, simulated off the main actor first.
             if let config = referenceConfig(front: front, catalog: catalog) {
-                destination(for: .debrief(config, BattleSimulator.run(config), front: front), catalog: catalog)
+                DirectDebrief(config: config) { result in
+                    destination(for: .debrief(config, result, front: front), catalog: catalog)
+                }
             } else {
                 contentLoadFailed
             }
@@ -331,4 +316,22 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+/// Runs a battle once, then shows what's built from its result — `-uiTestDebrief`'s way in.
+private struct DirectDebrief<Content: View>: View {
+    let config: BattleConfig
+    @ViewBuilder let content: (BattleResult) -> Content
+    @State private var result: BattleResult?
+
+    var body: some View {
+        Group {
+            if let result {
+                content(result)
+            } else {
+                Color.ink.ignoresSafeArea()
+            }
+        }
+        .task { result = await BattleRunner().run(config) }
+    }
 }

@@ -1,5 +1,7 @@
+import CoreGraphics
 import FermanCore
 import FermanReplay
+import Foundation
 import Observation
 
 /// Drives one battle screen: the "savaşı başlat" choreography (design brief §3.5), then playback.
@@ -46,6 +48,18 @@ final class BattleModel {
         case holds
     }
 
+    /// A figure as VoiceOver hears it (G15): what it is, whose it is, and — for the player's own — the
+    /// order it's carrying out. The table is SpriteKit, which exposes nothing to VoiceOver on iOS, so the
+    /// view lays these over it.
+    struct UnitDescription: Identifiable, Equatable {
+        let id: UnitID
+        /// Board view points (`BoardProjection.table`), top-left origin; the view scales them to its size.
+        let position: CGPoint
+        let isPlayer: Bool
+        let label: String
+        let value: String
+    }
+
     struct Evaluation: Equatable {
         let unit: UnitID
         /// How far down the program the pen has read.
@@ -85,15 +99,16 @@ final class BattleModel {
     private(set) var timeline: ReplayTimeline?
     private(set) var result: BattleResult?
     private(set) var triggerRows: [TriggerRow] = []
-    /// What VoiceOver hears for the sand table (G15) — `BattleScene` draws it in SpriteKit, which
-    /// carries no accessibility of its own, so this stands in for it: how many of the player's units
-    /// of each type are still standing, refreshed on the same cadence as `triggerRows`.
-    private(set) var tableAccessibilitySummary: String = ""
     private(set) var selectedUnitType: UnitTypeID?
     /// Counts the player's orders taking effect, as far as the hand should feel them — the view's haptic
     /// trigger. Rate-limited: at 4× a burst of orders would otherwise be one long buzz (ART-DIRECTION §7).
     private(set) var orderFeedbackPulse = 0
     private(set) var evaluation: Evaluation?
+    /// Filled only while `describesUnits` is on (VoiceOver running), refreshed with the strip at 10 Hz.
+    private(set) var unitDescriptions: [UnitDescription] = []
+    var describesUnits = false {
+        didSet { refreshUnitDescriptions() }
+    }
 
     /// Rows the trigger strip reserves: the longest of the player's programs, default order included.
     var reservedTriggerRowCount: Int {
@@ -326,19 +341,43 @@ final class BattleModel {
                 guard let clock = self.clock, !clock.isFinished else { break }
                 try? await Task.sleep(for: Self.sampleInterval)
                 self.refreshTriggerRows()
+                self.refreshUnitDescriptions()
             }
         }
+        refreshUnitDescriptions()
+    }
+
+    /// The player's own figures first, then the enemy's, each left to right across the table.
+    private func refreshUnitDescriptions() {
+        guard describesUnits, let timeline, let clock else {
+            if !unitDescriptions.isEmpty { unitDescriptions = [] }
+            return
+        }
+        let frame = timeline.frame(at: clock.currentTick)
+        let projection = BoardProjection.table(for: config.map)
+        unitDescriptions = frame.livingUnits.compactMap { unit -> UnitDescription? in
+            guard let team = frame.teams[unit], let type = frame.unitTypes[unit], let position = frame.positions[unit]
+            else { return nil }
+            let name = OrderPhraseFormatter.unitTypeName(type)
+            let side = team == .player ? String(localized: "senin ordun") : String(localized: "düşman")
+            let broken = frame.brokenMorale.contains(unit) ? ", " + String(localized: "morali çöktü") : ""
+            var value = ""
+            if team == .player, let order = currentOrder(of: unit) {
+                value = String(localized: "şu an \(order.priority). emir: \(order.action)")
+            }
+            return UnitDescription(
+                id: unit, position: projection.viewPoint(position), isPlayer: team == .player,
+                label: "\(name), \(side)\(broken)", value: value)
+        }
+        .sorted { ($0.isPlayer ? 0 : 1, $0.position.x) < ($1.isPlayer ? 0 : 1, $1.position.x) }
     }
 
     private func refreshTriggerRows() {
         guard let timeline, let clock else {
             triggerRows = []
-            tableAccessibilitySummary = ""
             return
         }
         let tick = clock.currentTick
-        tableAccessibilitySummary = Self.tableSummary(of: timeline.frame(at: tick))
-
         guard let unitType = selectedUnitType, let program = config.player.program(for: unitType) else {
             triggerRows = []
             return
@@ -391,19 +430,5 @@ final class BattleModel {
 
     private static func counts(in entries: [RuleFireCounts], team: Team, unitType: UnitTypeID) -> [Int] {
         entries.first { $0.team == team && $0.unitType == unitType }?.counts ?? []
-    }
-
-    /// "Ayakta: 3 okçu, 2 kalkanlı." — the player's living units by type, sorted for a stable reading
-    /// order (G15's VoiceOver stand-in for the sand table).
-    private static func tableSummary(of frame: ReplayFrame) -> String {
-        var countByType: [UnitTypeID: Int] = [:]
-        for unit in frame.livingUnits where frame.teams[unit] == .player {
-            guard let type = frame.unitTypes[unit] else { continue }
-            countByType[type, default: 0] += 1
-        }
-        guard !countByType.isEmpty else { return String(localized: "Ayakta birliğin kalmadı.") }
-        let parts = countByType.sorted { $0.key.rawValue < $1.key.rawValue }
-            .map { type, count in "\(count) \(OrderPhraseFormatter.unitTypeName(type))" }
-        return String(localized: "Ayakta: \(parts.joined(separator: ", ")).")
     }
 }

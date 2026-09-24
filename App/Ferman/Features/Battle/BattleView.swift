@@ -15,6 +15,7 @@ struct BattleView: View {
     /// programs are stamped at once.
     @State private var orderStackHeight: CGFloat = 1
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityVoiceOverEnabled) private var voiceOverEnabled
     @Environment(\.dismiss) private var dismiss
     /// Optional: a direct launch or preview may have no router; the debrief's replay request comes
     /// through it when there is one.
@@ -146,16 +147,23 @@ struct BattleView: View {
                 config: model.config, timeline: timeline, clock: clock, onUnitTapped: model.selectUnit,
                 currentOrder: { model.currentOrder(of: $0) }, audio: model.audio,
                 onPlayerOrder: { model.noteOrderCue() })
+                // SpriteKit carries no accessibility of its own (G15) — this stands in for the whole
+                // table rather than leaving VoiceOver with nothing on it: one figure per living unit,
+                // each where it stands, each a VoiceOver element of its own (rather than one opaque
+                // summary string) so a touch-select target exists per figure, player and enemy alike.
+                .accessibilityElement(children: .contain)
+                .accessibilityLabel(String(localized: "Kum masası"))
+                .accessibilityChildren {
+                    UnitAccessibilityLayer(
+                        units: model.unitDescriptions, board: BoardProjection.table(for: model.config.map).boardSize,
+                        onActivate: { model.selectUnit($0) })
+                }
+                .accessibilityHidden(!isShowingBattle)
+                .onChange(of: voiceOverEnabled, initial: true) { _, enabled in
+                    model.describesUnits = enabled
+                }
                 .scaleEffect(sceneScale)
                 .brightness(sceneBrightness)
-                // SpriteKit carries no accessibility of its own (G15) — this stands in for the whole
-                // table rather than leaving VoiceOver with nothing on it. Scoped to `BattleSceneView`
-                // itself, before the tutorial note is overlaid at the call site below, so the note
-                // keeps its own accessibility content instead of being swallowed by `.ignore` here.
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(String(localized: "Savaş masası"))
-                .accessibilityValue(isShowingBattle ? model.tableAccessibilitySummary : "")
-                .accessibilityHidden(!isShowingBattle)
         } else {
             Color.clear
         }
@@ -255,5 +263,32 @@ private struct BattleResultSlip: View {
             .rotationEffect(.degrees(-1.5))
             .shadow(color: .black.opacity(0.45), radius: 10, y: 6)
             .accessibilityAddTraits(.isButton)
+    }
+}
+
+/// The figures on the table as VoiceOver elements, each where its figure stands (G15). Laid out over
+/// the scene's frame, which fits the board inside it — so the board's scale and letterbox are found
+/// the same way `.aspectRatio(.fit)` found them.
+private struct UnitAccessibilityLayer: View {
+    let units: [BattleModel.UnitDescription]
+    let board: CGSize
+    let onActivate: (UnitID) -> Void
+
+    var body: some View {
+        GeometryReader { proxy in
+            let scale = min(proxy.size.width / max(board.width, 1), proxy.size.height / max(board.height, 1))
+            let origin = CGPoint(
+                x: (proxy.size.width - board.width * scale) / 2, y: (proxy.size.height - board.height * scale) / 2)
+            ForEach(units) { unit in
+                Color.clear
+                    .frame(width: 44, height: 44)
+                    .position(x: origin.x + unit.position.x * scale, y: origin.y + unit.position.y * scale)
+                    .accessibilityElement()
+                    .accessibilityLabel(unit.label)
+                    .accessibilityValue(unit.value)
+                    .accessibilityAddTraits(unit.isPlayer ? .isButton : [])
+                    .accessibilityAction { onActivate(unit.id) }
+            }
+        }
     }
 }

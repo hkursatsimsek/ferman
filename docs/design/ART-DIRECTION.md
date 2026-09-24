@@ -199,4 +199,10 @@ Görsel dosya repoya konmaz; yalnızca bağlantı.
 
 ## 11. Silüet testi günlüğü
 
-_(G15'te doldurulur: ekran, tarih, katılımcı sayısı, "hangi oyun?" cevapları, alınan aksiyon.)_
+_(Doldurulacak: ekran, tarih, katılımcı sayısı, "hangi oyun?" cevapları, alınan aksiyon.)_
+
+**Durum (G15, 2026-09-19):** henüz yapılmadı — insan katılımcı gerektiriyor, ajan yürütemez. G17 playtest
+oturumlarıyla birlikte yapılması önerilir: her ekranın (Ev, Sefer, Ordu Kurulumu, Emir Editörü, Savaş, Muhasebe)
+gri tonlamalı ekran görüntüsü 5 kişiye "hangi oyuna benziyor?" diye gösterilir. Gri görüntüler simülatörden
+alınabilir (`-uiTestArmySetup 8 -uiTestArmySetupPlaced YES`, `-uiTestBattle 8`, `-uiTestDebrief 2`,
+`-uiTestRuleEditorSample`, `-uiTestCampaign YES`).

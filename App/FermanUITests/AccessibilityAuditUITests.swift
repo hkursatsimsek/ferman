@@ -84,6 +84,53 @@ final class AccessibilityAuditUITests: XCTestCase {
         try auditAndReport(app)
     }
 
+    /// Same tool limitation as `testRuleEditorScreenHasNoAccessibilityIssues`: `SpeedControl`'s
+    /// unselected segments (`BattleTopBar`) reported `.contrast` here — "2×" on one run, "4×" on
+    /// another (same style, same code path). Pixel-sampled a real screenshot (`-uiTestBattle 2`, live
+    /// on a booted simulator) at an unselected segment's glass background: text ~(213,217,216) on
+    /// glass ~(57,64,70), ~8.7:1 — comfortably above 4.5:1. Also `.dynamicType` ("user will not be able
+    /// to change the font size") on the trigger strip's priority badges (`BattleTriggerStrip`,
+    /// `FermanFont.counter`, same scaling font as `debriefKnownIssueLabels`'s "33 sn") — reported as
+    /// "2" on one run, "1" on another (level 2 only has two rules, so only these two badges exist to
+    /// flag): set the simulator to `content_size accessibility-extra-extra-extra-large` and
+    /// screenshotted the paused battle screen — both badges grow right along with the rest of the
+    /// strip. None chased further than that (G15).
+    private static let battleKnownIssueLabels: Set<String> = ["2×", "4×", "1", "2"]
+    /// Same tool limitation, two different audit categories on the same merged-subtree pattern
+    /// (`DebriefTapeView`'s `.accessibilityElement(children: .ignore)`, `DebriefView`'s footer):
+    /// (1) `.contrast` on "Sonraki Cephe" (`FermanButton.Primary`'s brass gradient) — pixel-sampled a
+    /// real screenshot (`-uiTestDebrief 2`) across the whole gradient, text to background, at both its
+    /// lightest and darkest ends: ink ~(15,5,0) on brass ~(195,157,92) down to ~(171,139,64), 6.1–8.0:1
+    /// throughout, comfortably above 4.5:1 everywhere on the button. (2) `.dynamicType` ("user will not
+    /// be able to change the font size") on "33 sn" (the tape's total-duration label, `FermanFont.counter`,
+    /// which does scale — F1.13 already relies on that) — set the simulator to
+    /// `content_size accessibility-extra-extra-extra-large` and screenshotted the same screen: "33 sn"
+    /// grows right along with "emir"/"kayıp" beside it. Neither chased further than that (G15).
+    private static let debriefKnownIssueLabels: Set<String> = ["Sonraki Cephe", "33 sn"]
+
+    /// The battle (G15): the top bar, the trigger strip, and the table's figures as VoiceOver hears
+    /// them. Paused first, so the audit doesn't sample a table that's moving under it.
+    @MainActor
+    func testBattleScreenHasNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox", "-uiTestBattle", "2"]
+        app.launch()
+        let pause = app.buttons["Duraklat"]
+        XCTAssertTrue(pause.waitForExistence(timeout: 10))
+        pause.tap()
+        XCTAssertTrue(app.buttons["Oynat"].waitForExistence(timeout: 2))
+        try auditAndReport(app, knownIssueLabels: Self.battleKnownIssueLabels)
+    }
+
+    @MainActor
+    func testDebriefScreenHasNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSandbox", "-uiTestDebrief", "2"]
+        app.launch()
+        XCTAssertTrue(app.staticTexts["Hat tutuldu."].waitForExistence(timeout: 10))
+        try auditAndReport(app, knownIssueLabels: Self.debriefKnownIssueLabels)
+    }
+
     @MainActor
     func testRuleEditorScreenHasNoAccessibilityIssues() throws {
         let app = XCUIApplication()
@@ -98,30 +145,5 @@ final class AccessibilityAuditUITests: XCTestCase {
         // combined frame isn't the text pixels. Treating as a tool limitation, not a real contrast
         // bug, until it can be reproduced against a plain `Text`-only element.
         try auditAndReport(app, knownIssueLabels: ["Okçu", "Kalkanlı"])
-    }
-
-    /// `-uiTestBattle <level>`: the level's reference solution against its enemy, straight to the sand
-    /// table — no touch automation available on this machine to walk Home → Campaign → ArmySetup first
-    /// (the same constraint every other direct-launch entry point works around). Waits for "Sonuç"
-    /// (`BattleTopBar`'s always-present result button) rather than anything about the outcome, since the
-    /// intro choreography's length isn't fixed.
-    @MainActor
-    func testBattleScreenHasNoAccessibilityIssues() throws {
-        let app = XCUIApplication()
-        app.launchArguments += ["-uiTestSandbox", "-uiTestBattle", "1"]
-        app.launch()
-        XCTAssertTrue(app.buttons["Sonuç"].waitForExistence(timeout: 8))
-        try auditAndReport(app)
-    }
-
-    /// `-uiTestDebrief <level>`: the same reference battle, already simulated, opened straight on the
-    /// debrief. "Emirlerin" (`DebriefView.ordersSection`'s header) is shown regardless of the outcome.
-    @MainActor
-    func testDebriefScreenHasNoAccessibilityIssues() throws {
-        let app = XCUIApplication()
-        app.launchArguments += ["-uiTestSandbox", "-uiTestDebrief", "1"]
-        app.launch()
-        XCTAssertTrue(app.staticTexts["Emirlerin"].waitForExistence(timeout: 3))
-        try auditAndReport(app)
     }
 }

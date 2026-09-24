@@ -11,6 +11,7 @@ struct CampaignView: View {
     var loadFronts: () -> [CampaignFront] = { [] }
     @State private var selectedFront: CampaignFront?
     @Environment(AppRouter.self) private var router
+    @Environment(\.frontTransition) private var frontTransition
 
     private static let rowHeight: CGFloat = 108
     /// Where each front's pin stands across the table, as a fraction of its width — a track that winds.
@@ -120,6 +121,7 @@ struct CampaignView: View {
             FrontFlag(state: front.state)
                 .scaleEffect(isCurrent ? 1.35 : 1)
         }
+        .transitionSource(id: front.id, in: frontTransition)
         let label = VStack(alignment: labelLeads ? .trailing : .leading, spacing: 2) {
             Text(String(localized: "\(front.id). Cephe"))
                 .font(FermanFont.caption())
@@ -170,4 +172,17 @@ struct CampaignView: View {
     }
     .environment(AppRouter())
     .preferredColorScheme(.dark)
+}
+
+extension View {
+    /// `matchedTransitionSource` when there's a namespace to match in (previews and direct launches
+    /// have none).
+    @ViewBuilder
+    fileprivate func transitionSource(id: Int, in namespace: Namespace.ID?) -> some View {
+        if let namespace {
+            matchedTransitionSource(id: id, in: namespace)
+        } else {
+            self
+        }
+    }
 }

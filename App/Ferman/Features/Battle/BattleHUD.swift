@@ -14,46 +14,47 @@ struct BattleTopBar: View {
     var onShowResult: () -> Void
 
     var body: some View {
-        HStack(spacing: FermanSpacing.md) {
-            Button(action: onBack) {
-                Image(systemName: "chevron.backward")
-                    .foregroundStyle(Color.paper.opacity(0.85))
-            }
-            .accessibilityLabel(String(localized: "Geri"))
+        // Every control is a full 44 pt target (the accessibility audit found the bare glyphs, ~13 pt,
+        // too small to hit — G15); the targets themselves space the bar, so the gaps stay narrow.
+        HStack(spacing: FermanSpacing.xxs) {
+            barButton("chevron.backward", label: String(localized: "Geri"), action: onBack)
 
             Text(timeText)
                 .font(FermanFont.counter(size: 17, weight: .medium))
                 .monospacedDigit()
                 .foregroundStyle(Color.paper)
-                .frame(minWidth: 44, alignment: .leading)
+                .lineLimit(1)
+                // 0.7 still truncated to "0..." at the largest accessibility sizes — five fixed 44 pt
+                // touch targets plus `SpeedControl` (also growing at those sizes) leave too little room
+                // for a `relativeTo: .body`-scaled clock to shrink into at 70%; a lower floor keeps the
+                // full "00:01" legible instead (accessibility audit, G15).
+                .minimumScaleFactor(0.3)
 
             Spacer(minLength: 0)
 
-            Button(action: onRestart) {
-                Image(systemName: "arrow.counterclockwise")
-                    .foregroundStyle(Color.paper.opacity(0.85))
-            }
-            .accessibilityLabel(String(localized: "Başa sar"))
-
-            Button(action: onTogglePlayPause) {
-                Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                    .foregroundStyle(Color.paper.opacity(0.85))
-            }
-            .accessibilityLabel(isPlaying ? String(localized: "Duraklat") : String(localized: "Oynat"))
+            barButton("arrow.counterclockwise", label: String(localized: "Başa sar"), action: onRestart)
+            barButton(
+                isPlaying ? "pause.fill" : "play.fill",
+                label: isPlaying ? String(localized: "Duraklat") : String(localized: "Oynat"), action: onTogglePlayPause)
 
             SpeedControl(selection: $speed)
 
-            Button(action: onShowResult) {
-                Image(systemName: "flag.checkered")
-                    .foregroundStyle(Color.paper.opacity(0.85))
-            }
-            .accessibilityLabel(String(localized: "Sonuç"))
+            barButton("flag.checkered", label: String(localized: "Sonuç"), action: onShowResult)
         }
-        .padding(.horizontal, FermanSpacing.md)
-        .padding(.vertical, FermanSpacing.sm)
+        .padding(.horizontal, FermanSpacing.xxs)
         .glassEffect(.regular, in: RoundedRectangle(cornerRadius: FermanRadius.panel))
-        .padding(.horizontal, FermanSpacing.sm)
+        .padding(.horizontal, FermanSpacing.xxs)
         .padding(.top, FermanSpacing.xs)
+    }
+
+    private func barButton(_ systemName: String, label: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Image(systemName: systemName)
+                .foregroundStyle(Color.paper.opacity(0.85))
+                .frame(width: 44, height: 44)
+                .contentShape(Rectangle())
+        }
+        .accessibilityLabel(label)
     }
 
     private var timeText: String {

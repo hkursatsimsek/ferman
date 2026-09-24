@@ -16,5 +16,14 @@
 		<string>PublicSans-Bold.ttf</string>
 		<string>PublicSans-Italic.ttf</string>
 	</array>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>Ink</string>
+		<key>UIImageName</key>
+		<string>LaunchWordmark</string>
+		<key>UIImageRespectsSafeAreaInsets</key>
+		<true/>
+	</dict>
 </dict>
 </plist>

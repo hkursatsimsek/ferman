@@ -21,8 +21,10 @@ enum FermanButton {
         @ViewBuilder
         private var background: some View {
             if isEnabled {
+                // The lit brass (F1.13's contrast fix), not the shadowed one: ink on the old gradient
+                // measured ~4.8:1 at the bottom of the button and the accessibility audit flagged it.
                 LinearGradient(
-                    colors: [Color(hex: 0xA8873F), Color(hex: 0x8A6C33)], startPoint: .top, endPoint: .bottom)
+                    colors: [Color(hex: 0xC2A05C), Color(hex: 0xA8873F)], startPoint: .top, endPoint: .bottom)
             } else {
                 Color.paper.opacity(0.08)
             }
