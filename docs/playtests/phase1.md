@@ -21,10 +21,57 @@ kriterleri tablosu):
 | 3. parti bağımlılık yok | `Package.resolved` hiçbir pakette yok |
 | Yeniden başlatma < 100 ms | `BattleModelTests.restartReseeksWithoutResimulating` yeşil |
 | Erişilebilirlik temeli | `performAccessibilityAudit()` yeşil (F1.13, bilinen/belgelenmiş istisnalar hariç) |
-| 150 birimde 60 fps | **Doğrulanamadı** — bu ortamda fiziksel referans cihaz yok (F1.4'ten beri aynı kısıt); bkz. `CLAUDE.md`'nin F1.14 notu |
+| 150 birimde 60 fps | **Simülatörde evet** (G16, aşağıda) — 150 figürde sabit 60 fps, `update` kare başına ~1 ms. Gerçek cihazda ölçüm hâlâ kullanıcıda |
 
 Yani mekanik ölçüm tarafı tamam; eksik olan tek şey bu belgenin asıl konusu — gerçek insanların 10 dakika
 boyunca bunu eğlenceli bulup bulmadığı.
+
+## Performans ölçümü (G16)
+
+**Stres girişi:** `-uiTestStressBattle YES` — taraf başına 75 figür (4 tipin hepsi, iki tarafta aynı emirler:
+kalkan/mızrak duvarı, süvari hücumu, okçu siper + geri çekil), 8. cephenin arazili masası `vadi`
+(`App/Ferman/Features/Battle/StressBattle.swift`). `StressBattleTests` ilk 20 saniyede hiçbir tarafın silinmediğini,
+10. saniyede masada 75'ten fazla figür kaldığını doğruluyor.
+
+**Bulunan ve düzeltilen darboğaz:** Savaş ekranı (`BattleView.body`) üst bardaki saat için `clock.currentTick`'i
+okuyordu; `BattleScene` saati her karede ilerlettiği için gövde her karede yeniden değerlendiriliyordu. Her
+değerlendirmede `BattleSceneView.init`, `State(initialValue:)`'a verdiği yepyeni bir `BattleScene` kuruyordu
+(masa dokusu pişirme, `FigureMotion`, `BattleSoundscape`), SwiftUI da ilkini tuttuğu için bu sahne hemen çöpe
+gidiyordu. Apple'ın `State` belgesi tam bunu söylüyor: varsayılan değer görünüm her kurulduğunda oluşturulur,
+pahalı işi `init`'e koyma. Düzeltme: sahne görünüm ilk göründüğünde bir kez kuruluyor, `ReplayClock` saniye ve
+bitiş değerlerini (`elapsedSeconds`, `isFinished`) yalnızca değiştiklerinde yazıyor, üst bar bunları okuyor
+(`ReplayClockTests` bir karenin saat okuyucularını uyandırmadığını doğruluyor).
+
+**Simülatör, iPhone 18 Pro, Release, 2026-09-24** (SpriteKit sayaçları `-showsDrawCount YES`; kare süreleri
+`BattleScene`'in `OSSignposter` "update" aralıklarından, `xctrace record --instrument os_signpost`):
+
+| Senaryo | Önce | Sonra |
+|---|---|---|
+| 8. cephe (~25 figür) | 20 fps · 317 düğüm · 15 çizim | **60 fps** · 317 düğüm · 17 çizim |
+| Stres, 150 figür, 1× | 8,6 fps · 1031 düğüm · 29 çizim | **60 fps** · 1031 düğüm · 28–32 çizim |
+| Stres, 150 figür, 1×, 40 sn | — | `update` ort. 0,98 ms · p95 1,41 · p99 1,62 · en çok 1,94 ms; kare aralığı ort. 16,69 ms, 2430 karenin 5'i > 25 ms |
+| Stres, 150 figür, 4×, 25 sn | — | `update` ort. 0,84 ms · p99 1,47 ms; ilk kare 11,2 ms (tek seferlik); kare aralığı ort. 16,73 ms |
+
+Çizim çağrısı sayısı birim sayısıyla değil katman × dokuyla büyüyor (G5'in hedefi): 25 figürde 17, 150 figürde
+~30. Simülatör Mac'in GPU'sunu ve CPU'sunu kullanıyor; bu rakamlar gerçek cihazın yerine geçmez ama darboğazın
+çizim değil, her karede tekrarlanan SwiftUI işi olduğunu, sahnenin kendisinin ise 16,7 ms'lik bütçenin ~%6'sını
+kullandığını gösteriyor.
+
+**Gerçek cihazda ölçüm (kullanıcı):**
+
+1. Uygulamayı cihaza Release yapılandırmasıyla kur. Xcode'da şema → Run → Build Configuration: Release,
+   Arguments: `-uiTestStressBattle YES -uiTestSandbox` (sayaçları görmek için `-showsDrawCount YES` da ekle).
+2. Instruments → **Animation Hitches** şablonu (Time Profiler + Hitches). Hedef: Ferman, kayıt ~40 sn;
+   `-settings.defaultSpeed 4` argümanıyla bir kez de 4× kaydet.
+3. Bak: kare hızı 60'ta sabit mi (ProMotion'lı cihazda 120'ye çıkabilir), hitch sayısı, **Points of
+   Interest / os_signpost** altında `BattleScene` → `update` süreleri (simülatörde ~1 ms).
+4. Sonuçları bu tabloya ekle:
+
+| Cihaz | iOS | Senaryo | fps | Hitch | `update` p99 | Not |
+|---|---|---|---|---|---|---|
+| | | Stres 1× | | | | |
+| | | Stres 4× | | | | |
+| | | 8. cephe | | | | |
 
 ## Kurulum
 
