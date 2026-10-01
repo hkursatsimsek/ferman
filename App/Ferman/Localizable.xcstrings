@@ -4,6 +4,26 @@
     " " : {
 
     },
+    "%@ · %lld. emir bu cephede geçerli değil." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ · %2$lld. emir bu cephede geçerli değil."
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
     "%@ %%%@ %@ aynı anda morali bozuldu." : {
       "localizations" : {
         "tr" : {
@@ -53,6 +73,29 @@
         }
       }
     },
+    "%lld %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld %2$@"
+          }
+        }
+      }
+    },
+    "%lld cephe geçildi" : {
+
+    },
+    "%lld emir, %lld kayıp" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld emir, %2$lld kayıp"
+          }
+        }
+      }
+    },
     "%lld kez" : {
 
     },
@@ -60,6 +103,12 @@
 
     },
     "%lld puan" : {
+
+    },
+    "%lld puan geride başlıyorsun." : {
+
+    },
+    "%lld sn" : {
 
     },
     "%lld. cephe" : {
@@ -91,6 +140,19 @@
     "%lld. emir" : {
 
     },
+    "%lld. emir yüzünden hiç sıra gelmez." : {
+
+    },
+    "%lld. emir. %@ %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$lld. emir. %2$@ %3$@"
+          }
+        }
+      }
+    },
     "%lld. saniyede" : {
 
     },
@@ -101,12 +163,6 @@
 
     },
     "%lldp" : {
-
-    },
-    "⚠ Bu emir hiç çalışmadı." : {
-
-    },
-    "3 maç bekliyor" : {
 
     },
     "14. Cephe — Taş Geçit" : {
@@ -139,6 +195,9 @@
     "Askerlerin emir almazsa düşmana doğru yürür." : {
 
     },
+    "Askerlerin varsayılan emri uygular: düşmana doğru yürür ve öldürülene kadar dövüşür. İzle." : {
+
+    },
     "Ayarlar" : {
 
     },
@@ -154,13 +213,34 @@
     "Belirli bir andan sonra" : {
 
     },
+    "Bir figüre dokun." : {
+
+    },
+    "Bir kol yerinde dursun, öbürü vursun." : {
+
+    },
     "Birim türü" : {
 
     },
-    "Birimlerini aşağıdaki tepsiden buraya sürükle." : {
+    "Birliklerini diz." : {
+
+    },
+    "Bölgende bir kareye dokun." : {
 
     },
     "Boş hücre" : {
+
+    },
+    "Bu cephede emir yazılmaz." : {
+
+    },
+    "Bu cephede emir yazılmaz. Askerlerinin kendi başına ne yaptığını izle." : {
+
+    },
+    "Bu cephede yeni emir" : {
+
+    },
+    "Bu emir hiç çalışmadı." : {
 
     },
     "Bu emrin bir parametresi eksik kaldı. Tekrar dene." : {
@@ -172,6 +252,9 @@
     "Bütçe" : {
 
     },
+    "Bütçe yetmiyor." : {
+
+    },
     "buton 8pt" : {
 
     },
@@ -179,9 +262,6 @@
 
     },
     "Canım azaldığında" : {
-
-    },
-    "Cephe" : {
 
     },
     "Cephe Yarıldı" : {
@@ -196,7 +276,7 @@
     "Dağıl" : {
 
     },
-    "Değer" : {
+    "Dayanıklılık" : {
 
     },
     "Demir Kapı" : {
@@ -211,6 +291,9 @@
     "Duraklat" : {
 
     },
+    "düşman" : {
+
+    },
     "Düşman " : {
 
     },
@@ -221,6 +304,9 @@
 
     },
     "Düşman bütçesi" : {
+
+    },
+    "Düşman büyüdü. Her tipe kendi emrini yaz." : {
 
     },
     "düşman kompozisyonu gizli" : {
@@ -238,10 +324,16 @@
     "Düşman yoğunluğu" : {
 
     },
+    "düşük" : {
+
+    },
     "Düzenle" : {
 
     },
     "Ekle" : {
+
+    },
+    "emir" : {
 
     },
     "Emir ekle" : {
@@ -262,6 +354,12 @@
     "Emirlerin" : {
 
     },
+    "Emirsiz birlik ne yapar?" : {
+
+    },
+    "Emri düzenle" : {
+
+    },
     "Emri Düzenle" : {
 
     },
@@ -277,10 +375,10 @@
     "Eşik" : {
 
     },
-    "Eylem" : {
+    "geçildi" : {
 
     },
-    "geçildi" : {
+    "Geri" : {
 
     },
     "Geri çekil" : {
@@ -307,10 +405,13 @@
     "Hazırlan" : {
 
     },
-    "Hedef" : {
+    "Henüz emir yok." : {
 
     },
-    "Henüz emir yok." : {
+    "Hız" : {
+
+    },
+    "Hızlıdır, okçuları avlar. Hücumda ilk vuruşu sert indirir." : {
 
     },
     "HÜCUM" : {
@@ -325,7 +426,16 @@
     "İLERLE" : {
 
     },
+    "İlk emrini yaz." : {
+
+    },
+    "İlk karma ordu. Mızrakçı süvariyi karşılar." : {
+
+    },
     "İlk Tepe" : {
+
+    },
+    "İlk üç cephenin kalem notları, oyunu bir sonraki açışında yeniden görünecek." : {
 
     },
     "İzle" : {
@@ -337,7 +447,16 @@
     "Kaldır" : {
 
     },
+    "Kalem onun emirlerini yukarıdan okur ve tutan ilk emirde durur." : {
+
+    },
     "KALKAN DUVARI" : {
+
+    },
+    "Kalkanlılar yavaştır. Okçuların onları yakına sokmamalı." : {
+
+    },
+    "Kanatlar ağırlaştı. Kimin kimi karşılayacağını baştan düşün." : {
 
     },
     "Kara Boğaz" : {
@@ -346,7 +465,13 @@
     "kare" : {
 
     },
+    "Karşındaki ordu" : {
+
+    },
     "Kaydet" : {
+
+    },
+    "kayıp" : {
 
     },
     "kilitli" : {
@@ -379,7 +504,13 @@
     "Komutanlığı Kaldır" : {
 
     },
-    "Koşul" : {
+    "Koşulu tutan ilk emir uygulanır, altındakilere sıra gelmez. Sırayı sürükleyerek değiştir." : {
+
+    },
+    "koşulu tutmadı" : {
+
+    },
+    "Kum masası" : {
 
     },
     "Kum Masası" : {
@@ -389,6 +520,19 @@
 
     },
     "Kural hakkın" : {
+
+    },
+    "Kural hakkın %lld, %lld emir yazdın. Birini sil." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kural hakkın %1$lld, %2$lld emir yazdın. Birini sil."
+          }
+        }
+      }
+    },
+    "Kural hakkın doldu. Yeni emir için birini sil." : {
 
     },
     "Kuru Vadi" : {
@@ -401,6 +545,9 @@
 
     },
     "Malzeme tokenları. Marka rengi yok: soğuk kum, ham kâğıt, oksitlenmiş pirinç, çiğ demir." : {
+
+    },
+    "Menzil" : {
 
     },
     "menzilimde %@ varsa" : {
@@ -421,10 +568,34 @@
     "molozdaysam" : {
 
     },
+    "morali çöktü" : {
+
+    },
     "moralim %%%@ altındaysa" : {
 
     },
     "Moralim azaldığında" : {
+
+    },
+    "Ne yapsın?" : {
+
+    },
+    "Ne zaman?" : {
+
+    },
+    "Notu kapat" : {
+
+    },
+    "O anı izle" : {
+
+    },
+    "Öğretici notlarını yeniden göster" : {
+
+    },
+    "Okçular yakın dövüşte ezilir. “Emir ekle”: düşman yaklaşınca GERİ ÇEKİL. Mesafeyi kadranla ayarla." : {
+
+    },
+    "Oklara dayanır, hattı tutar. Kalkan duvarıyla yerinde durur." : {
 
     },
     "Ordun dağıldı." : {
@@ -442,6 +613,9 @@
     "ormandaysam" : {
 
     },
+    "orta" : {
+
+    },
     "Oynat" : {
 
     },
@@ -449,6 +623,12 @@
 
     },
     "pusula 2pt" : {
+
+    },
+    "Pusulalar yukarıdan okunur." : {
+
+    },
+    "Pusulayı yukarı taşımak önceliğini artırır." : {
 
     },
     "Sağdan kuşat" : {
@@ -463,10 +643,13 @@
     "Savaş berabere bitti." : {
 
     },
-    "Savaşa Başla" : {
+    "Savaş şu hızda başlasın" : {
 
     },
     "Savaşı Başlat" : {
+
+    },
+    "Savaşın zaman şeridi" : {
 
     },
     "Sayı" : {
@@ -476,6 +659,15 @@
 
     },
     "Senin bütçen" : {
+
+    },
+    "senin konuşlanma bölgen" : {
+
+    },
+    "senin ordun" : {
+
+    },
+    "Ses" : {
 
     },
     "Sil" : {
@@ -505,16 +697,47 @@
     "Son Hat" : {
 
     },
+    "Son hat. Düşman her şeyiyle geliyor." : {
+
+    },
+    "son savaş · %lld. cephe" : {
+
+    },
+    "Sonra açılacak" : {
+
+    },
+    "Sonraki Cephe" : {
+
+    },
     "Sonuç" : {
 
     },
     "Su" : {
 
     },
+    "şu an %lld. emir: %@" : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "şu an %1$lld. emir: %2$@"
+          }
+        }
+      }
+    },
+    "şu an uygulanıyor" : {
+
+    },
+    "şu an uyguluyor" : {
+
+    },
     "sudaysam" : {
 
     },
     "Süre" : {
+
+    },
+    "Süvariye karşı güçlü. Mızrak duvarıyla atlıları durdurur." : {
 
     },
     "Tamam" : {
@@ -530,6 +753,18 @@
 
     },
     "tepedeysem" : {
+
+    },
+    "Tepsiden bir birim seç ya da sürükle." : {
+
+    },
+    "Tepsiden bir birim seç, sonra alttaki bölgende bir kareye dokun." : {
+
+    },
+    "Tetiklenmelerin çoğu %lld. emirde." : {
+
+    },
+    "Titreşim ve azaltılmış hareket, cihazının kendi ayarlarına uyar." : {
 
     },
     "Toplan" : {
@@ -629,7 +864,16 @@
         }
       }
     },
+    "Uzaktan vurur, yakında zayıftır. Yaylımla bir alanı döver." : {
+
+    },
+    "Varsayılan emir her zaman yığının sonundadır." : {
+
+    },
     "Varsayılan Emri Düzenle" : {
+
+    },
+    "Varsayılan emri uygular: İLERLE. Savaşı başlat ve izle." : {
 
     },
     "Vazgeç" : {
@@ -641,10 +885,16 @@
     "yanımda %@ az dost varsa" : {
 
     },
+    "Yaralanan okçu ne yapsın? Emirlerin sırası önemli." : {
+
+    },
     "YAYLIM" : {
 
     },
     "Yaz" : {
+
+    },
+    "Yazılan emir" : {
 
     },
     "Yeni Emir" : {
@@ -669,6 +919,9 @@
 
     },
     "YÜKLEN" : {
+
+    },
+    "yüksek" : {
 
     }
   },
