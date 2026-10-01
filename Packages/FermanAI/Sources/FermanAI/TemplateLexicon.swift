@@ -89,8 +89,12 @@ enum TemplateLexicon {
         (
             .hold,
             [
-                "yerinde kal*", "yerini koru*", "mevzi*", "sabit kal*", "bekle*", "dur", "durun", "dursun",
-                "dursunlar", "hold*", "stay*", "stand*", "wait*", "keep position",
+                "yerinde kal*", "yerimde kal*", "yerini koru*", "yerimi koru*", "yerimden ayrilma*",
+                "yerinden ayrilma*",
+                "yerimden kimildama*", "yerinden kimildama*", "mevzi*", "sabit kal*", "bekle*", "dur", "durun",
+                "dursun",
+                "dursunlar", "hold*", "stay*", "stand", "stand still", "stand ground", "stand firm", "wait*",
+                "keep position", "keep your position", "keep the position", "keep your ground", "maintain position",
             ]
         ),
         (
@@ -134,7 +138,7 @@ enum TemplateLexicon {
     static let ally: [TemplatePhrase] = ["dost*", "muttefik*", "arkadas*", "ally", "allies", "friend*", "comrade*"]
     static let enemy: [TemplatePhrase] = ["dusman*", "rakip*", "enemy", "enemies", "foe*"]
     static let cells: [TemplatePhrase] = ["kare*", "hucre*", "cell*", "square*", "tile*"]
-    static let near: [TemplatePhrase] = ["yakin*", "yaklas*", "within", "close*", "near*"]
+    static let near: [TemplatePhrase] = ["yakin*", "yaklas*", "within", "close*", "near*", "approach*"]
     static let far: [TemplatePhrase] = ["uzak*", "far", "farther", "further", "beyond"]
     /// Every numeric condition except enemy density compares *below*; these words ask for the opposite.
     static let more: [TemplatePhrase] = [
@@ -151,6 +155,9 @@ enum TemplateLexicon {
         (.rubble, ["moloz", "enkaz", "harabe", "yikinti"]),
         (.open, ["acik", "ova", "duzluk", "arazi"]),
     ]
+    /// "ormanın içindeyken": the terrain word itself is in the genitive.
+    static let genitiveEndings: Set<String> = ["", "in", "un", "nin", "nun"]
+    static let terrainPostpositions = ["arasinda", "icinde", "uzerinde"]
     static let locativeEndings = ["da", "de", "ta", "te", "nda", "nde"]
     static let ablativeEndings = ["dan", "den", "tan", "ten"]
     /// English terrain needs a preposition just before it ("in the forest", "on a hill").

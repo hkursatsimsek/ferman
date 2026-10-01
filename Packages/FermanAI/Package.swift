@@ -24,6 +24,17 @@ let package = Package(
             swiftSettings: strictSettings
         ),
         .testTarget(
+            name: "CompilerAccuracyTests",
+            dependencies: [
+                "FermanAI",
+                .product(name: "FermanCore", package: "FermanCore"),
+            ],
+            path: "Tests/CompilerAccuracy",
+            exclude: ["Reports"],
+            resources: [.copy("phrases.json"), .copy("heldout-phrases.json")],
+            swiftSettings: strictSettings
+        ),
+        .testTarget(
             name: "FermanAITests",
             dependencies: [
                 "FermanAI",

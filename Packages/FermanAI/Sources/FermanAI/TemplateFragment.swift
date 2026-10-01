@@ -23,10 +23,19 @@ struct TemplateFragment {
         guard let action = takeFirstAction() else {
             return nil
         }
+        // "use your special ability": two words for the same action are one action, not two.
+        let sameAction = phrases(for: action.kind)
+        while let range = firstMatch(of: sameAction, rejectingConditionalForms: true) {
+            consume(range)
+        }
         if takeFirstAction() != nil {
             throw .multipleActions
         }
         return action
+    }
+
+    private func phrases(for kind: ActionKind) -> [TemplatePhrase] {
+        TemplateLexicon.actions.first { $0.0 == kind }?.1 ?? []
     }
 
     private mutating func takeFirstAction() -> Action? {
@@ -173,6 +182,15 @@ struct TemplateFragment {
             for index in tokens.indices where !consumed[index] {
                 let word = tokens[index].word
                 for stem in stems where word.hasPrefix(stem) {
+                    // "moloz arasındayken", "ormanın içindeyken": the locative sits on the next word.
+                    if TemplateLexicon.genitiveEndings.contains(String(word.dropFirst(stem.count))),
+                        index + 1 < tokens.count,
+                        TemplateLexicon.terrainPostpositions.contains(where: { tokens[index + 1].word.hasPrefix($0) })
+                    {
+                        consumed[index] = true
+                        consumed[index + 1] = true
+                        return terrain
+                    }
                     let ending = word.dropFirst(stem.count)
                     let isLocative =
                         TemplateLexicon.locativeEndings.contains { ending.hasPrefix($0) }

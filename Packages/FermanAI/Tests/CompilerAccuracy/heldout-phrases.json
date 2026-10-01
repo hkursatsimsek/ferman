@@ -1,0 +1,528 @@
+{
+ "version": 1,
+ "phrases": [
+  {
+   "id": "tr-h01",
+   "locale": "tr",
+   "text": "düşmanlar 3 kare yakınıma gelince geri çekilsinler",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h02",
+   "locale": "tr",
+   "text": "askerlerim %25 canın altına düşerse siper alsın",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h03",
+   "locale": "tr",
+   "text": "moralleri %30'un altına inerse komutanı korusunlar",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h04",
+   "locale": "tr",
+   "text": "tepede dururken yerinde kalsınlar",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h05",
+   "locale": "tr",
+   "text": "en yakın düşman okçu olursa ona yüklen",
+   "rules": [
+    {
+     "condition": {
+      "kind": "nearestEnemyType",
+      "unitType": "okcu"
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h06",
+   "locale": "tr",
+   "text": "15 saniye sonra sola dolan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 15
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h07",
+   "locale": "tr",
+   "text": "komutan öldüğünde herkes dağılsın",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h08",
+   "locale": "tr",
+   "text": "arkadan vurulursam geri çekileyim",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h09",
+   "locale": "tr",
+   "text": "yanımda 4'ten az arkadaş varsa toplan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 4
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h10",
+   "locale": "tr",
+   "text": "ilerlemeye devam",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h11",
+   "locale": "tr",
+   "text": "olduğun yerde dur",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h12",
+   "locale": "tr",
+   "text": "düşman 2 kareden yakına gelirse kalkan duvarı yap, yoksa ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h13",
+   "locale": "tr",
+   "text": "canım 40'ın altına düşerse geri çekil ve siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 40
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-h14",
+   "locale": "tr",
+   "text": "ormanda siper al, düşman 3 kareden yakınsa yüklen, değilse ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h01",
+   "locale": "en",
+   "text": "if an enemy comes within 3 tiles, fall back",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h02",
+   "locale": "en",
+   "text": "when my hit points drop below 25 percent, hide",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h03",
+   "locale": "en",
+   "text": "protect the general if morale is under 30%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h04",
+   "locale": "en",
+   "text": "hold still while on a hill",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h05",
+   "locale": "en",
+   "text": "if the closest enemy is an archer, target them",
+   "rules": [
+    {
+     "condition": {
+      "kind": "nearestEnemyType",
+      "unitType": "okcu"
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h06",
+   "locale": "en",
+   "text": "after 15 seconds swing around to the left",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 15
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h07",
+   "locale": "en",
+   "text": "when the commander falls, everyone scatter",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h08",
+   "locale": "en",
+   "text": "retreat if attacked from behind",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h09",
+   "locale": "en",
+   "text": "if there are fewer than four friendly units near me, regroup",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 4
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h10",
+   "locale": "en",
+   "text": "keep moving forward",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h11",
+   "locale": "en",
+   "text": "stand your ground",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h12",
+   "locale": "en",
+   "text": "if an enemy gets within 2 cells raise the shield wall, otherwise keep advancing",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h13",
+   "locale": "en",
+   "text": "run away if health below 40 and take cover",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 40
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h14",
+   "locale": "en",
+   "text": "take cover in the forest, focus on archers if an enemy is within 3 cells, otherwise advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-h15",
+   "locale": "en",
+   "text": "open fire on cavalry",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "suvari"
+     }
+    }
+   ]
+  }
+ ]
+}

@@ -171,6 +171,24 @@ struct TemplateCompilerTests {
             ])
     }
 
+    @Test func twoWordsForOneActionAreOneAction() async throws {
+        #expect(try await Self.compile("use your special ability") == [Self.rule(.always, .useAbility)])
+        #expect(try await Self.compile("kalkan duvarı kur, yetenek") == [Self.rule(.always, .useAbility)])
+    }
+
+    @Test func aTerrainWordBeforeAPostpositionIsALocation() async throws {
+        #expect(try await Self.compile("moloz arasındayken siper al") == [Self.rule(.terrainIs(.rubble), .takeCover)])
+        #expect(try await Self.compile("ormanın içindeysem yerimde kal") == [Self.rule(.terrainIs(.forest), .hold)])
+    }
+
+    @Test func standingInsideADescriptionIsNotAnAction() async throws {
+        #expect(
+            try await Self.compile("take cover while standing in rubble") == [
+                Self.rule(.terrainIs(.rubble), .takeCover)
+            ])
+        #expect(try await Self.compile("stand ground") == [Self.rule(.always, .hold)])
+    }
+
     @Test func minutesBecomeSeconds() async throws {
         #expect(try await Self.compile("1 dakika sonra ilerle") == [Self.rule(.timeAfter(seconds: 60), .advance)])
     }

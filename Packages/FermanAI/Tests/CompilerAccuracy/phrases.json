@@ -1,0 +1,2430 @@
+{
+ "version": 1,
+ "phrases": [
+  {
+   "id": "tr-001",
+   "locale": "tr",
+   "text": "düşman 4 kareye girince geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-002",
+   "locale": "tr",
+   "text": "düşman 2 kare yakınıma gelirse yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-003",
+   "locale": "tr",
+   "text": "canım %20'nin altına düşerse geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 20
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-004",
+   "locale": "tr",
+   "text": "can yüzde 50'nin altındaysa siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 50
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-005",
+   "locale": "tr",
+   "text": "moral 25'in altına inerse toplan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-006",
+   "locale": "tr",
+   "text": "kuşatılırsam dağıl",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-007",
+   "locale": "tr",
+   "text": "yanımda 2'den az dost kalırsa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 2
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-008",
+   "locale": "tr",
+   "text": "etrafımda 5'ten fazla düşman olursa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyDensityAbove",
+      "count": 5
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-009",
+   "locale": "tr",
+   "text": "30. saniyeden sonra ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 30
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-010",
+   "locale": "tr",
+   "text": "20 saniye sonra ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 20
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-011",
+   "locale": "tr",
+   "text": "ormandaysam yerimde dur",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-012",
+   "locale": "tr",
+   "text": "tepeye çıkınca bekle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-013",
+   "locale": "tr",
+   "text": "tepedeyken yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-014",
+   "locale": "tr",
+   "text": "moloz arasındayken siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "rubble"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-015",
+   "locale": "tr",
+   "text": "komutan ölürse geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-016",
+   "locale": "tr",
+   "text": "komutanımız düşerse dağılın",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-017",
+   "locale": "tr",
+   "text": "en yakın düşman süvariyse mızrak duvarı kur",
+   "rules": [
+    {
+     "condition": {
+      "kind": "nearestEnemyType",
+      "unitType": "suvari"
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-018",
+   "locale": "tr",
+   "text": "menzilimde okçu varsa ateş et",
+   "rules": [
+    {
+     "condition": {
+      "kind": "targetInRange",
+      "unitType": "okcu"
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-019",
+   "locale": "tr",
+   "text": "menzilime süvari girerse süvarilere yüklen",
+   "rules": [
+    {
+     "condition": {
+      "kind": "targetInRange",
+      "unitType": "suvari"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "suvari"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-020",
+   "locale": "tr",
+   "text": "düşman 3 kareden yakınsa okçulara yüklen",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-021",
+   "locale": "tr",
+   "text": "düşman 6 kare içine girerse mızrak duvarı yap",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 6
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-022",
+   "locale": "tr",
+   "text": "düşman 5 kareden yakınsa kalkan duvarı kur",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 5
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-023",
+   "locale": "tr",
+   "text": "canım %30'un altındaysa komutanı koru",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-024",
+   "locale": "tr",
+   "text": "moralim %50'nin altındaysa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 50
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-025",
+   "locale": "tr",
+   "text": "40 saniye sonra soldan kuşat",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 40
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-026",
+   "locale": "tr",
+   "text": "25 saniye sonra sağdan kuşat",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 25
+     },
+     "action": {
+      "kind": "flankRight"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-027",
+   "locale": "tr",
+   "text": "yanımda 3 dosttan az varsa toplan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 3
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-028",
+   "locale": "tr",
+   "text": "etrafımda 4 düşmandan fazla varsa dağıl",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyDensityAbove",
+      "count": 4
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-029",
+   "locale": "tr",
+   "text": "düşman 1 kareye gelince geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 1
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-030",
+   "locale": "tr",
+   "text": "düşman 8 kareye girerse ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 8
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-031",
+   "locale": "tr",
+   "text": "ormanda isem yerimde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-032",
+   "locale": "tr",
+   "text": "Düşman 3 kareden yakınsa GERİ ÇEKİL",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-033",
+   "locale": "tr",
+   "text": "dusman 5 kareye girerse geri cekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 5
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-034",
+   "locale": "tr",
+   "text": "arkadan saldırılırsam yerimden kımıldama",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-035",
+   "locale": "tr",
+   "text": "moralim 35'in altına düşünce toplan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 35
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-036",
+   "locale": "tr",
+   "text": "geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-037",
+   "locale": "tr",
+   "text": "ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-038",
+   "locale": "tr",
+   "text": "yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-039",
+   "locale": "tr",
+   "text": "ilerlemeye devam et",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-040",
+   "locale": "tr",
+   "text": "komutanı koru",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-041",
+   "locale": "tr",
+   "text": "okçulara odaklan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-042",
+   "locale": "tr",
+   "text": "siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-043",
+   "locale": "tr",
+   "text": "dağıl",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-044",
+   "locale": "tr",
+   "text": "toplanın",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-045",
+   "locale": "tr",
+   "text": "yeteneğini kullan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-046",
+   "locale": "tr",
+   "text": "sağdan dolan",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "flankRight"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-047",
+   "locale": "tr",
+   "text": "ileri atıl",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-048",
+   "locale": "tr",
+   "text": "düşman 3 kareden yakınsa geri çekil, başka durumda ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-049",
+   "locale": "tr",
+   "text": "canım %30'un altına düşerse siper al. düşman 4 kareye girerse yüklen. aksi halde ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-050",
+   "locale": "tr",
+   "text": "düşman 2 kareden yakınsa mızrak duvarı kur, yoksa yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-051",
+   "locale": "tr",
+   "text": "kuşatılırsam dağıl; moralim %40'ın altındaysa geri çekil; başka durumda ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    },
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 40
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-052",
+   "locale": "tr",
+   "text": "10 saniye sonra soldan kuşat ve düşman 3 kareden yakınsa süvarilere yüklen",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 10
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "suvari"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-053",
+   "locale": "tr",
+   "text": "ormandaysam yerinde kal, açıktaysam ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    },
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "open"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-054",
+   "locale": "tr",
+   "text": "yanımda 3'ten az dost varsa toplan, düşman 2 kareden yakınsa saldır, yoksa yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 3
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "advance"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-055",
+   "locale": "tr",
+   "text": "20 saniye sonra ilerle, öncesinde yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 20
+     },
+     "action": {
+      "kind": "advance"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-056",
+   "locale": "tr",
+   "text": "ilerle ama canım %25'in altına düşerse geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-057",
+   "locale": "tr",
+   "text": "okçulara yüklen ve düşman 2 kareden yakınsa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-058",
+   "locale": "tr",
+   "text": "komutan ölürse dağıl, moralim %20'nin altındaysa geri çekil, başka durumda yerinde kal",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    },
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 20
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-059",
+   "locale": "tr",
+   "text": "düşman 5 kareye girince okçulara yüklen yoksa ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 5
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-060",
+   "locale": "tr",
+   "text": "düşman üç kareden yakınsa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-061",
+   "locale": "tr",
+   "text": "canım yüzde kırk beşin altına düşerse siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 45
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-062",
+   "locale": "tr",
+   "text": "on beş saniye sonra ilerle",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 15
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-063",
+   "locale": "tr",
+   "text": "iki kareden yakınsa geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-064",
+   "locale": "tr",
+   "text": "düşman 20 kareye girerse geri çekil",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 20
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-065",
+   "locale": "tr",
+   "text": "canım %5'in altına düşerse siper al",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 5
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "tr-066",
+   "locale": "tr",
+   "text": "yaklaşan düşman olursa geri çekil",
+   "error": "missingConditionParameter:enemyWithin"
+  },
+  {
+   "id": "tr-067",
+   "locale": "tr",
+   "text": "canım azsa geri çekil",
+   "error": "missingConditionParameter:healthBelow"
+  },
+  {
+   "id": "tr-068",
+   "locale": "tr",
+   "text": "moralim bozulursa komutanın yanına git",
+   "error": "missingConditionParameter:moraleBelow"
+  },
+  {
+   "id": "tr-069",
+   "locale": "tr",
+   "text": "düşman görünce saldır",
+   "error": "unrecognizedCondition"
+  },
+  {
+   "id": "tr-070",
+   "locale": "tr",
+   "text": "canım %60'ın üstündeyse ilerle",
+   "error": "unsupportedComparison:healthBelow"
+  },
+  {
+   "id": "tr-071",
+   "locale": "tr",
+   "text": "düşman 3 kareden uzaksa yerinde kal",
+   "error": "unsupportedComparison:enemyWithin"
+  },
+  {
+   "id": "tr-072",
+   "locale": "tr",
+   "text": "düşman 3 kareden yakınsa",
+   "error": "missingAction:enemyWithin"
+  },
+  {
+   "id": "tr-073",
+   "locale": "tr",
+   "text": "ilerle, aksi halde geri çekil",
+   "error": "conflictingDefaultOrders"
+  },
+  {
+   "id": "tr-074",
+   "locale": "tr",
+   "text": "ilk 10 saniye bekle sonra ilerle",
+   "error": "multipleActions"
+  },
+  {
+   "id": "tr-075",
+   "locale": "tr",
+   "text": "merhaba nasılsın",
+   "error": "noOrderRecognized"
+  },
+  {
+   "id": "tr-076",
+   "locale": "tr",
+   "text": "bugün hava güzel",
+   "error": "noOrderRecognized"
+  },
+  {
+   "id": "en-001",
+   "locale": "en",
+   "text": "retreat if an enemy gets within 4 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-002",
+   "locale": "en",
+   "text": "if enemies are within 2 cells, hold position",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-003",
+   "locale": "en",
+   "text": "fall back when health is below 20%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 20
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-004",
+   "locale": "en",
+   "text": "take cover if my health goes under 50 percent",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 50
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-005",
+   "locale": "en",
+   "text": "regroup when morale falls below 25%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-006",
+   "locale": "en",
+   "text": "scatter if I get flanked",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-007",
+   "locale": "en",
+   "text": "retreat if there are fewer than 2 allies nearby",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 2
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-008",
+   "locale": "en",
+   "text": "retreat when more than 5 enemies are around me",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyDensityAbove",
+      "count": 5
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-009",
+   "locale": "en",
+   "text": "advance after 30 seconds",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 30
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-010",
+   "locale": "en",
+   "text": "after 20 seconds, flank left",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 20
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-011",
+   "locale": "en",
+   "text": "hold when I'm in the forest",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-012",
+   "locale": "en",
+   "text": "stay put on the hill",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-013",
+   "locale": "en",
+   "text": "take cover while standing in rubble",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "rubble"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-014",
+   "locale": "en",
+   "text": "if the commander dies, retreat",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-015",
+   "locale": "en",
+   "text": "scatter when the commander is dead",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-016",
+   "locale": "en",
+   "text": "use ability if the nearest enemy is cavalry",
+   "rules": [
+    {
+     "condition": {
+      "kind": "nearestEnemyType",
+      "unitType": "suvari"
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-017",
+   "locale": "en",
+   "text": "focus fire on archers when cavalry is in range",
+   "rules": [
+    {
+     "condition": {
+      "kind": "targetInRange",
+      "unitType": "suvari"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-018",
+   "locale": "en",
+   "text": "attack archers if an enemy is within 3 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-019",
+   "locale": "en",
+   "text": "use ability when an enemy is within 6 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 6
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-020",
+   "locale": "en",
+   "text": "guard the commander if health is below 30%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-021",
+   "locale": "en",
+   "text": "retreat if morale is below 50%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 50
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-022",
+   "locale": "en",
+   "text": "flank right after 25 seconds",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 25
+     },
+     "action": {
+      "kind": "flankRight"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-023",
+   "locale": "en",
+   "text": "regroup if less than 3 allies are close",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 3
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-024",
+   "locale": "en",
+   "text": "scatter if more than 4 enemies are near",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyDensityAbove",
+      "count": 4
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-025",
+   "locale": "en",
+   "text": "RETREAT IF AN ENEMY IS WITHIN 4 CELLS",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-026",
+   "locale": "en",
+   "text": "pull back if I am surrounded",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-027",
+   "locale": "en",
+   "text": "if cavalry is in my range, shoot them",
+   "rules": [
+    {
+     "condition": {
+      "kind": "targetInRange",
+      "unitType": "suvari"
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-028",
+   "locale": "en",
+   "text": "keep your position when standing on a hill",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "hill"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-029",
+   "locale": "en",
+   "text": "if the nearest enemy is a spearman, retreat",
+   "rules": [
+    {
+     "condition": {
+      "kind": "nearestEnemyType",
+      "unitType": "mizrakci"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-030",
+   "locale": "en",
+   "text": "charge when the enemy is within 4 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-031",
+   "locale": "en",
+   "text": "when the commander is killed fall back",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-032",
+   "locale": "en",
+   "text": "attack when an enemy is within 3 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-033",
+   "locale": "en",
+   "text": "retreat to the forest if health below 30",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-034",
+   "locale": "en",
+   "text": "when morale drops under 35% regroup",
+   "rules": [
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 35
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-035",
+   "locale": "en",
+   "text": "fall back if an enemy comes within 1 cell",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 1
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-036",
+   "locale": "en",
+   "text": "advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-037",
+   "locale": "en",
+   "text": "retreat",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-038",
+   "locale": "en",
+   "text": "hold position",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-039",
+   "locale": "en",
+   "text": "guard the commander",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "guardCommander"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-040",
+   "locale": "en",
+   "text": "focus on the cavalry",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "suvari"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-041",
+   "locale": "en",
+   "text": "take cover",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-042",
+   "locale": "en",
+   "text": "scatter",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-043",
+   "locale": "en",
+   "text": "regroup",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-044",
+   "locale": "en",
+   "text": "use your special ability",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-045",
+   "locale": "en",
+   "text": "flank left",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-046",
+   "locale": "en",
+   "text": "go forward",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-047",
+   "locale": "en",
+   "text": "flank from the right",
+   "rules": [
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "flankRight"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-048",
+   "locale": "en",
+   "text": "retreat if an enemy is within 3 cells, otherwise advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-049",
+   "locale": "en",
+   "text": "if health below 30% take cover. if enemy within 4 cells focus fire. else advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 30
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 4
+     },
+     "action": {
+      "kind": "focusFire"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-050",
+   "locale": "en",
+   "text": "if an enemy is within 2 cells use ability, otherwise hold",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "useAbility"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-051",
+   "locale": "en",
+   "text": "scatter if flanked; retreat if morale below 40%; otherwise advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "isFlanked"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    },
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 40
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-052",
+   "locale": "en",
+   "text": "after 10 seconds flank left and focus fire on cavalry if an enemy is within 3 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 10
+     },
+     "action": {
+      "kind": "flankLeft"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "suvari"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-053",
+   "locale": "en",
+   "text": "hold if in the forest, advance if on open ground",
+   "rules": [
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "forest"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    },
+    {
+     "condition": {
+      "kind": "terrainIs",
+      "terrain": "open"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-054",
+   "locale": "en",
+   "text": "if fewer than 3 allies nearby regroup, if enemy within 2 cells attack, otherwise hold",
+   "rules": [
+    {
+     "condition": {
+      "kind": "allyCountBelow",
+      "count": 3
+     },
+     "action": {
+      "kind": "regroup"
+     }
+    },
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "advance"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-055",
+   "locale": "en",
+   "text": "advance, but retreat if health drops below 25%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 25
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-056",
+   "locale": "en",
+   "text": "focus fire on archers and retreat if an enemy is within 2 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 2
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-057",
+   "locale": "en",
+   "text": "if the commander dies scatter, if morale is below 20% retreat, otherwise hold",
+   "rules": [
+    {
+     "condition": {
+      "kind": "commanderDead"
+     },
+     "action": {
+      "kind": "scatter"
+     }
+    },
+    {
+     "condition": {
+      "kind": "moraleBelow",
+      "percent": 20
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "hold"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-058",
+   "locale": "en",
+   "text": "when an enemy gets within 5 cells focus on archers, else advance",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 5
+     },
+     "action": {
+      "kind": "focusFire",
+      "unitType": "okcu"
+     }
+    },
+    {
+     "condition": {
+      "kind": "always"
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-059",
+   "locale": "en",
+   "text": "retreat if an enemy is within three cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 3
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-060",
+   "locale": "en",
+   "text": "take cover when health is below forty five percent",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 45
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-061",
+   "locale": "en",
+   "text": "advance after fifteen seconds",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 15
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-062",
+   "locale": "en",
+   "text": "advance after one minute",
+   "rules": [
+    {
+     "condition": {
+      "kind": "timeAfter",
+      "seconds": 60
+     },
+     "action": {
+      "kind": "advance"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-063",
+   "locale": "en",
+   "text": "retreat if an enemy is within 15 cells",
+   "rules": [
+    {
+     "condition": {
+      "kind": "enemyWithin",
+      "cells": 15
+     },
+     "action": {
+      "kind": "retreat"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-064",
+   "locale": "en",
+   "text": "take cover if health is below 5%",
+   "rules": [
+    {
+     "condition": {
+      "kind": "healthBelow",
+      "percent": 5
+     },
+     "action": {
+      "kind": "takeCover"
+     }
+    }
+   ]
+  },
+  {
+   "id": "en-065",
+   "locale": "en",
+   "text": "retreat if enemies approach",
+   "error": "missingConditionParameter:enemyWithin"
+  },
+  {
+   "id": "en-066",
+   "locale": "en",
+   "text": "retreat if my health is low",
+   "error": "missingConditionParameter:healthBelow"
+  },
+  {
+   "id": "en-067",
+   "locale": "en",
+   "text": "retreat if an enemy shows up",
+   "error": "unrecognizedCondition"
+  },
+  {
+   "id": "en-068",
+   "locale": "en",
+   "text": "advance if health is above 60%",
+   "error": "unsupportedComparison:healthBelow"
+  },
+  {
+   "id": "en-069",
+   "locale": "en",
+   "text": "hold if the enemy is farther than 5 cells",
+   "error": "unsupportedComparison:enemyWithin"
+  },
+  {
+   "id": "en-070",
+   "locale": "en",
+   "text": "if an enemy is within 3 cells",
+   "error": "missingAction:enemyWithin"
+  },
+  {
+   "id": "en-071",
+   "locale": "en",
+   "text": "advance, otherwise retreat",
+   "error": "conflictingDefaultOrders"
+  },
+  {
+   "id": "en-072",
+   "locale": "en",
+   "text": "hold for 10 seconds then advance",
+   "error": "multipleActions"
+  },
+  {
+   "id": "en-073",
+   "locale": "en",
+   "text": "hello there",
+   "error": "noOrderRecognized"
+  },
+  {
+   "id": "en-074",
+   "locale": "en",
+   "text": "what is the weather",
+   "error": "noOrderRecognized"
+  }
+ ]
+}
