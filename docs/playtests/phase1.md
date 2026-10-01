@@ -21,7 +21,7 @@ kriterleri tablosu):
 | 3. parti bağımlılık yok | `Package.resolved` hiçbir pakette yok |
 | Yeniden başlatma < 100 ms | `BattleModelTests.restartReseeksWithoutResimulating` yeşil |
 | Erişilebilirlik temeli | `performAccessibilityAudit()` yeşil (F1.13, bilinen/belgelenmiş istisnalar hariç) |
-| 150 birimde 60 fps | **Simülatörde evet** (G16, aşağıda) — 150 figürde sabit 60 fps, `update` kare başına ~1 ms. Gerçek cihazda ölçüm hâlâ kullanıcıda |
+| 150 birimde 60 fps | **Evet** (G16, aşağıda) — simülatörde ve gerçek iPhone'da (Instruments, Release) 150 figürde 1× ve 4×'te 60 fps; açılış dışında kendiliğinden hitch yok. 8. cephe kaydı ve `update` p99 değeri hâlâ eksik |
 
 Yani mekanik ölçüm tarafı tamam; eksik olan tek şey bu belgenin asıl konusu — gerçek insanların 10 dakika
 boyunca bunu eğlenceli bulup bulmadığı.
@@ -69,9 +69,15 @@ kullandığını gösteriyor.
 
 | Cihaz | iOS | Senaryo | fps | Hitch | `update` p99 | Not |
 |---|---|---|---|---|---|---|
-| | | Stres 1× | | | | |
-| | | Stres 4× | | | | |
+| iPhone 17 (ProMotion) | 27.0 | Stres 1×, 47 sn | 60 (SpriteKit sayacı, savaş boyunca) | 4 · toplam 187,5 ms · en uzun 133 ms | ölçülmedi | Dördü de ilk ~4 sn'de (açılış); sonraki ~43 sn'de hitch yok. Sayaç: 1031 düğüm |
+| iPhone 17 | 27.0 | Stres 4×, 41 sn | 60 (sayaç) | 16 · toplam 708 ms · en uzun 217 ms | ölçülmedi | Açılışta birkaç; 27–31. sn arasında uygulama etkin değildi (ekran görüntüsü alındı) ve hitch'lerin çoğu orada; 34. ve 36. sn'de iki tekil hitch açıklanamadı. Sayaç: 1031 düğüm, 3 çizim |
 | | | 8. cephe | | | | |
+
+Notlar: en kısa hitch süresi 8,33 ms, yani ekran 120 Hz; sahne 60 fps'e sabit (SpriteKit'in varsayılanı), bu
+yüzden Instruments kare aralığı 16,7 ms'dir. 4× kaydındaki 27–31. sn kümesi `Foreground - Active` izindeki
+boşlukla çakışıyor; uygulama o sırada sistemin ekran görüntüsü arayüzü yüzünden etkin değildi, oyunun
+kendi takılması sayılmadı. Savaş stres düzeneğinde 1:30'dan sonra kilitlendi (iki taraf aynı emirlerle
+karşılıklı kalkan duvarında duruyor) ve ölü figürler masada kaldığı için 1031 düğümün hepsi çizilmeye devam etti.
 
 ## Kurulum
 
