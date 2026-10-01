@@ -15,7 +15,11 @@ struct BattleSceneView: View {
     var audio: (any AudioPlaying)?
     var onPlayerOrder: (() -> Void)?
 
-    @State private var scene: BattleScene
+    /// Built once, when the view first appears — not in `init`. The battle screen's body is re-evaluated
+    /// while the replay runs, and a scene passed as `State`'s initial value was built (terrain bake,
+    /// `FigureMotion`, `BattleSoundscape`) on every one of those re-evaluations and thrown away: G16
+    /// measured the battle at 8.6 fps with 150 figures, 20 fps with 25.
+    @State private var scene: BattleScene?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     init(
@@ -30,7 +34,6 @@ struct BattleSceneView: View {
         self.currentOrder = currentOrder
         self.audio = audio
         self.onPlayerOrder = onPlayerOrder
-        _scene = State(initialValue: BattleScene(config: config, timeline: timeline, clock: clock))
     }
 
     /// `-showsDrawCount YES`: SpriteKit's draw-call and node counters over the table — how G5's "the
@@ -43,16 +46,24 @@ struct BattleSceneView: View {
         // scales anything, so the sand table lands centered (SwiftUI centers a smaller child in its
         // parent by default) instead of pinned to whichever corner `SKScene.anchorPoint` happens to
         // place the scene's origin at.
-        SpriteView(scene: scene, options: [.ignoresSiblingOrder], debugOptions: Self.debugOptions)
-            .onAppear {
-                scene.onUnitTapped = onUnitTapped
-                scene.currentOrder = currentOrder
-                scene.audio = audio
-                scene.onPlayerOrder = onPlayerOrder
-                scene.reduceMotion = reduceMotion
+        Group {
+            if let scene {
+                SpriteView(scene: scene, options: [.ignoresSiblingOrder], debugOptions: Self.debugOptions)
+            } else {
+                Color.clear
             }
-            .onChange(of: reduceMotion) { _, newValue in scene.reduceMotion = newValue }
-            .aspectRatio(BoardProjection.table(for: config.map).aspectRatio, contentMode: .fit)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .onAppear {
+            let scene = scene ?? BattleScene(config: config, timeline: timeline, clock: clock)
+            scene.onUnitTapped = onUnitTapped
+            scene.currentOrder = currentOrder
+            scene.audio = audio
+            scene.onPlayerOrder = onPlayerOrder
+            scene.reduceMotion = reduceMotion
+            self.scene = scene
+        }
+        .onChange(of: reduceMotion) { _, newValue in scene?.reduceMotion = newValue }
+        .aspectRatio(BoardProjection.table(for: config.map).aspectRatio, contentMode: .fit)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

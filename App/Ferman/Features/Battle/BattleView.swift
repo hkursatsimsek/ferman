@@ -190,8 +190,9 @@ struct BattleView: View {
         }
     }
 
+    /// `ReplayClock.elapsedSeconds`, not `currentTick`: this body must not be re-evaluated every frame.
     private var elapsedSeconds: Int {
-        Int((model.clock?.currentTick ?? 0) / Int32(BattleConfig.ticksPerSecond))
+        model.clock?.elapsedSeconds ?? 0
     }
 
     private var speedBinding: Binding<BattleSpeed> {

@@ -100,32 +100,42 @@ struct BattleTriggerStrip: View {
         .padding(.bottom, FermanSpacing.xs)
     }
 
+    /// Scrolls sideways when the army's types don't fit (all four do not on an iPhone 18 Pro) — squeezed
+    /// into the width instead, each name broke mid-word ("Kalk / anlı").
     private var unitTypeTabs: some View {
-        HStack(spacing: FermanSpacing.sm) {
-            ForEach(unitTypes, id: \.self) { unitType in
-                let isSelected = unitType == selectedUnitType
-                Button {
-                    onSelectUnitType(unitType)
-                } label: {
-                    HStack(spacing: FermanSpacing.xxs) {
-                        UnitToken(type: unitType, size: .chip)
-                        Text(OrderPhraseFormatter.unitTypeName(unitType))
-                            .font(isSelected ? FermanFont.tabSelected() : FermanFont.tab())
-                            .foregroundStyle(isSelected ? Color.paper : Color.paper.opacity(0.7))
-                    }
-                    .padding(.trailing, FermanSpacing.xs)
-                    .overlay(alignment: .bottom) {
-                        Rectangle().fill(isSelected ? Color.brass : .clear).frame(height: 2)
-                    }
-                    .contentShape(Rectangle())
+        ScrollView(.horizontal) {
+            HStack(spacing: FermanSpacing.sm) {
+                ForEach(unitTypes, id: \.self) { unitType in
+                    unitTypeTab(unitType)
                 }
-                .buttonStyle(.plain)
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(OrderPhraseFormatter.unitTypeName(unitType))
-                .accessibilityAddTraits(isSelected ? [.isSelected] : [])
             }
-            Spacer(minLength: 0)
         }
+        .scrollIndicators(.hidden)
+        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+    }
+
+    private func unitTypeTab(_ unitType: UnitTypeID) -> some View {
+        let isSelected = unitType == selectedUnitType
+        return Button {
+            onSelectUnitType(unitType)
+        } label: {
+            HStack(spacing: FermanSpacing.xxs) {
+                UnitToken(type: unitType, size: .chip)
+                Text(OrderPhraseFormatter.unitTypeName(unitType))
+                    .font(isSelected ? FermanFont.tabSelected() : FermanFont.tab())
+                    .foregroundStyle(isSelected ? Color.paper : Color.paper.opacity(0.7))
+                    .lineLimit(1)
+            }
+            .padding(.trailing, FermanSpacing.xs)
+            .overlay(alignment: .bottom) {
+                Rectangle().fill(isSelected ? Color.brass : .clear).frame(height: 2)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(OrderPhraseFormatter.unitTypeName(unitType))
+        .accessibilityAddTraits(isSelected ? [.isSelected] : [])
     }
 }
 
