@@ -71,6 +71,17 @@ struct ContentView: View {
             }
             .environment(router)
             .environment(\.frontTransition, frontTransition)
+        } else if let catalog, UserDefaults.standard.bool(forKey: "uiTestStressBattle"),
+            let config = StressBattle.config(catalog: catalog)
+        {
+            // `-uiTestStressBattle YES`: 150 figures on the table at once, for G16's frame-rate check.
+            NavigationStack(path: $router.path) {
+                destination(for: .battle(config, front: nil), catalog: catalog)
+                    .navigationDestination(for: Route.self) { route in
+                        destination(for: route, catalog: catalog)
+                    }
+            }
+            .environment(router)
         } else if let catalog, let screen = DirectLaunch.current, let front = directLaunchFront(screen, catalog) {
             NavigationStack(path: $router.path) {
                 directLaunchView(screen, front: front, catalog: catalog)
