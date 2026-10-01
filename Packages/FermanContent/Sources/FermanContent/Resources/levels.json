@@ -20,17 +20,17 @@
         "placements": [
           {
             "type": "suvari",
-            "cell": 23,
+            "cell": 143,
             "isCommander": false
           },
           {
             "type": "suvari",
-            "cell": 47,
+            "cell": 167,
             "isCommander": false
           },
           {
             "type": "suvari",
-            "cell": 71,
+            "cell": 191,
             "isCommander": false
           }
         ],
@@ -54,22 +54,22 @@
         "placements": [
           {
             "type": "mizrakci",
-            "cell": 0,
+            "cell": 120,
             "isCommander": false
           },
           {
             "type": "mizrakci",
-            "cell": 24,
+            "cell": 144,
             "isCommander": false
           },
           {
             "type": "mizrakci",
-            "cell": 48,
+            "cell": 168,
             "isCommander": false
           },
           {
             "type": "mizrakci",
-            "cell": 72,
+            "cell": 192,
             "isCommander": false
           }
         ],
@@ -113,12 +113,12 @@
         "placements": [
           {
             "type": "kalkan",
-            "cell": 18,
+            "cell": 114,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 42,
+            "cell": 138,
             "isCommander": false
           }
         ],
@@ -142,17 +142,17 @@
         "placements": [
           {
             "type": "okcu",
-            "cell": 5,
+            "cell": 101,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 29,
+            "cell": 125,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 53,
+            "cell": 149,
             "isCommander": false
           }
         ],
@@ -207,17 +207,17 @@
         "placements": [
           {
             "type": "kalkan",
-            "cell": 18,
+            "cell": 114,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 42,
+            "cell": 138,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 66,
+            "cell": 162,
             "isCommander": false
           }
         ],
@@ -241,17 +241,17 @@
         "placements": [
           {
             "type": "okcu",
-            "cell": 5,
+            "cell": 101,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 29,
+            "cell": 125,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 53,
+            "cell": 149,
             "isCommander": false
           }
         ],
@@ -331,22 +331,22 @@
         "placements": [
           {
             "type": "kalkan",
-            "cell": 23,
+            "cell": 143,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 47,
+            "cell": 167,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 71,
+            "cell": 191,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 95,
+            "cell": 215,
             "isCommander": false
           }
         ],
@@ -370,27 +370,27 @@
         "placements": [
           {
             "type": "kalkan",
-            "cell": 0,
+            "cell": 120,
             "isCommander": false
           },
           {
             "type": "kalkan",
-            "cell": 24,
+            "cell": 144,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 48,
+            "cell": 168,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 72,
+            "cell": 192,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 96,
+            "cell": 216,
             "isCommander": false
           }
         ],
@@ -474,37 +474,37 @@
         "placements": [
           {
             "type": "suvari",
-            "cell": 23,
-            "isCommander": false
-          },
-          {
-            "type": "suvari",
-            "cell": 47,
-            "isCommander": false
-          },
-          {
-            "type": "suvari",
             "cell": 71,
             "isCommander": false
           },
           {
-            "type": "kalkan",
+            "type": "suvari",
             "cell": 95,
             "isCommander": false
           },
           {
-            "type": "kalkan",
+            "type": "suvari",
             "cell": 119,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "kalkan",
             "cell": 143,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "kalkan",
             "cell": 167,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 191,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 215,
             "isCommander": false
           }
         ],
@@ -554,21 +554,11 @@
         "placements": [
           {
             "type": "mizrakci",
-            "cell": 0,
-            "isCommander": false
-          },
-          {
-            "type": "mizrakci",
-            "cell": 24,
-            "isCommander": false
-          },
-          {
-            "type": "okcu",
             "cell": 48,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "mizrakci",
             "cell": 72,
             "isCommander": false
           },
@@ -580,6 +570,16 @@
           {
             "type": "okcu",
             "cell": 120,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 144,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 168,
             "isCommander": false
           }
         ],
@@ -672,16 +672,6 @@
         "placements": [
           {
             "type": "suvari",
-            "cell": 23,
-            "isCommander": false
-          },
-          {
-            "type": "suvari",
-            "cell": 47,
-            "isCommander": false
-          },
-          {
-            "type": "suvari",
             "cell": 71,
             "isCommander": false
           },
@@ -691,12 +681,12 @@
             "isCommander": false
           },
           {
-            "type": "kalkan",
+            "type": "suvari",
             "cell": 119,
             "isCommander": false
           },
           {
-            "type": "kalkan",
+            "type": "suvari",
             "cell": 143,
             "isCommander": false
           },
@@ -706,18 +696,28 @@
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "kalkan",
             "cell": 191,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "kalkan",
             "cell": 215,
             "isCommander": false
           },
           {
             "type": "okcu",
             "cell": 239,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 263,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 287,
             "isCommander": false
           }
         ],
@@ -767,26 +767,16 @@
         "placements": [
           {
             "type": "mizrakci",
-            "cell": 0,
-            "isCommander": false
-          },
-          {
-            "type": "mizrakci",
-            "cell": 24,
-            "isCommander": false
-          },
-          {
-            "type": "mizrakci",
             "cell": 48,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "mizrakci",
             "cell": 72,
             "isCommander": false
           },
           {
-            "type": "okcu",
+            "type": "mizrakci",
             "cell": 96,
             "isCommander": false
           },
@@ -803,6 +793,16 @@
           {
             "type": "okcu",
             "cell": 168,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 192,
+            "isCommander": false
+          },
+          {
+            "type": "okcu",
+            "cell": 216,
             "isCommander": false
           }
         ],
@@ -1213,17 +1213,17 @@
           },
           {
             "type": "okcu",
-            "cell": 22,
+            "cell": 118,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 46,
+            "cell": 142,
             "isCommander": false
           },
           {
             "type": "okcu",
-            "cell": 70,
+            "cell": 166,
             "isCommander": false
           }
         ],
