@@ -640,7 +640,7 @@ F1.14'ün mekanik kabul kriterleri yeşilken ürün sahibinin kararıyla araya g
 | Adım | Çıktı | Bitti tanımı |
 |---|---|---|
 | F3.1 | `DifficultyCurve` tabloları: formüller üretici araçta, runtime tamsayı tablo (D19) | Tablo testi |
-| F3.2 | Kısıt kartlarının kesin tanımı ve etkisi. Öneri: **Sis** — düşman kompozisyonu gizli · **Körlük** — algı ≤ 3 kare · **Tek akıl** — tüm tipler tek program · **İnat** — 3 sn bağlılık · **Sessiz emir** — doğal dil yok, sayaç şeridi gizli · **Vekil** — düşmanın yazdığı silinemez üst kural | Simülasyon ve editör testleri |
+| F3.2 | Kısıt kartlarının kesin tanımı ve etkisi. Öneri: **Sis** — düşman kompozisyonu gizli · **Körlük** — algı ≤ 3 kare · **Tek akıl** — tüm tipler tek program · **İnat** — 3 sn bağlılık · **Sessiz emir** — doğal dil yok, sayaç şeridi gizli · **Vekil** — düşmanın yazdığı silinemez üst kural. **Sis'te ipucu kademeleri (D28):** tip silüetleri bedava → tip başına sayılar → tam yerleşim; sayılar ve yerleşim ödüllü reklamla (F5.3) ya da ilk denemeden sonra bedava açılır (muhasebe düşmanı zaten göstermiştir) | Simülasyon ve editör testleri |
 | F3.3 | Harita tehlikesi H(n) tanımı ve haritalar | İçerik doğrulama |
 | F3.4 | Elle yazılmış düşman taktik kütüphanesi (`RuleProgram` arketipleri) + seviye 1–10 | Çözülebilirlik testleri |
 | F3.5 | `EnemyAI/EnemyTacticTree` (`GKDecisionTree`, seviye 11–25): oyuncu profili özellikleri → taktik arketipi → Sendable `EnemyTactic` | macOS testleri |
@@ -648,6 +648,7 @@ F1.14'ün mekanik kabul kriterleri yeşilken ürün sahibinin kararıyla araya g
 | F3.7 | Ayna seviyeleri (41+): oyuncunun `n − k` seviyesindeki kazanan programı düşman olur; `k` son 5 sonuca göre 3–8 arasında kayar; program yoksa yedek arketip | Testler |
 | F3.8 | 40 seviye | Çözülebilirlik ve kalibrasyon testleri |
 | F3.9 | Gecelik denge iş akışı (GitHub Actions schedule, Linux): 10k rastgele set × 50 kompozisyon → CSV + aykırı değer raporu, regresyon eşiği %5 | Artifact üretiliyor |
+| F3.10 | **Takviye** (öneri, D28): oyuncu savaştan önce yedek birlik ve bir çağırma emri yazar (ör. "3 düşman düştüğünde okçuları sahaya sür"); düşman öldürmek savaş içinde takviye puanı kazandırır. Simülasyonun parçasıdır (`FermanCore`, kenar tetiklemeli, deterministik), savaş sırasında oyuncu girdisi yoktur (kural 4); yeni koşul/eylem `simulationVersion`'ı artırır. Seviyeler arası taşınan para birimi değildir | Simülasyon testleri, altın dosyalar, denge batch'i |
 
 **Zorluk formülleri** (üretici araçta hesaplanır, tabloya pişirilir):
 
@@ -708,9 +709,9 @@ H(n)  = min(4, n/8)                   // harita tehlikesi
 | F5.4 | Banner yalnızca ana menü ve meta ekranlarda; savaş ve editör ekranında asla; ödeme yapan kullanıcıda **yüklenmez** (gizlenmez) |
 | F5.5 | StoreKit 2: configuration file, `Transaction.updates` dinleyicisi, `currentEntitlements`, token'larla stillenmiş `SubscriptionStoreView` / `ProductView`, geri yükleme, `EntitlementStore`. Ürünler: Reklamsız $4.99 · Sezon Geçişi $7.99 · Komutanlık $3.99/ay |
 | F5.6 | AdAttributionKit |
-| F5.7 | `EntitlementIndependenceTests`: hiçbir hak R(n)'i değiştiremez; tasarımdaki "1 240" kaynağının kararı |
+| F5.7 | `EntitlementIndependenceTests`: hiçbir hak ya da reklam ödülü R(n)'i ve ordu bütçesini (`playerBudget`, D28) değiştiremez; tasarımdaki "1 240" kaynağının kararı |
 
-**Değişmez kural:** Kural bütçesi `R(n)` satılamaz. Kozmetik, kolaylık ve yatay içerik satılabilir.
+**Değişmez kural:** Kural bütçesi `R(n)` ve ordu bütçesi satılamaz, reklamla artırılamaz (D28). Kozmetik, kolaylık ve yatay içerik satılabilir.
 
 ---
 

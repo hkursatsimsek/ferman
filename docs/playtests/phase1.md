@@ -109,6 +109,7 @@ karşılıklı kalkan duvarında duruyor) ve ölü figürler masada kaldığı i
 |---|---|
 | Katılımcı # / tarih | |
 | Cihaz (simülatör / gerçek cihaz, model) | |
+| Düşman ordusunu (seviye kartındaki "Karşındaki ordu" ya da masanın üstündeki demir figürler) kendi ordusunu kurmadan önce fark etti mi? | |
 | İlk kuralı yazmaya kadar geçen süre | |
 | Emir Editörü'nde tıkandığı an oldu mu? Nerede? | |
 | Seçici akışını (koşul → parametre → eylem) kendi başına mı çözdü, yoksa açıklama mı gerekti? | |

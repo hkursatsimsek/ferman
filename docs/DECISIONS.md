@@ -323,3 +323,13 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
   - Okçu okları, replay geleceği bildiği için uçuş süresi kadar önceden fırlatılır ve `attack` tick'inde iner.
   - `spearWall`/`shieldWall`/`charge` etkinleşmesi `FermanCore`'da mevcut `.abilityUsed` olayıyla yalnızca `recordEvents` açıkken yayımlanır. Durum ve RNG değişmez, checksum değişmez, `simulationVersion` artmaz.
 - **Sonuçlar:** Geri sarma, hız ve klip birebir aynı kareyi üretir. Titreme gibi "rastgele" görünen hareketler birim kimliği + tick hash'inden türetilir.
+
+## D28 — Ordu bütçesi satılamaz; reklam yalnızca kolaylık ve bilgi verir
+
+- **Tarih:** 2026-10-01 · **Durum:** Kabul · **Kaynak:** Kullanıcı
+- **Bağlam:** Ürün sahibi üç öneri getirdi: rakip hakkında ipucu (ve ödüllü reklamla daha fazlası), düşman öldürdükçe artan puan, reklam izleyince daha fazla asker. FERMAN-PLAN Faz 5'in değişmezi yalnızca kural hakkı `R(n)`'i koruyordu; birim yerleştirme bütçesi (`LevelDefinition.playerBudget`) için açık bir kural yoktu.
+- **Karar:**
+  - Oyuncunun ordu bütçesi (`playerBudget`) da `R(n)` gibi **satılamaz ve reklamla artırılamaz.** Seviyeler elle ve `LevelSolvabilityTests` ile bu bütçeye göre dengelenir; fazladan askerle kazanmak emirleri düzeltmeyi gereksiz kılar, muhasebe teşhisini anlamsızlaştırır ve Arena'da kazanmak için ödemeye dönüşür.
+  - Ödüllü reklamın verebilecekleri F5.3'teki listeyle sınırlıdır: yeniden dene · düşman önizlemesi (yalnızca düşmanın gizli olduğu Sis kısıtlı seviyelerde, F3.2) · Arena ekstra maç · ödül 2×.
+  - Düşmanı öldürerek kazanılan puan seviyeler arası taşınan bir para birimi olmaz (kazanan güçlenir, zorlanan zayıflar; elle dengelenen seviyeler bozulur). Aynı fikir savaşın **içinde**, önceden yazılan bir emirle deterministik olarak harcanan "Takviye" mekaniği olarak Faz 3'te değerlendirilir (F3.10).
+- **Sonuçlar:** F5.7'deki `EntitlementIndependenceTests` `playerBudget`'ı da kapsar. Seviye ekranı, Sis'siz seviyelerde düşman kompozisyonunu zaten bedava gösterir (G12); ipucu yalnızca Sis'li seviyelerde kademelenir.
