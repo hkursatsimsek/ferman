@@ -143,8 +143,12 @@ sıktı) sayılardan daha belirleyici olmalı.
 
 ## Sonuçlar
 
-_(Boş — gerçek oturumlar yürütüldükçe doldurulacak. Her katılımcı için yukarıdaki gözlem şablonunu kopyalayın.)_
+**2026-10-01 — 2 katılımcı** (kullanıcı yürüttü). İkisi de oyunu beğendi. Gözlem şablonu katılımcı başına
+doldurulmadı; aşağıdaki karar bu özet üzerine verildi.
 
 ## Karar
 
-_(Boş — 5 oturum tamamlanmadan verilemez.)_
+**Devam — Faz 2'ye geçildi** (kullanıcı kararı, 2026-10-01). Protokolün en az 5 katılımcı eşiği karşılanmadı;
+karar bilerek 2 olumlu oturumla verildi. Faz 2'nin doğal dil katmanı mekaniği kurtarmak için değil kolaylık
+olarak ekleniyor (§6 KARAR NOKTASI); sonraki playtest'lerde (Faz 6 beta) bu şablonu kullanarak eksik veri
+tamamlanmalı.

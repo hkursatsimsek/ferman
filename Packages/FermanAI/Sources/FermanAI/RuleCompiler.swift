@@ -1,9 +1,24 @@
 import FermanCore
 
-/// A parameter a draft never filled in — a selector left at its placeholder, or a language model
-/// that didn't supply one. Caught here, before `RuleValidator` ever sees the order.
+/// Why an input couldn't become orders. Caught here, before `RuleValidator` ever sees them.
 public enum RuleCompileError: Error, Sendable, Equatable {
+    /// A parameter never filled in — a selector left at its placeholder, a language model that
+    /// didn't supply one, or typed text that names the condition but not its number
+    /// ("düşman yaklaşırsa geri çekil": how many cells?).
     case missingConditionParameter(ConditionKind)
+    /// Nothing in the text read as an order.
+    case noOrderRecognized
+    /// A condition with no action before or after it.
+    case missingAction(ConditionKind)
+    /// Text that is clearly a condition ("düşman görünce…") but not one the game has.
+    case unrecognizedCondition
+    /// A comparison the condition can't express: health and morale only compare *below*,
+    /// enemy distance only *closer than* ("canım %40'ın üstündeyse").
+    case unsupportedComparison(ConditionKind)
+    /// Two different default orders in one text ("ilerle … başka durumda geri çekil").
+    case conflictingDefaultOrders
+    /// Two actions in one clause ("10 saniye bekle sonra ilerle"): splitting them is a guess.
+    case multipleActions
 }
 
 /// What a compiler needs beyond its own input: which unit type the order is for, what the level
