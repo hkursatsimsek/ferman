@@ -5,6 +5,7 @@
 //  Created by Hamza Kürşat Şimşek on 15.09.2026.
 //
 
+import FermanAI
 import FermanContent
 import FermanCore
 import SwiftUI
@@ -145,6 +146,9 @@ struct ContentView: View {
                         model: RuleEditorModel(
                             unitTypes: unitTypes, catalog: catalog.units, constraints: level.constraints,
                             enemyUnitTypes: catalog.units.map(\.id).filter { enemyTypes.contains($0) },
+                            // The template first, the on-device model for what it doesn't read (D30);
+                            // with Apple Intelligence off the chain is simply the template (F2.6).
+                            textCompiler: CompilerChain(model: FoundationModelsCompiler()),
                             audio: AudioService.shared),
                         battleSetup: RuleEditorView.BattleSetup(
                             front: front, level: level, map: map, catalog: catalog, placements: playerSetup.placements))

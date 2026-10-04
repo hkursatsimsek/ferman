@@ -170,6 +170,17 @@ struct TemplateFragment {
         return try takeEnemyWithin()
     }
 
+    /// Whether any word is left that no match used and that isn't glue (`TemplateLexicon.glueWords`,
+    /// articles, conditional words): a word the lexicon doesn't know.
+    var hasUnreadWords: Bool {
+        tokens.indices.contains { index in
+            let word = tokens[index].word
+            return !consumed[index] && tokens[index].number == nil && word != "%"
+                && !TemplateLexicon.glueWords.contains(word) && !TemplateLexicon.englishArticles.contains(word)
+                && !TemplateLexicon.englishPrepositions.contains(word) && !TemplateLexicon.isConditionalWord(word)
+        }
+    }
+
     /// Text that reads as a condition ("eğer…", "düşman görünce…") but matched none.
     var hasConditionalWord: Bool {
         tokens.indices.contains { !consumed[$0] && TemplateLexicon.isConditionalWord(tokens[$0].word) }

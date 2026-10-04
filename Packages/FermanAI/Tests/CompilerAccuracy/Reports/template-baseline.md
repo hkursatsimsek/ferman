@@ -2,6 +2,8 @@
 
 **Exact match: 149/150 (99.3%)**
 
+Time per phrase: p50 0 ms · p95 1 ms · max 1 ms
+
 | By language | Exact |
 |---|---|
 | tr | 75/76 (98.7%) |

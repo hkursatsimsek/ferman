@@ -169,6 +169,15 @@ enum TemplateLexicon {
         (.open, ["open ground", "open field", "plain*", "open"]),
     ]
     static let englishPrepositions: Set<String> = ["in", "on", "at", "inside"]
+    /// Words that carry no order of their own — pronouns, auxiliaries, the soldiers being addressed.
+    /// A fragment whose only unread words are these has really said nothing more.
+    static let glueWords: Set<String> = [
+        "is", "are", "am", "be", "been", "being", "gets", "get", "got", "comes", "come", "my", "me", "i", "im",
+        "you", "your", "there", "of", "to", "from", "than", "then", "it", "its", "them", "they", "we", "our", "us",
+        "all", "any", "some", "so", "just", "now", "still", "please", "unit", "units", "soldiers", "troops", "men",
+        "ben", "sen", "biz", "siz", "onlar", "o", "bu", "su", "de", "da", "ki", "gibi", "kadar", "icin", "ile",
+        "hemen", "artik", "lutfen", "asker", "askerler", "askerlerim", "birlik", "birlikler", "herkes",
+    ]
     static let englishArticles: Set<String> = ["the", "a", "an"]
 
     // MARK: Units

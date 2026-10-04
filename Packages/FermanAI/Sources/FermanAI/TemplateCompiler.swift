@@ -40,7 +40,7 @@ public struct TemplateCompiler: RuleCompiler<String>, RuleDrafter {
             if condition == nil, fragment.hasConditionalWord {
                 throw .unrecognizedCondition
             }
-            try assembler.add(condition: condition, action: action)
+            try assembler.add(condition: condition, action: action, hasUnreadWords: fragment.hasUnreadWords)
         }
         return try assembler.finish()
     }
@@ -53,9 +53,11 @@ private struct OrderAssembler {
     private var drafts: [RuleDraft] = []
     private var defaultAction: Action?
     private var pendingCondition: ConditionDraft?
+    /// Whether the pending condition's fragment had words left that no match used.
+    private var pendingConditionHadUnreadWords = false
     private var pendingAction: Action?
 
-    mutating func add(condition: ConditionDraft?, action: Action?) throws(RuleCompileError) {
+    mutating func add(condition: ConditionDraft?, action: Action?, hasUnreadWords: Bool) throws(RuleCompileError) {
         switch (condition, action) {
         case (nil, nil):
             return
@@ -70,6 +72,7 @@ private struct OrderAssembler {
             } else {
                 try flushPendingCondition()
                 pendingCondition = condition
+                pendingConditionHadUnreadWords = hasUnreadWords
             }
         case (nil, let action?):
             if let condition = pendingCondition {
@@ -118,7 +121,7 @@ private struct OrderAssembler {
 
     private mutating func flushPendingCondition() throws(RuleCompileError) {
         if let condition = pendingCondition {
-            throw .missingAction(condition.kind)
+            throw pendingConditionHadUnreadWords ? .unrecognizedAction(condition.kind) : .missingAction(condition.kind)
         }
     }
 }

@@ -59,11 +59,13 @@ enum Outcome: Equatable {
         switch error {
         case .missingConditionParameter(let kind): "missingConditionParameter:\(kind.rawValue)"
         case .missingAction(let kind): "missingAction:\(kind.rawValue)"
+        case .unrecognizedAction(let kind): "unrecognizedAction:\(kind.rawValue)"
         case .unsupportedComparison(let kind): "unsupportedComparison:\(kind.rawValue)"
         case .noOrderRecognized: "noOrderRecognized"
         case .unrecognizedCondition: "unrecognizedCondition"
         case .conflictingDefaultOrders: "conflictingDefaultOrders"
         case .multipleActions: "multipleActions"
+        case .modelUnavailable: "modelUnavailable"
         }
     }
 
@@ -144,6 +146,8 @@ struct PhraseScore {
 struct AccuracyReport {
     let compilerName: String
     let scores: [PhraseScore]
+    /// Wall-clock time per phrase, in the order compiled.
+    var durations: [Duration] = []
 
     var exactRate: Double { Self.rate(scores.filter(\.isExact).count, scores.count) }
 
@@ -151,11 +155,28 @@ struct AccuracyReport {
         compiler: any RuleCompiler<String>, name: String, phrases: [LabeledPhrase], context: CompileContext
     ) async -> AccuracyReport {
         var scores: [PhraseScore] = []
+        var durations: [Duration] = []
+        let clock = ContinuousClock()
         for phrase in phrases {
+            let start = clock.now
             let outcome = await Outcome(compiling: phrase.text, with: compiler, context: context)
+            durations.append(clock.now - start)
             scores.append(PhraseScore(phrase: phrase, outcome: outcome))
         }
-        return AccuracyReport(compilerName: name, scores: scores)
+        return AccuracyReport(compilerName: name, scores: scores, durations: durations)
+    }
+
+    /// The `fraction` quantile of the per-phrase times (nearest rank).
+    func latency(_ fraction: Double) -> Duration {
+        let sorted = durations.sorted()
+        guard !sorted.isEmpty else { return .zero }
+        let rank = Int((fraction * Double(sorted.count)).rounded(.up)) - 1
+        return sorted[min(max(rank, 0), sorted.count - 1)]
+    }
+
+    private static func milliseconds(_ duration: Duration) -> String {
+        let (seconds, attoseconds) = duration.components
+        return "\(seconds * 1000 + attoseconds / 1_000_000_000_000_000) ms"
     }
 
     static func rate(_ right: Int, _ total: Int) -> Double {
@@ -176,6 +197,13 @@ struct AccuracyReport {
         var lines = ["# Compiler accuracy — \(compilerName)", ""]
         let all = exactRate { _ in true }
         lines.append("**Exact match: \(all.right)/\(all.total) (\(Self.percent(exactRate)))**")
+        if !durations.isEmpty {
+            lines += [
+                "",
+                "Time per phrase: p50 \(Self.milliseconds(latency(0.5))) · p95 \(Self.milliseconds(latency(0.95))) · "
+                    + "max \(Self.milliseconds(latency(1)))",
+            ]
+        }
         lines += ["", "| By language | Exact |", "|---|---|"]
         for locale in ["tr", "en"] {
             let part = exactRate { $0.phrase.locale == locale }

@@ -10,6 +10,9 @@ public enum RuleCompileError: Error, Sendable, Equatable {
     case noOrderRecognized
     /// A condition with no action before or after it.
     case missingAction(ConditionKind)
+    /// A condition, and words beside it that read as no action the game knows ("protect the
+    /// general if…"): likely a verb the lexicon lacks, unlike `missingAction`, where nothing is left.
+    case unrecognizedAction(ConditionKind)
     /// Text that is clearly a condition ("düşman görünce…") but not one the game has.
     case unrecognizedCondition
     /// A comparison the condition can't express: health and morale only compare *below*,
@@ -19,6 +22,10 @@ public enum RuleCompileError: Error, Sendable, Equatable {
     case conflictingDefaultOrders
     /// Two actions in one clause ("10 saniye bekle sonra ilerle"): splitting them is a guess.
     case multipleActions
+    /// The language model couldn't answer — unavailable, the language unsupported, the request over
+    /// its token budget, a refusal or an unreadable reply (D17). Never a statement about the text:
+    /// `CompilerChain` answers with `TemplateCompiler` instead.
+    case modelUnavailable
 }
 
 /// What a compiler needs beyond its own input: which unit type the order is for, what the level
@@ -59,4 +66,10 @@ public protocol RuleCompiler<Input>: Sendable {
 /// instead of refusing the whole sentence. Everything else that can't be read is still an error.
 public protocol RuleDrafter: Sendable {
     func drafts(from text: String, context: CompileContext) async throws(RuleCompileError) -> [RuleDraft]
+    /// Gets ready for the first order — loads a model, warms a session. Called when the editor opens.
+    func prewarm() async
+}
+
+extension RuleDrafter {
+    public func prewarm() async {}
 }

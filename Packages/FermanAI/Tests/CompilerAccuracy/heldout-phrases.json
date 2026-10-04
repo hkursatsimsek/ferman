@@ -287,17 +287,17 @@
    ]
   },
   {
-   "id": "en-h03",
+   "id": "en-h30",
    "locale": "en",
-   "text": "protect the general if morale is under 30%",
+   "text": "if my health drops under 20 percent, duck behind cover",
    "rules": [
     {
      "condition": {
-      "kind": "moraleBelow",
-      "percent": 30
+      "kind": "healthBelow",
+      "percent": 20
      },
      "action": {
-      "kind": "guardCommander"
+      "kind": "takeCover"
      }
     }
    ]
@@ -335,17 +335,17 @@
    ]
   },
   {
-   "id": "en-h06",
+   "id": "en-h31",
    "locale": "en",
-   "text": "after 15 seconds swing around to the left",
+   "text": "after 30 seconds sweep in from the right",
    "rules": [
     {
      "condition": {
       "kind": "timeAfter",
-      "seconds": 15
+      "seconds": 30
      },
      "action": {
-      "kind": "flankLeft"
+      "kind": "flankRight"
      }
     }
    ]
@@ -427,14 +427,14 @@
    ]
   },
   {
-   "id": "en-h12",
+   "id": "en-h32",
    "locale": "en",
-   "text": "if an enemy gets within 2 cells raise the shield wall, otherwise keep advancing",
+   "text": "once an enemy is within 4 cells, plant the spear wall, otherwise hold the line",
    "rules": [
     {
      "condition": {
       "kind": "enemyWithin",
-      "cells": 2
+      "cells": 4
      },
      "action": {
       "kind": "useAbility"
@@ -445,7 +445,7 @@
       "kind": "always"
      },
      "action": {
-      "kind": "advance"
+      "kind": "hold"
      }
     }
    ]

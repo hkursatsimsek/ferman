@@ -208,14 +208,14 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
     - `SystemLanguageModel.default.availability` ve `supportsLocale()` önce kontrol edilir.
     - Her derlemede yeni `LanguageModelSession` açılır; geçmiş tutulmaz.
     - `Instructions` Apple'ın tam locale cümlesiyle başlar: "The person's locale is tr_TR.".
-    - `GenerationOptions(sampling: .greedy)` kullanılır.
+    - `GenerationOptions(samplingMode: .greedy)` kullanılır (iOS 27'de `init(sampling:)` kullanımdan kalktı).
   - **Şema:**
     - `@Generable` ayna tipleri yalnızca `FoundationModelsCompiler.swift` içinde tanımlanır; çekirdek enum'ları FoundationModels'e bağlanmaz.
     - Seviyede kilitli koşul ve eylemler `DynamicGenerationSchema` ile şemadan çıkarılır.
   - **Sınırlar:**
     - `tokenCount(for:)` ile oturum başına < 800 token ve `contextSize` kontrolü yapılır.
     - Editör açılınca `prewarm()` çağrılır.
-    - 2 sn zaman aşımında `TemplateCompiler`'a düşülür.
+    - 2 sn zaman aşımında `TemplateCompiler`'a düşülür. (Zincirin sırası D30 ile değişti: önce `TemplateCompiler`.)
   - **Test:** Birim testlerde iOS 27 `LanguageModel` protokolüyle sahte model kullanılır. Doğruluk harness'ı gerçek modelle macOS/cihazda koşar.
 - **Sonuçlar:** Model hiçbir zaman sonucu belirlemez. Üretilen her kural oyuncuya gösterilir ve onaylanır (CLAUDE.md kural 3).
 
@@ -344,3 +344,14 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
   - Editör yalnızca `any RuleDrafter` ile konuşur. F2.3'ün `FoundationModelsCompiler`'ı ve `TemplateCompiler`'a düşüş zinciri de aynı protokolü uygular.
   - Yazılan emirler, oyuncu mühürleyene kadar programa girmez. Taslak masadayken "Savaşı Başlat" kapalıdır (CLAUDE.md kural 3). Mühürlemeden önce taslaklar aynı `RuleValidator`'dan geçer; kilitli tür, aralık dışı sayı ve kural hakkı aşımı mühürlemeyi engeller.
 - **Sonuçlar:** `RuleDraft` artık yalnızca seçicinin değil, yazılı emrin de durumudur. Seçici sayfası (`RulePickerSheet`) boş alanlı bir taslakla açılabilir.
+
+## D30 — Metin zinciri: önce `TemplateCompiler`, model yalnızca anlaşılmayan metne
+
+- **Tarih:** 2026-10-05 · **Durum:** Kabul · **Kaynak:** Ölçüm (F2.3)
+- **Bağlam:** D17 dil modelini zincirin başına, `TemplateCompiler`'ı yedeğe koyuyordu. F2.3'te gerçek cihaz modeliyle (macOS 27, `SystemLanguageModel.default`, `tr_TR`) 150 etiketli ifade ölçüldü. Model tek başına %64,7 tam eşleşmede kaldı ve 33 kez **yanlış ama geçerli görünen** emir üretti. Ayrı sette (29 ifade) %55,2 ve 11 yanlış kabul; üç ifadesi F2.2 kuralıyla yenilenen ayrı sette son ölçüm %69,0 ve 7 yanlış kabul. `TemplateCompiler` ise geliştirme setinde %99,3, ayrı sette %86,2 tutturdu ve hiç sessiz yanlış emir üretmedi. Modelin süresi Mac'te sıralı koşumda p50 ~1,5 sn, p95 ~2,0 sn; iPhone'da daha yavaş olması beklenir. Talimatları daha fazla ayarlamak ölçüm setine uyum demek olurdu.
+- **Karar:**
+  - `CompilerChain` (yeni dosya, FoundationModels import etmez) önce `TemplateCompiler`'ı çalıştırır. Şablon bir taslak üretirse, boşluklu olsa bile, model hiç sorulmaz.
+  - Model yalnızca şablon metni **anlamadığında** sorulur: `noOrderRecognized`, `unrecognizedCondition` ve yeni `unrecognizedAction` (koşulun yanında şablonun tanımadığı bir fiil kaldı, örneğin "protect the general"). "Anlaşıldı ama oyunda yok" demek olan retler olduğu gibi kalır: eylemsiz koşul (`missingAction`), "üstündeyse" (`unsupportedComparison`), iki eylem, iki varsayılan.
+  - Model 2 sn içinde yanıt vermezse, kullanılamıyorsa ya da metni o da anlamazsa oyuncu şablonun kendi yanıtını görür.
+  - Modelin ürettiği her taslak yine mühürsüz pusula olarak gösterilir (D29, CLAUDE.md kural 3).
+- **Sonuçlar:** Ölçülen zincir: geliştirme setinde %98,7 (yanlış kabul 0), ayrı sette %93,1 (yanlış kabul 2, ikisi de modelden). F2.3'ün %88 hedefi zincirle iki sette de karşılanıyor; tek başına model karşılamıyor ve bu raporlarda ayrıca kayıtlı (`Tests/CompilerAccuracy/Reports/`). Çoğu emirde gecikme sıfır: model yalnızca şablonun okuyamadığı cümlelerde bekletir. Model bir OS güncellemesiyle değişebileceği için ölçüm `FERMAN_MODEL_ACCURACY=1` ile elle tekrarlanır.

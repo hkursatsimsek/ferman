@@ -167,6 +167,9 @@ struct RuleEditorView: View {
         .sensoryFeedback(SoundEffect.stamp.feel?.feedback ?? .impact, trigger: model.justSealed) { _, sealed in
             !sealed.isEmpty
         }
+        .task {
+            await model.prewarmWriting()
+        }
         .task(id: model.justSealed) {
             guard !model.justSealed.isEmpty else { return }
             try? await Task.sleep(for: .seconds(1.4))
@@ -609,6 +612,8 @@ struct RuleEditorView: View {
             String(localized: "Bunu bir emre çeviremedim. Örneğin: “düşman 3 kareden yakınsa geri çekil”.")
         case .missingAction:
             String(localized: "Ne zaman olacağı belli, ne yapacakları değil. Sonuna bir eylem ekle: “… geri çekil”.")
+        case .unrecognizedAction:
+            String(localized: "Ne yapacaklarını anlayamadım. Eylemi başka bir sözle yaz: “… geri çekil”.")
         case .unrecognizedCondition:
             String(localized: "Bu durumu tanımıyorum. “Emir ekle” ile seçerek yazabilirsin.")
         case .unsupportedComparison(let kind):
@@ -624,6 +629,9 @@ struct RuleEditorView: View {
             String(localized: "Bir cümlede iki eylem var. Emirleri virgülle ayır.")
         case .missingConditionParameter:
             String(localized: "Bu emrin bir parametresi eksik kaldı. Tekrar dene.")
+        case .modelUnavailable:
+            // `CompilerChain` answers these itself; only reachable if a lone model is wired in.
+            String(localized: "Bu emri şimdi okuyamadım. “Emir ekle” ile seçerek yazabilirsin.")
         }
     }
 

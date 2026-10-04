@@ -454,6 +454,13 @@ final class RuleEditorModel {
         }
     }
 
+    /// Warms the text path's language model when the editor opens (D17), so the first written order
+    /// doesn't wait for it to load.
+    func prewarmWriting() async {
+        guard canWriteOrders else { return }
+        await textCompiler.prewarm()
+    }
+
     func sealWritten() {
         guard let written, sealBlocker == nil else { return }
         var sealed: Set<EditableRule.ID> = []

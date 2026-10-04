@@ -136,23 +136,26 @@ Sources/FermanAI/
 ├── RuleDraft.swift                 seçicinin ve yazılı emrin taslağı (boş parametre olabilir); rule() → Rule
 ├── ManualCompiler.swift            RuleDraft → [Rule]
 ├── TemplateCompiler.swift          String → [RuleDraft] / [Rule] (TR/EN anahtar kelime, ek normalizasyonu)
-├── FoundationModelsCompiler.swift  String → [Rule] (tek FoundationModels dosyası)
-├── CompilerChain.swift             FM → zaman aşımı/uygunsuzluk → Template
+├── FoundationModelsCompiler.swift  String → [RuleDraft] / [Rule] (tek FoundationModels dosyası; ayna enumlar + dinamik şema)
+├── CompilerChain.swift             Template → (anlaşılmayan metin) FM → zaman aşımı/uygunsuzluk → Template'in yanıtı (D30)
 └── EnemyAI/                        GameplayKit yalnızca burada (D6)
     ├── EnemyTacticTree.swift       GKDecisionTree → EnemyTactic
     ├── EnemyStrategist.swift       GKMonteCarloStrategist → EnemyArmyPlan
     └── PlayerProfile.swift         Sendable girdi: son kazanan ordular/programlar
 ```
 
-### Derleyici hattı (D17, D18, D29)
+### Derleyici hattı (D17, D18, D29, D30)
 ```
 metin ──► CompilerChain (RuleDrafter)
-            ├─ FoundationModelsCompiler
-            │    availability + supportsLocale? ──hayır──► TemplateCompiler
-            │    tokenCount(for:) < min(800, contextSize)?
-            │    yeni LanguageModelSession(instructions: locale cümlesi + görev)
-            │    DynamicGenerationSchema (yalnızca açık koşul/eylem)
-            │    respond(…, options: .init(sampling: .greedy))  ── 2 sn yarışı ──► zaman aşımı ► Template
+            ├─ TemplateCompiler ──taslak (boşluklu olabilir)──► döner, model sorulmaz
+            │       └─ "anlaşıldı ama oyunda yok" reddi (eylemsiz koşul, "üstündeyse", iki eylem, iki varsayılan) ──► döner
+            └─ yalnızca noOrderRecognized / unrecognizedCondition / unrecognizedAction ise:
+                 FoundationModelsCompiler
+                   availability + supportsLocale? ──hayır──► şablonun yanıtı
+                   tokenCount(talimatlar + istem) < min(800, contextSize)?
+                   yeni LanguageModelSession (talimatlar: locale cümlesi + görev + örnekler; prewarm'lı)
+                   DynamicGenerationSchema (koşul başına yapı, yalnızca açık koşul/eylem), includeSchemaInPrompt: false
+                   respond(…, options: .init(samplingMode: .greedy))  ── 2 sn yarışı ──► zaman aşımı ► şablonun yanıtı
             └─► [RuleDraft] ──► mühürsüz pusulalar (boşluk = kadran) ──► RuleValidator ──► oyuncu düzeltir/mühürler ──► [Rule]
 ```
 
