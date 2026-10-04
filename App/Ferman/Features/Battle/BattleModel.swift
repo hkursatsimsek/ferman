@@ -323,7 +323,12 @@ final class BattleModel {
     }
 
     private func sleepStep(_ duration: Duration) async {
-        try? await Task.sleep(for: isSkipping ? Self.skippingStepDuration : duration)
+        try? await Task.sleep(for: stepDuration(duration))
+    }
+
+    /// How long a choreography step lasts now: its own length, or a frame once the player has tapped.
+    func stepDuration(_ duration: Duration) -> Duration {
+        isSkipping ? Self.skippingStepDuration : duration
     }
 
     // MARK: - Trigger strip

@@ -197,6 +197,23 @@ struct TemplateCompilerTests {
         #expect(try await Self.compile("kalkan duvarı") == [Self.rule(.always, .useAbility)])
     }
 
+    // MARK: Spoken orders
+
+    /// Real `DictationTranscriber` output (tr_TR, macOS 27) for orders read aloud by the system's Turkish
+    /// voice (F2.5): numbers come back as digits or words, the comma before "başka durumda" can go
+    /// missing, and the case is whatever the transcriber guessed.
+    @Test(
+        arguments: [
+            (
+                " Düşman üç kareden yakınsa geri Çekil başka durumda ilerle",
+                [rule(.enemyWithin(cells: 3), .retreat), rule(.always, .advance)]
+            ),
+            (" Canım %30'un altına düşerse siper al", [rule(.healthBelow(percent: 30), .takeCover)]),
+        ] as [(String, [Rule])])
+    func readsTranscribedSpeech(text: String, expected: [Rule]) async throws {
+        #expect(try await Self.compile(text) == expected)
+    }
+
     // MARK: Errors
 
     @Test(

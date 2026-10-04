@@ -127,8 +127,26 @@ final class RuleEditorModel {
     /// Orders sealed a moment ago — the view presses the seal on these, then lets it fade.
     private(set) var justSealed: Set<EditableRule.ID> = []
 
+    /// The microphone beside the write field (F2.5): hidden while `.unavailable` (D16).
+    enum ListeningState: Equatable {
+        case unavailable
+        /// The language's speech assets need one download first.
+        case needsAssets
+        case installing(progress: Double)
+        case idle
+        /// The running transcript of what's being said.
+        case listening(transcript: String)
+    }
+
+    private(set) var listening: ListeningState = .unavailable
+    /// Why the last attempt to listen didn't work. Cleared by the next attempt.
+    var listeningError: ListeningError?
+
     private let compiler: any RuleCompiler<RuleDraft>
     private let textCompiler: any RuleDrafter
+    private let listener: (any OrderListening)?
+    private var spokenOrder: (any SpokenOrder)?
+    private var transcriptTask: Task<Void, Never>?
     private let audio: any AudioPlaying
 
     init(
@@ -139,6 +157,7 @@ final class RuleEditorModel {
         initialPrograms: [RuleProgram] = [],
         compiler: any RuleCompiler<RuleDraft> = ManualCompiler(),
         textCompiler: any RuleDrafter = TemplateCompiler(),
+        listener: (any OrderListening)? = nil,
         audio: any AudioPlaying = SilentAudioPlaying()
     ) {
         precondition(!unitTypes.isEmpty, "RuleEditorModel needs at least one unit type")
@@ -150,6 +169,7 @@ final class RuleEditorModel {
         self.enemyUnitTypes = enemyUnitTypes ?? catalog.map(\.id)
         self.compiler = compiler
         self.textCompiler = textCompiler
+        self.listener = listener
         self.audio = audio
         self.selectedUnitType = unitTypes[0]
 
@@ -517,6 +537,75 @@ final class RuleEditorModel {
     func setSlipNumber(_ value: Int, for id: WrittenSlip.ID) {
         guard let index = written?.slips.firstIndex(where: { $0.id == id }) else { return }
         written?.slips[index].draft.conditionNumericValue = value
+    }
+
+    // MARK: - Spoken orders (F2.5)
+
+    func checkListening() async {
+        guard canWriteOrders, let listener else {
+            listening = .unavailable
+            return
+        }
+        switch await listener.availability() {
+        case .ready: listening = .idle
+        case .needsAssets: listening = .needsAssets
+        case .unavailable: listening = .unavailable
+        }
+    }
+
+    func installSpeechAssets() async {
+        guard let listener, listening == .needsAssets else { return }
+        listeningError = nil
+        listening = .installing(progress: 0)
+        do {
+            try await listener.installAssets { [weak self] progress in
+                Task { @MainActor in self?.updateInstallProgress(progress) }
+            }
+            listening = .idle
+        } catch {
+            listening = .needsAssets
+            listeningError = .assetsMissing
+        }
+    }
+
+    private func updateInstallProgress(_ progress: Double) {
+        guard case .installing = listening else { return }
+        listening = .installing(progress: progress)
+    }
+
+    func startListening() async {
+        guard let listener, listening == .idle, written == nil else { return }
+        listeningError = nil
+        do {
+            let order = try await listener.startListening()
+            spokenOrder = order
+            listening = .listening(transcript: "")
+            transcriptTask = Task { [weak self] in
+                do {
+                    for try await transcript in order.transcripts {
+                        self?.listening = .listening(transcript: transcript)
+                    }
+                } catch {
+                    self?.listeningError = .failed
+                }
+            }
+        } catch let error as ListeningError {
+            listeningError = error
+            if error == .assetsMissing { listening = .needsAssets }
+        } catch {
+            listeningError = .failed
+        }
+    }
+
+    /// Closes the microphone and returns what was said, the last words included.
+    func stopListening() async -> String {
+        await spokenOrder?.finish()
+        await transcriptTask?.value
+        let transcript = if case .listening(let transcript) = listening { transcript } else { "" }
+        spokenOrder = nil
+        transcriptTask = nil
+        listening = listener == nil ? .unavailable : .idle
+        return transcript.trimmingCharacters(in: .whitespacesAndNewlines)
     }
 
     // MARK: - Compiling and validation

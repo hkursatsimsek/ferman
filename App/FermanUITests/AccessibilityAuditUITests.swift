@@ -175,4 +175,15 @@ final class AccessibilityAuditUITests: XCTestCase {
                 "Okçu", "Kalkanlı", "1", "2", "3", "4", "5", "düşman \u{2007}\u{2007}\u{2007} kareden yakınsa",
             ])
     }
+
+    /// F2.5: the write field with its microphone (a scripted one; the real one needs a device).
+    @MainActor
+    func testTheMicrophoneHasNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSpokenOrder", "geri çekil"]
+        app.launch()
+        XCTAssertTrue(app.buttons["Emri söyle"].waitForExistence(timeout: 3))
+        // Same tab-row tool limitation as `testRuleEditorScreenHasNoAccessibilityIssues`.
+        try auditAndReport(app, knownIssueLabels: ["Okçu", "Kalkanlı"])
+    }
 }

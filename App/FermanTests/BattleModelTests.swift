@@ -33,12 +33,18 @@ struct BattleModelTests {
         #expect(elapsed < .milliseconds(100))
     }
 
+    /// The speed-up is checked on the step length itself, not against a wall-clock budget: every test
+    /// here shares the main actor, and under a full parallel run it can be busy for longer than the
+    /// whole skipped choreography takes (a one-second budget failed that way, F2.5).
     @Test
     func skipFastForwardsThroughTheChoreography() async throws {
         let model = BattleModel(config: try Fixture.config(), orders: Fixture.orders)
         model.start(reduceMotion: false)
+        #expect(model.stepDuration(BattleModel.cameraDescendDuration) == BattleModel.cameraDescendDuration)
+
         model.skip()
-        try await Fixture.waitUntilPlaying(model, timeout: .seconds(1))
+        #expect(model.stepDuration(BattleModel.cameraDescendDuration) == BattleModel.skippingStepDuration)
+        try await Fixture.waitUntilPlaying(model)
 
         #expect(model.phase == .playing)
     }

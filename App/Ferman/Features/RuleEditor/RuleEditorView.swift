@@ -19,7 +19,9 @@ struct RuleEditorView: View {
     @State private var showingPresets = false
     @State private var writeText = ""
     @State private var slipDialTarget: WrittenSlip.ID?
+    @State private var offeringSpeechDownload = false
     @FocusState private var isWriteFieldFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// Optional, not required: `-uiTestRuleEditor`'s standalone fixture never wraps this view in
     /// `.environment(AppRouter())`, and a required `@Environment(AppRouter.self)` crashes as soon as
     /// SwiftUI resolves this view's dependencies — before `body` even runs, regardless of whether the
@@ -168,6 +170,7 @@ struct RuleEditorView: View {
             !sealed.isEmpty
         }
         .task {
+            await model.checkListening()
             await model.prewarmWriting()
         }
         .task(id: model.justSealed) {
@@ -420,26 +423,45 @@ struct RuleEditorView: View {
     }
 
     /// The field stays small and plain (brief §4.4): the slips are the interface, this is a shortcut.
+    /// The microphone beside it appears only where speech can be taken (D16).
     private var writeField: some View {
         VStack(alignment: .leading, spacing: FermanSpacing.xs) {
             HStack(spacing: FermanSpacing.sm) {
-                TextField(
-                    String(localized: "Emri yaz"), text: $writeText,
-                    prompt: Text(String(localized: "Emri yaz")).foregroundStyle(Color.paper.opacity(0.7))
-                )
-                .font(FermanFont.body())
-                .foregroundStyle(Color.paper)
-                .tint(Color.brass)
-                .submitLabel(.done)
-                .focused($isWriteFieldFocused)
-                .onSubmit(submitWriting)
-                .accessibilityIdentifier("writeOrderField")
-                if model.isWriting {
-                    ProgressView()
-                        .tint(Color.paper)
-                } else if !writeText.trimmingCharacters(in: .whitespaces).isEmpty {
-                    Button(String(localized: "Yaz"), action: submitWriting)
-                        .buttonStyle(FermanButton.Chip())
+                microphoneButton
+                if case .installing(let progress) = model.listening {
+                    ProgressView(value: progress) {
+                        Text(String(localized: "Ses paketi iniyor…"))
+                            .font(FermanFont.caption())
+                            .foregroundStyle(Color.paper)
+                    }
+                    .tint(Color.brass)
+                } else if case .listening(let transcript) = model.listening {
+                    Text(transcript.isEmpty ? String(localized: "Dinliyorum…") : transcript)
+                        .font(FermanFont.body())
+                        .foregroundStyle(Color.paper.opacity(transcript.isEmpty ? 0.7 : 1))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .accessibilityIdentifier("spokenTranscript")
+                } else {
+                    // The prompt stays this short even beside the microphone, whose own label says
+                    // "Emri söyle": "Emri söyle ya da yaz" clipped at large Dynamic Type sizes there.
+                    TextField(
+                        String(localized: "Emri yaz"), text: $writeText,
+                        prompt: Text(String(localized: "Emri yaz")).foregroundStyle(Color.paper.opacity(0.7))
+                    )
+                    .font(FermanFont.body())
+                    .foregroundStyle(Color.paper)
+                    .tint(Color.brass)
+                    .submitLabel(.done)
+                    .focused($isWriteFieldFocused)
+                    .onSubmit(submitWriting)
+                    .accessibilityIdentifier("writeOrderField")
+                    if model.isWriting {
+                        ProgressView()
+                            .tint(Color.paper)
+                    } else if !writeText.trimmingCharacters(in: .whitespaces).isEmpty {
+                        Button(String(localized: "Yaz"), action: submitWriting)
+                            .buttonStyle(FermanButton.Chip())
+                    }
                 }
             }
             .padding(.horizontal, FermanSpacing.md)
@@ -453,12 +475,69 @@ struct RuleEditorView: View {
                     .foregroundStyle(Color.paper)
                     .fixedSize(horizontal: false, vertical: true)
                     .accessibilityIdentifier("writeOrderError")
+            } else if let error = model.listeningError {
+                Text(Self.sentence(for: error))
+                    .font(FermanFont.caption())
+                    .foregroundStyle(Color.paper)
+                    .fixedSize(horizontal: false, vertical: true)
             }
         }
         .padding(.horizontal, FermanSpacing.md)
         .padding(.top, FermanSpacing.sm)
         .onChange(of: writeText) {
             model.writeError = nil
+        }
+        .confirmationDialog(
+            String(localized: "Sesle emir"), isPresented: $offeringSpeechDownload, titleVisibility: .visible
+        ) {
+            Button(String(localized: "Ses paketini indir")) {
+                Task { await model.installSpeechAssets() }
+            }
+        } message: {
+            Text(String(localized: "Söylediğin emri yazıya dökmek için ses paketi bir kez indirilir. Sonra internetsiz çalışır; sesin cihazdan çıkmaz."))
+        }
+    }
+
+    @ViewBuilder
+    private var microphoneButton: some View {
+        switch model.listening {
+        case .unavailable, .installing:
+            EmptyView()
+        case .needsAssets:
+            Button {
+                offeringSpeechDownload = true
+            } label: {
+                Image(systemName: "mic")
+                    .frame(width: 44, height: 44)
+            }
+            .foregroundStyle(Color.paper)
+            .accessibilityLabel(String(localized: "Emri söyle"))
+        case .idle:
+            Button {
+                isWriteFieldFocused = false
+                Task { await model.startListening() }
+            } label: {
+                Image(systemName: "mic")
+                    .frame(width: 44, height: 44)
+            }
+            .foregroundStyle(Color.paper)
+            .accessibilityLabel(String(localized: "Emri söyle"))
+        case .listening:
+            Button {
+                Task {
+                    let transcript = await model.stopListening()
+                    guard !transcript.isEmpty else { return }
+                    writeText = transcript
+                    submitWriting()
+                }
+            } label: {
+                Image(systemName: "stop.circle.fill")
+                    .font(.title2)
+                    .frame(width: 44, height: 44)
+            }
+            .foregroundStyle(Color.brass)
+            .symbolEffect(.pulse, isActive: !reduceMotion)
+            .accessibilityLabel(String(localized: "Söylemeyi bitir"))
         }
     }
 
@@ -632,6 +711,19 @@ struct RuleEditorView: View {
         case .modelUnavailable:
             // `CompilerChain` answers these itself; only reachable if a lone model is wired in.
             String(localized: "Bu emri şimdi okuyamadım. “Emir ekle” ile seçerek yazabilirsin.")
+        }
+    }
+
+    private static func sentence(for error: ListeningError) -> String {
+        switch error {
+        case .microphoneDenied:
+            String(localized: "Mikrofon izni kapalı. Ayarlar'dan açabilir ya da emri yazabilirsin.")
+        case .noMicrophone:
+            String(localized: "Mikrofon bulunamadı. Emri yazabilirsin.")
+        case .assetsMissing:
+            String(localized: "Ses paketi henüz inmedi. Mikrofona dokunup indirebilirsin.")
+        case .failed:
+            String(localized: "Sesini şimdi duyamadım. Tekrar söyle ya da yaz.")
         }
     }
 

@@ -62,6 +62,9 @@ struct ContentView: View {
             // `-uiTestWrittenOrder "<text>"`: the editor with that text already written and waiting
             // to be sealed (F2.4) — a screenshot entry point, since this machine can't type into it.
             WrittenOrderFixture(model: Self.ruleEditorFixture(programs: Self.sampleOrders), text: text)
+        } else if let text = UserDefaults.standard.string(forKey: "uiTestSpokenOrder") {
+            // `-uiTestSpokenOrder "<text>"`: the editor with a microphone that "hears" that text (F2.5).
+            RuleEditorView(model: Self.ruleEditorFixture(listener: ScriptedOrderListener(text: text)))
         } else if ProcessInfo.processInfo.arguments.contains("-uiTestRulePicker") {
             RulePickerSheet(
                 mode: .add, constraints: .unrestricted, availableUnitTypes: ["mizrakci", "okcu", "suvari", "kalkan"],
@@ -149,6 +152,7 @@ struct ContentView: View {
                             // The template first, the on-device model for what it doesn't read (D30);
                             // with Apple Intelligence off the chain is simply the template (F2.6).
                             textCompiler: CompilerChain(model: FoundationModelsCompiler()),
+                            listener: SpeechOrderListener(),
                             audio: AudioService.shared),
                         battleSetup: RuleEditorView.BattleSetup(
                             front: front, level: level, map: map, catalog: catalog, placements: playerSetup.placements))
@@ -316,7 +320,9 @@ struct ContentView: View {
             ])
     ]
 
-    private static func ruleEditorFixture(programs: [RuleProgram] = []) -> RuleEditorModel {
+    private static func ruleEditorFixture(
+        programs: [RuleProgram] = [], listener: (any OrderListening)? = nil
+    ) -> RuleEditorModel {
         let archer: UnitTypeID = "okcu"
         let shield: UnitTypeID = "kalkan"
         let catalog: [UnitType] = [
@@ -329,7 +335,7 @@ struct ContentView: View {
         ]
         return RuleEditorModel(
             unitTypes: [archer, shield], catalog: catalog, constraints: .unrestricted, initialPrograms: programs,
-            audio: AudioService.shared)
+            listener: listener, audio: AudioService.shared)
     }
 }
 

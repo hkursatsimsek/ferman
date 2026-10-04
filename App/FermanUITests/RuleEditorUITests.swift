@@ -129,6 +129,36 @@ final class RuleEditorUITests: XCTestCase {
         XCTAssertFalse(app.buttons["Mühürle"].exists)
     }
 
+    // MARK: Spoken orders (F2.5)
+
+    /// A scripted microphone (`-uiTestSpokenOrder`) — the real one needs a device.
+    @MainActor
+    func testASpokenOrderLandsAsSlipsToSeal() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-uiTestSpokenOrder", "düşman 3 kareden yakınsa geri çekil"]
+        app.launch()
+
+        let microphone = app.buttons["Emri söyle"]
+        XCTAssertTrue(microphone.waitForExistence(timeout: 3))
+        microphone.tap()
+
+        let transcript = app.staticTexts["spokenTranscript"]
+        XCTAssertTrue(transcript.waitForExistence(timeout: 2))
+        let stop = app.buttons["Söylemeyi bitir"]
+        XCTAssertTrue(stop.exists)
+        stop.tap()
+
+        XCTAssertTrue(app.staticTexts["düşman 3 kareden yakınsa"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Mühürle"].exists)
+    }
+
+    @MainActor
+    func testWithoutAMicrophoneThereIsNoMicrophoneButton() throws {
+        let app = launchApp()
+        XCTAssertTrue(app.textFields["writeOrderField"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Emri söyle"].exists)
+    }
+
     // "Sırala" (reorder) is exercised at the model level instead of here
     // (RuleEditorModelTests.reorderMovesSourcesToJustBeforeTheirAnchor,
     // .moveUpAndMoveDownSwapAdjacentOrders): a live `press(forDuration:thenDragTo:)` onto a

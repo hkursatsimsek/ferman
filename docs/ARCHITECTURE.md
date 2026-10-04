@@ -191,7 +191,7 @@ App/Ferman/
 │   ├── GameCenterService.swift
 │   ├── ArenaService.swift        CloudKit public DB + önbellek + doğrulama
 │   ├── DuelService.swift         GKTurnBasedMatch
-│   ├── SpeechInputService.swift  SpeechAnalyzer
+│   ├── SpokenOrders.swift        SpeechAnalyzer + DictationTranscriber + CaptureInputSequenceProvider (D31)
 │   ├── AudioService.swift        SFX, AVAudioSession.ambient
 │   └── Monetization/             EntitlementStore · RewardedAdProvider · NoopAdProvider · AdMobProvider (Faz 5)
 ├── DesignSystem/    Tokens (Color/Font/Spacing/Radius/Shadow) · Components · Shaders (.metal) · UnitArt (D24)
@@ -345,7 +345,7 @@ Doğrula:          savunan cihaz raporları çeker ─► config'i yeniden kurar
 | 2D render | SpriteKit (`SKScene`, `SpriteView`, `SKShader`, `SKRenderer`) | GameplayKit `GKAgent`/`GKGridGraph` |
 | Veri | SwiftData (`VersionedSchema`, `@Attribute(.codable)`, `ResultsObserver`) + CloudKit | Core Data, `GKSavedGame` |
 | LLM | Foundation Models (`LanguageModelSession`, `@Generable`, `DynamicGenerationSchema`, `tokenCount(for:)`, `LanguageModel` protokolü) | Uzak API |
-| Konuşma | `SpeechAnalyzer` + `SpeechTranscriber` | `SFSpeechRecognizer` |
+| Konuşma | `SpeechAnalyzer` + `DictationTranscriber` (D31: `SpeechTranscriber`'da Türkçe yok) | `SFSpeechRecognizer` |
 | Klip | `SKRenderer` + `AVAssetWriter`, `ShareLink` | ReplayKit |
 | Sosyal | GameKit (`GKGameActivity`, `GKChallengeDefinition`, `GKTurnBasedMatch`), CloudKit public DB | Özel sunucu |
 | Satın alma | StoreKit 2 (`Transaction`, `SubscriptionStoreView`) | StoreKit 1 |

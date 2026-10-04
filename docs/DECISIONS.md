@@ -198,7 +198,7 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
 
 - **Tarih:** 2026-09-15 · **Durum:** Kabul · **Kaynak:** Teknik
 - **Karar:** `SFSpeechRecognizer` yerine `SpeechAnalyzer` + `SpeechTranscriber` (on-device) kullanılır. Dil varlıkları `AssetInventory` ile indirilir. Desteklenen diller `tr_TR` ve `en_US`.
-- **Sonuçlar:** Varlık indirildikten sonra çevrimdışı çalışır. Özellik kullanılamıyorsa mikrofon düğmesi gizlenir.
+- **Sonuçlar:** Varlık indirildikten sonra çevrimdışı çalışır. Özellik kullanılamıyorsa mikrofon düğmesi gizlenir. (Modül D31 ile `DictationTranscriber` oldu: `SpeechTranscriber`'da Türkçe yok.)
 
 ## D17 — Foundation Models kullanım deseni
 
@@ -355,3 +355,14 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
   - Model 2 sn içinde yanıt vermezse, kullanılamıyorsa ya da metni o da anlamazsa oyuncu şablonun kendi yanıtını görür.
   - Modelin ürettiği her taslak yine mühürsüz pusula olarak gösterilir (D29, CLAUDE.md kural 3).
 - **Sonuçlar:** Ölçülen zincir: geliştirme setinde %98,7 (yanlış kabul 0), ayrı sette %93,1 (yanlış kabul 2, ikisi de modelden). F2.3'ün %88 hedefi zincirle iki sette de karşılanıyor; tek başına model karşılamıyor ve bu raporlarda ayrıca kayıtlı (`Tests/CompilerAccuracy/Reports/`). Çoğu emirde gecikme sıfır: model yalnızca şablonun okuyamadığı cümlelerde bekletir. Model bir OS güncellemesiyle değişebileceği için ölçüm `FERMAN_MODEL_ACCURACY=1` ile elle tekrarlanır.
+
+## D31 — Sesli emir: `SpeechTranscriber` yerine `DictationTranscriber`
+
+- **Tarih:** 2026-10-05 · **Durum:** Kabul · **Kaynak:** Platform ölçümü (F2.5)
+- **Bağlam:** D16 `SpeechAnalyzer` + `SpeechTranscriber`'ı seçmişti. macOS 27'de `SpeechTranscriber.supportedLocales` 45 dil listeliyor ve `tr_TR` yok; `supportedLocale(equivalentTo: tr_TR)` `nil`, `AssetInventory.status` `unsupported`. Aynı `SpeechAnalyzer` ailesindeki `DictationTranscriber` ise 54 dil ve `tr_TR` destekliyor. Apple'ın iOS 27 canlı ses örneği ("Recognizing speech in live audio") de `DictationTranscriber` kullanıyor.
+- **Karar:**
+  - Sesli emir `SpeechAnalyzer` + `DictationTranscriber` ile cihazda yazıya dökülür (`contentHints: [.shortForm]`, `transcriptionOptions: [.punctuation]`, `reportingOptions: [.volatileResults]`, `attributeOptions: [.audioTimeRange]`). Dil oyuncunun dili, desteklenmiyorsa `tr_TR`, o da yoksa `en_US`.
+  - Ses, iOS 27'nin `CaptureInputSequenceProvider`'ından gelir; ses motoruna tap kurulmaz. Varlıklar `AssetInventory.reserve` + `assetInstallationRequest` ile, oyuncunun onayıyla bir kez indirilir.
+  - İzin yalnızca mikrofon içindir (`NSMicrophoneUsageDescription`). Apple'ın örneği de ayrı bir konuşma tanıma izni istemiyor. Yakalama bitince ses oturumu `.ambient`'e döner.
+  - Söylenen metin yazılan metinle aynı alana düşer ve aynı zincirden geçer (D29, D30). Pusulalar mühürlenmeden hiçbir şey savaşa girmez.
+- **Sonuçlar:** macOS 27'de sistemin Türkçe sesiyle okutulan iki emir bu ayarlarla doğru yazıya döküldü ve `TemplateCompiler` tarafından okundu. Dökümde "başka durumda"dan önceki virgül düşebildiği için "başka" ve "aksi" yeni parça başlatıyor. Canlı mikrofon yalnızca fiziksel cihazda çalışır; Apple'ın örneği de simülatörde çalışmıyor.

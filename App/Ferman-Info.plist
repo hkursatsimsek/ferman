@@ -16,6 +16,8 @@
 		<string>PublicSans-Bold.ttf</string>
 		<string>PublicSans-Italic.ttf</string>
 	</array>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Emirlerini sesle söyleyebilmen için. Söylediğin cihazda yazıya dökülür ve hiçbir yere gönderilmez.</string>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

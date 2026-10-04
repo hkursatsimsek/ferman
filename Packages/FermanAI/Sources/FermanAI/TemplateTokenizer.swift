@@ -101,7 +101,8 @@ enum TemplateTokenizer {
     }
 
     private static let connectors: Set<String> = ["ve", "and", "ama", "but"]
-    private static let fragmentOpeners: Set<String> = ["else", "otherwise", "yoksa"]
+    /// "başka durumda", "aksi halde" too: dictation (F2.5) drops the comma before them.
+    private static let fragmentOpeners: Set<String> = ["else", "otherwise", "yoksa", "baska", "aksi"]
 
     private static func isDigit(_ character: Character) -> Bool {
         ("0"..."9").contains(character)
