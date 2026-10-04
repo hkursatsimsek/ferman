@@ -36,6 +36,7 @@ struct RulePickerSheet: View {
         availableUnitTypes: [UnitTypeID],
         ability: Ability? = nil,
         initialRule: Rule? = nil,
+        initialDraft: RuleDraft? = nil,
         onConfirmRule: @escaping (RuleDraft) -> Void = { _ in },
         onConfirmDefaultAction: @escaping (Action) -> Void = { _ in }
     ) {
@@ -46,22 +47,17 @@ struct RulePickerSheet: View {
         self.onConfirmRule = onConfirmRule
         self.onConfirmDefaultAction = onConfirmDefaultAction
 
-        let condition = initialRule?.condition
+        // A written order (F2.4) may arrive with its number or unit type still blank: the sheet
+        // starts that slot at the same place it would for a new order.
+        let draft = initialDraft ?? initialRule.map(RuleDraft.init)
         let firstAvailableCondition = constraints.availableConditions.first { $0 != .always } ?? .always
-        let conditionKind = condition?.kind ?? firstAvailableCondition
+        let conditionKind = draft?.conditionKind ?? firstAvailableCondition
         _conditionKind = State(initialValue: conditionKind)
-        _numericValue = State(
-            initialValue: Self.numericValue(in: condition) ?? Self.defaultNumericValue(for: conditionKind))
-        _conditionUnitType = State(initialValue: Self.unitTypeValue(in: condition) ?? availableUnitTypes.first ?? "")
-        _conditionTerrain = State(initialValue: Self.terrainValue(in: condition) ?? .open)
-
-        let action = initialRule?.action
-        _actionKind = State(initialValue: action?.kind ?? constraints.availableActions.first ?? .advance)
-        if case .focusFire(let target) = action {
-            _actionUnitType = State(initialValue: target)
-        } else {
-            _actionUnitType = State(initialValue: nil)
-        }
+        _numericValue = State(initialValue: draft?.conditionNumericValue ?? Self.defaultNumericValue(for: conditionKind))
+        _conditionUnitType = State(initialValue: draft?.conditionUnitType ?? availableUnitTypes.first ?? "")
+        _conditionTerrain = State(initialValue: draft?.conditionTerrain ?? .open)
+        _actionKind = State(initialValue: draft?.actionKind ?? constraints.availableActions.first ?? .advance)
+        _actionUnitType = State(initialValue: draft?.actionUnitType)
     }
 
     var body: some View {
@@ -266,28 +262,6 @@ struct RulePickerSheet: View {
 
     // MARK: - Pre-fill extraction
 
-    private static func numericValue(in condition: Condition?) -> Int? {
-        switch condition {
-        case .enemyWithin(let v), .timeAfter(let v), .healthBelow(let v), .moraleBelow(let v),
-            .allyCountBelow(let v), .enemyDensityAbove(let v):
-            v
-        default:
-            nil
-        }
-    }
-
-    private static func unitTypeValue(in condition: Condition?) -> UnitTypeID? {
-        switch condition {
-        case .targetInRange(let unitType), .nearestEnemyType(let unitType): unitType
-        default: nil
-        }
-    }
-
-    private static func terrainValue(in condition: Condition?) -> Terrain? {
-        if case .terrainIs(let terrain) = condition { return terrain }
-        return nil
-    }
-
     private static func numericRange(of kind: ConditionKind) -> ClosedRange<Int>? {
         switch kind.parameter {
         case .cells(let range), .percent(let range), .count(let range), .seconds(let range): range
@@ -295,7 +269,7 @@ struct RulePickerSheet: View {
         }
     }
 
-    private static func defaultNumericValue(for kind: ConditionKind) -> Int {
+    static func defaultNumericValue(for kind: ConditionKind) -> Int {
         switch kind.parameter {
         case .cells(let range), .percent(let range), .count(let range), .seconds(let range): range.lowerBound
         default: 0

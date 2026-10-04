@@ -1,11 +1,13 @@
+import FermanAI
 import FermanContent
 import FermanCore
 import SwiftUI
 import TipKit
 
 /// EmirEditörü — the game's heart (design brief §4.4). Unit type tabs, a reorderable order stack
-/// with a fixed default at the bottom, and a selector sheet to add or edit an order. No natural
-/// language input here yet — that's Faz 2 (CLAUDE.md rule 3).
+/// with a fixed default at the bottom, a selector sheet to add or edit an order, and a small field
+/// to write one in words (F2.4). Written orders land as unsealed slips the player checks, fills in
+/// and seals — nothing written reaches a battle unseen (CLAUDE.md rule 3).
 struct RuleEditorView: View {
     /// Non-nil only on the real navigation path (`Route.ruleEditor`) — `nil` for the standalone
     /// `-uiTestRuleEditor` fixture (`ContentView`), which has no front/army to build a `BattleConfig`
@@ -15,6 +17,9 @@ struct RuleEditorView: View {
     @State private var sheet: SheetKind?
     @State private var dialTarget: EditableRule.ID?
     @State private var showingPresets = false
+    @State private var writeText = ""
+    @State private var slipDialTarget: WrittenSlip.ID?
+    @FocusState private var isWriteFieldFocused: Bool
     /// Optional, not required: `-uiTestRuleEditor`'s standalone fixture never wraps this view in
     /// `.environment(AppRouter())`, and a required `@Environment(AppRouter.self)` crashes as soon as
     /// SwiftUI resolves this view's dependencies — before `body` even runs, regardless of whether the
@@ -44,12 +49,14 @@ struct RuleEditorView: View {
         case add
         case editRule(EditableRule.ID)
         case editDefaultAction
+        case editSlip(WrittenSlip.ID)
 
         var id: String {
             switch self {
             case .add: "add"
             case .editRule(let id): "edit-\(id)"
             case .editDefaultAction: "default"
+            case .editSlip(let id): "slip-\(id)"
             }
         }
     }
@@ -76,44 +83,63 @@ struct RuleEditorView: View {
             .padding(.horizontal, FermanSpacing.md)
             .padding(.top, FermanSpacing.sm)
 
-            ScrollView {
-                VStack(spacing: FermanSpacing.md - 2) {
-                    tutorialNote
-                    if model.orders.isEmpty {
-                        emptyState
-                    } else {
-                        reorderableStack
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(spacing: FermanSpacing.md - 2) {
+                        tutorialNote
+                        if model.orders.isEmpty {
+                            if model.written == nil { emptyState }
+                        } else {
+                            reorderableStack
+                        }
+                        if let written = model.written, written.unitType == model.selectedUnitType {
+                            writtenSection(written)
+                                .id(Self.writtenAnchor)
+                                .transition(.opacity)
+                        }
+                        defaultCard
+                        if model.orders.count >= 2, dialTarget == nil, model.written == nil {
+                            Text(String(localized: "Pusulayı yukarı taşımak önceliğini artırır."))
+                                .font(FermanFont.caption())
+                                .foregroundStyle(Color.paper.opacity(0.65))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.top, FermanSpacing.xs)
+                        }
                     }
-                    defaultCard
-                    if model.orders.count >= 2, dialTarget == nil {
-                        Text(String(localized: "Pusulayı yukarı taşımak önceliğini artırır."))
-                            .font(FermanFont.caption())
-                            .foregroundStyle(Color.paper.opacity(0.65))
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.top, FermanSpacing.xs)
-                    }
+                    .padding(FermanSpacing.md)
+                    .animation(.easeOut(duration: 0.2), value: dialTarget)
+                    .animation(.easeOut(duration: 0.2), value: slipDialTarget)
                 }
-                .padding(FermanSpacing.md)
-                .animation(.easeOut(duration: 0.2), value: dialTarget)
+                .onChange(of: model.written?.text) { _, text in
+                    guard text != nil else { return }
+                    withAnimation(.easeOut(duration: 0.3)) { proxy.scrollTo(Self.writtenAnchor, anchor: .bottom) }
+                }
             }
 
-            if model.canAddRule {
-                Button {
-                    sheet = .add
-                } label: {
-                    Label(String(localized: "Emir ekle"), systemImage: "plus")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(FermanButton.Outline())
-                .padding(.horizontal, FermanSpacing.md)
-                .padding(.top, FermanSpacing.md)
-            } else if model.canWriteOrders {
-                Text(String(localized: "Kural hakkın doldu. Yeni emir için birini sil."))
-                    .font(FermanFont.caption())
-                    .foregroundStyle(Color.paper.opacity(0.65))
-                    .frame(maxWidth: .infinity)
+            if let written = model.written {
+                reviewBar(written)
+            } else {
+                if model.canAddRule {
+                    Button {
+                        sheet = .add
+                    } label: {
+                        Label(String(localized: "Emir ekle"), systemImage: "plus")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(FermanButton.Outline())
                     .padding(.horizontal, FermanSpacing.md)
                     .padding(.top, FermanSpacing.md)
+                } else if model.canWriteOrders {
+                    Text(String(localized: "Kural hakkın doldu. Yeni emir için birini sil."))
+                        .font(FermanFont.caption())
+                        .foregroundStyle(Color.paper.opacity(0.65))
+                        .frame(maxWidth: .infinity)
+                        .padding(.horizontal, FermanSpacing.md)
+                        .padding(.top, FermanSpacing.md)
+                }
+                if model.canWriteOrders {
+                    writeField
+                }
             }
 
             if let battleSetup {
@@ -137,6 +163,14 @@ struct RuleEditorView: View {
         .background(Color.ink)
         .sheet(item: $sheet) { kind in
             sheetView(for: kind)
+        }
+        .sensoryFeedback(SoundEffect.stamp.feel?.feedback ?? .impact, trigger: model.justSealed) { _, sealed in
+            !sealed.isEmpty
+        }
+        .task(id: model.justSealed) {
+            guard !model.justSealed.isEmpty else { return }
+            try? await Task.sleep(for: .seconds(1.4))
+            withAnimation(.easeOut(duration: 0.4)) { model.clearJustSealed() }
         }
         .confirmationDialog(
             String(localized: "Hazır emir setleri"), isPresented: $showingPresets, titleVisibility: .visible
@@ -164,6 +198,8 @@ struct RuleEditorView: View {
     /// Says what to fix, not that something is wrong (brief §7 — a calm officer, no "hata oluştu").
     private static func sentence(for blocker: RuleEditorModel.BattleBlocker) -> String {
         switch blocker {
+        case .unsealedOrders:
+            String(localized: "Yazdığın emri mühürle ya da vazgeç.")
         case .budgetExceeded(let used, let budget):
             String(localized: "Kural hakkın \(budget), \(used) emir yazdın. Birini sil.")
         case .invalidOrder(let unitType, let priority):
@@ -202,6 +238,9 @@ struct RuleEditorView: View {
                         }
                     }
                     .buttonStyle(.plain)
+                    // A written order is sealed or set aside on its own tab first.
+                    .disabled(model.written != nil && !isSelected)
+                    .opacity(model.written != nil && !isSelected ? 0.4 : 1)
                     // See `HomeView.menuRow`: a tab combining `UnitToken`'s icon with `Text` under
                     // the default grouping gave the contrast audit a frame reaching into the icon
                     // instead of just the text (F1.13). `.accessibilityElement` first, traits/label
@@ -266,6 +305,7 @@ struct RuleEditorView: View {
             condition: OrderPhraseFormatter.condition(item.rule.condition),
             action: OrderPhraseFormatter.action(item.rule.action, ability: model.ability(for: model.selectedUnitType)),
             state: isEditingDial ? .editing : model.state(for: item),
+            isSealed: model.justSealed.contains(item.id),
             foldedUnder: model.foldedUnder[item.id],
             highlightsParameter: model.numericParameter(for: item.id) != nil
         )
@@ -318,7 +358,7 @@ struct RuleEditorView: View {
     private var defaultCard: some View {
         VStack(alignment: .leading, spacing: FermanSpacing.xxs) {
             OrderCard(
-                priority: model.orders.count + 1,
+                priority: model.orders.count + writtenOrderCount + 1,
                 condition: OrderPhraseFormatter.condition(.always),
                 action: OrderPhraseFormatter.action(
                     model.defaultRule.rule.action, ability: model.ability(for: model.selectedUnitType)),
@@ -366,6 +406,255 @@ struct RuleEditorView: View {
         .frame(maxWidth: .infinity)
     }
 
+    // MARK: - Written orders (F2.4)
+
+    private static let writtenAnchor = "written"
+
+    /// Written slips waiting on this tab that will join the stack (the default one replaces it instead).
+    private var writtenOrderCount: Int {
+        guard let written = model.written, written.unitType == model.selectedUnitType else { return 0 }
+        return written.slips.count { !$0.isDefault }
+    }
+
+    /// The field stays small and plain (brief §4.4): the slips are the interface, this is a shortcut.
+    private var writeField: some View {
+        VStack(alignment: .leading, spacing: FermanSpacing.xs) {
+            HStack(spacing: FermanSpacing.sm) {
+                TextField(
+                    String(localized: "Emri yaz"), text: $writeText,
+                    prompt: Text(String(localized: "Emri yaz")).foregroundStyle(Color.paper.opacity(0.7))
+                )
+                .font(FermanFont.body())
+                .foregroundStyle(Color.paper)
+                .tint(Color.brass)
+                .submitLabel(.done)
+                .focused($isWriteFieldFocused)
+                .onSubmit(submitWriting)
+                .accessibilityIdentifier("writeOrderField")
+                if model.isWriting {
+                    ProgressView()
+                        .tint(Color.paper)
+                } else if !writeText.trimmingCharacters(in: .whitespaces).isEmpty {
+                    Button(String(localized: "Yaz"), action: submitWriting)
+                        .buttonStyle(FermanButton.Chip())
+                }
+            }
+            .padding(.horizontal, FermanSpacing.md)
+            .frame(minHeight: 44)
+            .background(
+                RoundedRectangle(cornerRadius: FermanRadius.orderCard)
+                    .strokeBorder(Color.paper.opacity(0.35), lineWidth: 1))
+            if let error = model.writeError {
+                Text(Self.sentence(for: error))
+                    .font(FermanFont.caption())
+                    .foregroundStyle(Color.paper)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityIdentifier("writeOrderError")
+            }
+        }
+        .padding(.horizontal, FermanSpacing.md)
+        .padding(.top, FermanSpacing.sm)
+        .onChange(of: writeText) {
+            model.writeError = nil
+        }
+    }
+
+    private func submitWriting() {
+        let text = writeText
+        Task {
+            await model.write(text)
+            if model.written != nil {
+                writeText = ""
+                isWriteFieldFocused = false
+            }
+        }
+    }
+
+    private func writtenSection(_ written: WrittenOrders) -> some View {
+        VStack(alignment: .leading, spacing: FermanSpacing.sm) {
+            Text("“\(written.text)”")
+                .font(FermanFont.caption())
+                .italic()
+                .foregroundStyle(Color.paper.opacity(0.75))
+                .frame(maxWidth: .infinity, alignment: .leading)
+            ForEach(Array(written.slips.enumerated()), id: \.element.id) { index, slip in
+                writtenSlipView(slip, index: index, priority: writtenPriority(of: slip, in: written))
+            }
+        }
+    }
+
+    private func writtenPriority(of slip: WrittenSlip, in written: WrittenOrders) -> Int {
+        // The default slip takes the default order's place, under every written order.
+        let ahead = slip.isDefault ? writtenOrderCount : written.slips.prefix { $0.id != slip.id }.count { !$0.isDefault }
+        return model.orders.count + ahead + 1
+    }
+
+    @ViewBuilder
+    private func writtenSlipView(_ slip: WrittenSlip, index: Int, priority: Int) -> some View {
+        let issue = model.slipIssues[slip.id]
+        VStack(alignment: .leading, spacing: FermanSpacing.xs) {
+            WrittenSlipCard(
+                priority: priority,
+                condition: OrderPhraseFormatter.condition(of: slip.draft),
+                action: OrderPhraseFormatter.action(slip.draft.action, ability: model.ability(for: model.selectedUnitType)),
+                inkDelay: Double(index) * 0.8
+            )
+            .onTapGesture { tapSlip(slip) }
+            .contextMenu {
+                Button(String(localized: "Düzenle")) { sheet = .editSlip(slip.id) }
+                Button(role: .destructive) {
+                    model.removeSlip(slip.id)
+                } label: {
+                    Text(String(localized: "Sil"))
+                }
+            }
+            .accessibilityValue(issue.map(Self.sentence(for:)) ?? "")
+            .accessibilityHint(String(localized: "Düzeltmek için dokun."))
+            .accessibilityAction(named: Text("Sil")) { model.removeSlip(slip.id) }
+            if slipDialTarget == slip.id, let parameter = model.slipNumericParameter(for: slip.id) {
+                slipDialPanel(for: slip, parameter: parameter)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            } else if slip.isDefault {
+                Text(String(localized: "Varsayılan emrin yerine geçer."))
+                    .font(FermanFont.caption())
+                    .foregroundStyle(Color.paper.opacity(0.65))
+            }
+            if let issue {
+                Text(Self.sentence(for: issue))
+                    .font(FermanFont.caption())
+                    .foregroundStyle(Color.paper)
+                    .padding(.leading, FermanSpacing.sm)
+                    .overlay(alignment: .leading) {
+                        Rectangle().fill(Color.brass).frame(width: 2)
+                    }
+                    .accessibilityHidden(true)
+            }
+        }
+        .opacity(slipDialTarget == nil || slipDialTarget == slip.id ? 1 : 0.5)
+    }
+
+    /// A numeric slot opens the dial right under the slip — a blank one starts where a new order
+    /// would, and is filled the moment the dial opens, so what the player sees is what gets sealed.
+    private func tapSlip(_ slip: WrittenSlip) {
+        if let parameter = model.slipNumericParameter(for: slip.id) {
+            if slip.draft.conditionNumericValue == nil {
+                model.setSlipNumber(parameter.value, for: slip.id)
+            }
+            slipDialTarget = slipDialTarget == slip.id ? nil : slip.id
+        } else {
+            sheet = .editSlip(slip.id)
+        }
+    }
+
+    private func slipDialPanel(for slip: WrittenSlip, parameter: (value: Int, range: ClosedRange<Int>)) -> some View {
+        VStack(spacing: FermanSpacing.xs) {
+            ParameterDial(
+                label: RulePickerSheet.parameterLabel(for: slip.draft.conditionKind),
+                unit: RulePickerSheet.parameterUnit(for: slip.draft.conditionKind),
+                value: Binding(
+                    get: { parameter.value },
+                    set: { model.setSlipNumber($0, for: slip.id) }
+                ),
+                range: parameter.range
+            )
+            HStack {
+                Button(String(localized: "Emri düzenle")) {
+                    slipDialTarget = nil
+                    sheet = .editSlip(slip.id)
+                }
+                .buttonStyle(FermanButton.Ghost())
+                Spacer()
+                Button(String(localized: "Tamam")) {
+                    slipDialTarget = nil
+                }
+                .buttonStyle(FermanButton.Ghost())
+            }
+        }
+    }
+
+    /// Replaces the field while slips are on the table: they're sealed or set aside, never left
+    /// half-read (F2.4's "zorunlu onay").
+    private func reviewBar(_ written: WrittenOrders) -> some View {
+        VStack(spacing: FermanSpacing.sm) {
+            Text(model.sealBlocker.map(Self.sentence(for:)) ?? String(localized: "Doğruysa mühürle. Yanlışsa pusulaya dokunup düzelt."))
+                .font(FermanFont.caption())
+                .foregroundStyle(Color.paper)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: FermanSpacing.md) {
+                Button(String(localized: "Vazgeç")) {
+                    slipDialTarget = nil
+                    withAnimation(.easeOut(duration: 0.2)) { model.discardWritten() }
+                }
+                .buttonStyle(FermanButton.Ghost())
+                if model.sealBlocker == nil {
+                    Button(String(localized: "Mühürle")) {
+                        slipDialTarget = nil
+                        withAnimation(.spring(duration: 0.3, bounce: 0.35)) { model.sealWritten() }
+                    }
+                    .buttonStyle(FermanButton.Primary())
+                }
+            }
+        }
+        .padding(.horizontal, FermanSpacing.md)
+        .padding(.top, FermanSpacing.md)
+    }
+
+    /// Says what to do next, not what went wrong (brief §7). Never a word from the ban list (CLAUDE.md
+    /// rule 7): the player "writes" orders, nothing is "read by the machine".
+    private static func sentence(for error: RuleCompileError) -> String {
+        switch error {
+        case .noOrderRecognized:
+            String(localized: "Bunu bir emre çeviremedim. Örneğin: “düşman 3 kareden yakınsa geri çekil”.")
+        case .missingAction:
+            String(localized: "Ne zaman olacağı belli, ne yapacakları değil. Sonuna bir eylem ekle: “… geri çekil”.")
+        case .unrecognizedCondition:
+            String(localized: "Bu durumu tanımıyorum. “Emir ekle” ile seçerek yazabilirsin.")
+        case .unsupportedComparison(let kind):
+            switch kind {
+            case .enemyWithin:
+                String(localized: "Mesafe yalnızca “yakınsa” diye sorulur: “düşman 3 kareden yakınsa”.")
+            default:
+                String(localized: "Bu yalnızca “altındaysa” diye sorulur: “canım %40'ın altındaysa”.")
+            }
+        case .conflictingDefaultOrders:
+            String(localized: "İki ayrı varsayılan emir yazdın. Birini seç.")
+        case .multipleActions:
+            String(localized: "Bir cümlede iki eylem var. Emirleri virgülle ayır.")
+        case .missingConditionParameter:
+            String(localized: "Bu emrin bir parametresi eksik kaldı. Tekrar dene.")
+        }
+    }
+
+    private static func sentence(for issue: RuleEditorModel.SlipIssue) -> String {
+        switch issue {
+        case .blank:
+            String(localized: "Bir boşluk var. Pusulaya dokunup doldur.")
+        case .conditionLocked:
+            String(localized: "Bu cephede bu koşul yok. Dokunup değiştir ya da sil.")
+        case .actionLocked:
+            String(localized: "Bu cephede bu eylem yok. Dokunup değiştir ya da sil.")
+        case .outOfRange(let range):
+            String(localized: "Bu sayı \(range.lowerBound) ile \(range.upperBound) arasında olmalı. Dokunup düzelt.")
+        }
+    }
+
+    private static func sentence(for blocker: RuleEditorModel.SealBlocker) -> String {
+        switch blocker {
+        case .blank:
+            String(localized: "Boşlukları doldur, sonra mühürle.")
+        case .notAllowedHere:
+            String(localized: "İşaretli pusulaları düzelt ya da sil.")
+        case .budget(let needed, let remaining):
+            if remaining == 0 {
+                String(localized: "Kural hakkın dolu. Yığından bir emri sil ya da vazgeç.")
+            } else {
+                String(localized: "Kural hakkında \(remaining) yer var, \(needed) emir yazdın. Birini sil.")
+            }
+        }
+    }
+
     // MARK: - Sheet
 
     @ViewBuilder
@@ -390,6 +679,47 @@ struct RuleEditorView: View {
                 ability: model.ability(for: model.selectedUnitType),
                 initialRule: model.defaultRule.rule,
                 onConfirmDefaultAction: { action in model.updateDefaultAction(action) })
+        case .editSlip(let id):
+            if let slip = model.written?.slips.first(where: { $0.id == id }) {
+                if slip.isDefault {
+                    RulePickerSheet(
+                        mode: .editDefaultAction, constraints: model.constraints,
+                        availableUnitTypes: model.enemyUnitTypes, ability: model.ability(for: model.selectedUnitType),
+                        initialDraft: slip.draft,
+                        onConfirmDefaultAction: { action in
+                            model.updateSlip(id, to: RuleDraft(Rule(condition: .always, action: action)))
+                        })
+                } else {
+                    RulePickerSheet(
+                        mode: .editRule, constraints: model.constraints, availableUnitTypes: model.enemyUnitTypes,
+                        ability: model.ability(for: model.selectedUnitType),
+                        initialDraft: slip.draft,
+                        onConfirmRule: { draft in model.updateSlip(id, to: draft) })
+                }
+            }
+        }
+    }
+}
+
+/// A written slip, inked a moment after it lands (ART-DIRECTION §8): the condition, then the action.
+/// Reduce Motion skips the pen and shows the words at once.
+private struct WrittenSlipCard: View {
+    let priority: Int
+    let condition: String
+    let action: String
+    let inkDelay: Double
+    @State private var isInked = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    var body: some View {
+        OrderCard(
+            priority: priority, condition: condition, action: action, state: .written,
+            isInked: isInked || reduceMotion
+        )
+        .task {
+            guard !isInked else { return }
+            try? await Task.sleep(for: .seconds(inkDelay))
+            isInked = true
         }
     }
 }

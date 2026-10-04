@@ -333,3 +333,14 @@ Bu dosya projedeki mimari ve ürün kararlarının tek kaynağıdır. Her karar 
   - Ödüllü reklamın verebilecekleri F5.3'teki listeyle sınırlıdır: yeniden dene · düşman önizlemesi (yalnızca düşmanın gizli olduğu Sis kısıtlı seviyelerde, F3.2) · Arena ekstra maç · ödül 2×.
   - Düşmanı öldürerek kazanılan puan seviyeler arası taşınan bir para birimi olmaz (kazanan güçlenir, zorlanan zayıflar; elle dengelenen seviyeler bozulur). Aynı fikir savaşın **içinde**, önceden yazılan bir emirle deterministik olarak harcanan "Takviye" mekaniği olarak Faz 3'te değerlendirilir (F3.10).
 - **Sonuçlar:** F5.7'deki `EntitlementIndependenceTests` `playerBudget`'ı da kapsar. Seviye ekranı, Sis'siz seviyelerde düşman kompozisyonunu zaten bedava gösterir (G12); ipucu yalnızca Sis'li seviyelerde kademelenir.
+
+## D29 — Yazılı emir önce taslak olur: `RuleDrafter`
+
+- **Tarih:** 2026-10-04 · **Durum:** Kabul · **Kaynak:** Teknik
+- **Bağlam:** ART-DIRECTION §8, cümlenin belirsiz kısmının pusulada altı çizili bir boşluk olarak kalmasını ve oyuncunun onu kadranla doldurmasını istiyor ("düşman yaklaşırsa geri çekil": kaç kare?). D18'deki `RuleCompiler<String>` ise yalnızca tam `[Rule]` döndürebiliyor; eksik bir sayı bütün cümleyi `.missingConditionParameter` ile reddettiriyordu.
+- **Karar:**
+  - FermanAI'a ikinci bir protokol eklenir: `RuleDrafter.drafts(from:context:) async throws(RuleCompileError) -> [RuleDraft]`. Taslakta koşulun sayısı, birim tipi ya da arazisi boş kalabilir. Bunun dışında okunamayan her şey (eylem yok, desteklenmeyen karşılaştırma, iki eylem…) yine hata olarak döner.
+  - `RuleDraft.rule()` taslaktan `Rule`'a giden tek yoldur. `ManualCompiler` ve `TemplateCompiler.compile` bunu kullanır. Metin derleyicilerinin `RuleCompiler<String>` uyumu korunur: boşluk orada `.missingConditionParameter` olur. Böylece doğruluk ölçümü (F2.2) değişmez.
+  - Editör yalnızca `any RuleDrafter` ile konuşur. F2.3'ün `FoundationModelsCompiler`'ı ve `TemplateCompiler`'a düşüş zinciri de aynı protokolü uygular.
+  - Yazılan emirler, oyuncu mühürleyene kadar programa girmez. Taslak masadayken "Savaşı Başlat" kapalıdır (CLAUDE.md kural 3). Mühürlemeden önce taslaklar aynı `RuleValidator`'dan geçer; kilitli tür, aralık dışı sayı ve kural hakkı aşımı mühürlemeyi engeller.
+- **Sonuçlar:** `RuleDraft` artık yalnızca seçicinin değil, yazılı emrin de durumudur. Seçici sayfası (`RulePickerSheet`) boş alanlı bir taslakla açılabilir.

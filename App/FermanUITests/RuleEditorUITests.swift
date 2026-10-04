@@ -60,6 +60,75 @@ final class RuleEditorUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["YERİNDE KAL"].waitForExistence(timeout: 2))
     }
 
+    // MARK: Written orders (F2.4)
+
+    @MainActor
+    private func write(_ text: String, in app: XCUIApplication) {
+        let field = app.textFields["writeOrderField"]
+        XCTAssertTrue(field.waitForExistence(timeout: 2))
+        field.tap()
+        field.typeText(text + "\n")
+    }
+
+    @MainActor
+    func testAWrittenOrderIsSealedIntoTheStack() throws {
+        let app = launchApp()
+        write("düşman 3 kareden yakınsa geri çekil", in: app)
+
+        XCTAssertTrue(app.staticTexts["düşman 3 kareden yakınsa"].waitForExistence(timeout: 3))
+        // Waiting to be sealed: the field and "Emir ekle" give way to the review bar.
+        XCTAssertFalse(app.buttons["Emir ekle"].exists)
+        let seal = app.buttons["Mühürle"]
+        XCTAssertTrue(seal.exists)
+        seal.tap()
+
+        XCTAssertTrue(app.buttons["Emir ekle"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.buttons["Mühürle"].exists)
+        XCTAssertTrue(app.staticTexts["düşman 3 kareden yakınsa"].exists)
+        XCTAssertTrue(app.staticTexts["GERİ ÇEKİL"].exists)
+    }
+
+    @MainActor
+    func testABlankMustBeFilledBeforeSealing() throws {
+        let app = launchApp()
+        write("düşman yaklaşırsa geri çekil", in: app)
+
+        XCTAssertTrue(app.staticTexts["Boşlukları doldur, sonra mühürle."].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Mühürle"].exists)
+
+        app.staticTexts["GERİ ÇEKİL"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["parameterDial"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["düşman 1 kareden yakınsa"].exists)
+
+        let seal = app.buttons["Mühürle"]
+        XCTAssertTrue(seal.waitForExistence(timeout: 2))
+        seal.tap()
+        XCTAssertTrue(app.buttons["Emir ekle"].waitForExistence(timeout: 2))
+        XCTAssertTrue(app.staticTexts["düşman 1 kareden yakınsa"].exists)
+    }
+
+    @MainActor
+    func testDiscardingAWrittenOrderLeavesTheStackAsItWas() throws {
+        let app = launchApp()
+        write("kuşatıldıysam dağıl", in: app)
+
+        XCTAssertTrue(app.staticTexts["kuşatıldıysam"].waitForExistence(timeout: 3))
+        app.buttons["Vazgeç"].tap()
+
+        XCTAssertTrue(app.buttons["Emir ekle"].waitForExistence(timeout: 2))
+        XCTAssertFalse(app.staticTexts["kuşatıldıysam"].exists)
+        XCTAssertTrue(app.staticTexts["Henüz emir yok."].exists)
+    }
+
+    @MainActor
+    func testTextThatIsNotAnOrderSaysWhy() throws {
+        let app = launchApp()
+        write("merhaba komutan", in: app)
+
+        XCTAssertTrue(app.staticTexts["writeOrderError"].waitForExistence(timeout: 3))
+        XCTAssertFalse(app.buttons["Mühürle"].exists)
+    }
+
     // "Sırala" (reorder) is exercised at the model level instead of here
     // (RuleEditorModelTests.reorderMovesSourcesToJustBeforeTheirAnchor,
     // .moveUpAndMoveDownSwapAdjacentOrders): a live `press(forDuration:thenDragTo:)` onto a

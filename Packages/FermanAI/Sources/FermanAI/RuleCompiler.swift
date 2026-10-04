@@ -52,3 +52,11 @@ public protocol RuleCompiler<Input>: Sendable {
     associatedtype Input: Sendable
     func compile(_ input: Input, context: CompileContext) async throws(RuleCompileError) -> [Rule]
 }
+
+/// Turns a typed or spoken order into drafts the player reviews before they become orders (F2.4,
+/// D29). Unlike `RuleCompiler`, a draft may leave a condition's number or unit type empty when the
+/// words didn't give it — the editor shows that as a blank on the slip, filled in with the dial,
+/// instead of refusing the whole sentence. Everything else that can't be read is still an error.
+public protocol RuleDrafter: Sendable {
+    func drafts(from text: String, context: CompileContext) async throws(RuleCompileError) -> [RuleDraft]
+}

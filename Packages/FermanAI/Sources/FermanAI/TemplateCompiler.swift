@@ -9,14 +9,29 @@ import FermanCore
 /// comes out as written and `RuleValidator` flags it, the same as for a hand-picked order. Rules
 /// keep the order they were written in, which is their priority (D7); a default order
 /// ("başka durumda ilerle", or an action with no condition) goes last.
-public struct TemplateCompiler: RuleCompiler<String> {
+///
+/// As a `RuleDrafter` it leaves a number or unit type the words didn't give as a blank for the
+/// player to fill in; as a `RuleCompiler` that same blank is `.missingConditionParameter`.
+public struct TemplateCompiler: RuleCompiler<String>, RuleDrafter {
     public init() {}
 
     public func compile(_ input: String, context: CompileContext) async throws(RuleCompileError) -> [Rule] {
         try Self.rules(from: input)
     }
 
+    public func drafts(from text: String, context: CompileContext) async throws(RuleCompileError) -> [RuleDraft] {
+        try Self.drafts(from: text)
+    }
+
     static func rules(from text: String) throws(RuleCompileError) -> [Rule] {
+        var rules: [Rule] = []
+        for draft in try drafts(from: text) {
+            rules.append(try draft.rule())
+        }
+        return rules
+    }
+
+    static func drafts(from text: String) throws(RuleCompileError) -> [RuleDraft] {
         var assembler = OrderAssembler()
         for tokens in TemplateTokenizer.fragments(of: text) {
             var fragment = TemplateFragment(tokens)
@@ -35,12 +50,12 @@ public struct TemplateCompiler: RuleCompiler<String> {
 /// and "retreat, if an enemy is close" (English order) both split at the comma; a condition-only
 /// fragment takes the action-only fragment right before or after it.
 private struct OrderAssembler {
-    private var rules: [Rule] = []
+    private var drafts: [RuleDraft] = []
     private var defaultAction: Action?
-    private var pendingCondition: Condition?
+    private var pendingCondition: ConditionDraft?
     private var pendingAction: Action?
 
-    mutating func add(condition: Condition?, action: Action?) throws(RuleCompileError) {
+    mutating func add(condition: ConditionDraft?, action: Action?) throws(RuleCompileError) {
         switch (condition, action) {
         case (nil, nil):
             return
@@ -67,23 +82,23 @@ private struct OrderAssembler {
         }
     }
 
-    mutating func finish() throws(RuleCompileError) -> [Rule] {
+    mutating func finish() throws(RuleCompileError) -> [RuleDraft] {
         try flushPendingAction()
         try flushPendingCondition()
-        guard !rules.isEmpty || defaultAction != nil else {
+        guard !drafts.isEmpty || defaultAction != nil else {
             throw .noOrderRecognized
         }
         guard let defaultAction else {
-            return rules
+            return drafts
         }
-        return rules + [Rule(condition: .always, action: defaultAction)]
+        return drafts + [ConditionDraft(kind: .always).draft(with: defaultAction)]
     }
 
-    private mutating func append(_ condition: Condition, _ action: Action) throws(RuleCompileError) {
-        if condition == .always {
+    private mutating func append(_ condition: ConditionDraft, _ action: Action) throws(RuleCompileError) {
+        if condition.kind == .always {
             try setDefault(action)
         } else {
-            rules.append(Rule(condition: condition, action: action))
+            drafts.append(condition.draft(with: action))
         }
     }
 

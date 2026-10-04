@@ -132,10 +132,10 @@ Sources/FermanCore/
 
 ```
 Sources/FermanAI/
-├── RuleCompiler.swift              protocol RuleCompiler<Input>, CompileContext, RuleCompileError
-├── RuleDraft.swift                 seçici durumu (koşul türü, parametre, eylem türü, parametre)
+├── RuleCompiler.swift              protocol RuleCompiler<Input>, protocol RuleDrafter (D29), CompileContext, RuleCompileError
+├── RuleDraft.swift                 seçicinin ve yazılı emrin taslağı (boş parametre olabilir); rule() → Rule
 ├── ManualCompiler.swift            RuleDraft → [Rule]
-├── TemplateCompiler.swift          String → [Rule] (TR/EN anahtar kelime, ek normalizasyonu)
+├── TemplateCompiler.swift          String → [RuleDraft] / [Rule] (TR/EN anahtar kelime, ek normalizasyonu)
 ├── FoundationModelsCompiler.swift  String → [Rule] (tek FoundationModels dosyası)
 ├── CompilerChain.swift             FM → zaman aşımı/uygunsuzluk → Template
 └── EnemyAI/                        GameplayKit yalnızca burada (D6)
@@ -144,16 +144,16 @@ Sources/FermanAI/
     └── PlayerProfile.swift         Sendable girdi: son kazanan ordular/programlar
 ```
 
-### Derleyici hattı (D17, D18)
+### Derleyici hattı (D17, D18, D29)
 ```
-metin ──► CompilerChain
+metin ──► CompilerChain (RuleDrafter)
             ├─ FoundationModelsCompiler
             │    availability + supportsLocale? ──hayır──► TemplateCompiler
             │    tokenCount(for:) < min(800, contextSize)?
             │    yeni LanguageModelSession(instructions: locale cümlesi + görev)
             │    DynamicGenerationSchema (yalnızca açık koşul/eylem)
             │    respond(…, options: .init(sampling: .greedy))  ── 2 sn yarışı ──► zaman aşımı ► Template
-            └─► [Rule] ──► RuleValidator ──► UI'da pusula olarak gösterilir ──► oyuncu onaylar/düzeltir
+            └─► [RuleDraft] ──► mühürsüz pusulalar (boşluk = kadran) ──► RuleValidator ──► oyuncu düzeltir/mühürler ──► [Rule]
 ```
 
 ### GameplayKit izolasyonu (D6, D13)

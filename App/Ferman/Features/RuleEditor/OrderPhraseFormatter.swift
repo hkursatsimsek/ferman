@@ -1,3 +1,4 @@
+import FermanAI
 import FermanCore
 import Foundation
 
@@ -30,6 +31,29 @@ nonisolated enum OrderPhraseFormatter {
             String(localized: "yakınımda \(TurkishNumberSuffix.ablative(count)) fazla düşman varsa")
         case .always:
             String(localized: "başka durumda")
+        }
+    }
+
+    /// The gap a written slip (F2.4) leaves where the words didn't give a number or unit type; the
+    /// card underlines it (ART-DIRECTION §8 — "altı çizili boş bir alan").
+    static let blank = OrderCard.blank
+
+    /// A written slip's condition, with `blank` where its parameter is still missing.
+    static func condition(of draft: RuleDraft) -> String {
+        if let rule = try? draft.rule() {
+            return condition(rule.condition)
+        }
+        switch draft.conditionKind {
+        case .enemyWithin: return String(localized: "düşman \(blank) kareden yakınsa")
+        case .healthBelow: return String(localized: "canım %\(blank) altındaysa")
+        case .allyCountBelow: return String(localized: "yanımda \(blank) az dost varsa")
+        case .targetInRange: return String(localized: "menzilimde \(blank) varsa")
+        case .timeAfter: return String(localized: "\(blank). saniyeden sonra")
+        case .nearestEnemyType: return String(localized: "en yakın düşman \(blank) ise")
+        case .moraleBelow: return String(localized: "moralim %\(blank) altındaysa")
+        case .terrainIs: return String(localized: "\(blank) arazideysem")
+        case .enemyDensityAbove: return String(localized: "yakınımda \(blank) fazla düşman varsa")
+        case .isFlanked, .commanderDead, .always: return condition(.always)
         }
     }
 

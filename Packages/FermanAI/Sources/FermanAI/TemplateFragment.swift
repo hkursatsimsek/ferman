@@ -1,5 +1,23 @@
 import FermanCore
 
+/// A condition as the words gave it: its kind, and its number, unit type or terrain if they did.
+struct ConditionDraft: Equatable {
+    var kind: ConditionKind
+    var number: Int?
+    var unitType: UnitTypeID?
+    var terrain: Terrain?
+
+    func draft(with action: Action) -> RuleDraft {
+        var target: UnitTypeID?
+        if case .focusFire(let unitType) = action {
+            target = unitType
+        }
+        return RuleDraft(
+            conditionKind: kind, conditionNumericValue: number, conditionUnitType: unitType, conditionTerrain: terrain,
+            actionKind: action.kind, actionUnitType: target)
+    }
+}
+
 /// One fragment of a typed order, read once for an action and once for a condition. Every word a
 /// match uses is consumed, so "komutanı koru" can't also count as `commanderDead` and the number
 /// a condition takes can't be taken twice.
@@ -105,52 +123,49 @@ struct TemplateFragment {
 
     // MARK: Condition
 
-    /// The first condition the remaining words describe, most specific first. Throws when the
-    /// words clearly name a condition but leave out its number or unit type, or ask for a
-    /// comparison the game doesn't have.
-    mutating func takeCondition() throws(RuleCompileError) -> Condition? {
+    /// The first condition the remaining words describe, most specific first. A number or unit type
+    /// the words leave out stays empty (the player fills it in); a comparison the game doesn't have
+    /// throws.
+    mutating func takeCondition() throws(RuleCompileError) -> ConditionDraft? {
         if contains(TemplateLexicon.commander), contains(TemplateLexicon.commanderLost) {
             _ = take(TemplateLexicon.commander)
             _ = take(TemplateLexicon.commanderLost)
-            return .commanderDead
+            return ConditionDraft(kind: .commanderDead)
         }
         if take(TemplateLexicon.otherwise) {
-            return .always
+            return ConditionDraft(kind: .always)
         }
         if take(TemplateLexicon.flanked) {
-            return .isFlanked
+            return ConditionDraft(kind: .isFlanked)
         }
         if let terrain = takeTerrain() {
-            return .terrainIs(terrain)
+            return ConditionDraft(kind: .terrainIs, terrain: terrain)
         }
         if take(TemplateLexicon.seconds) {
-            return .timeAfter(seconds: try requireNumber(for: .timeAfter))
+            return ConditionDraft(kind: .timeAfter, number: takeNumber())
         }
         if take(TemplateLexicon.minutes) {
-            return .timeAfter(seconds: try requireNumber(for: .timeAfter) * 60)
+            return ConditionDraft(kind: .timeAfter, number: takeNumber().map { $0 * 60 })
         }
         if take(TemplateLexicon.health) {
-            return .healthBelow(percent: try requireNumberBelow(for: .healthBelow))
+            return ConditionDraft(kind: .healthBelow, number: try takeNumberBelow(for: .healthBelow))
         }
         if take(TemplateLexicon.morale) {
-            return .moraleBelow(percent: try requireNumberBelow(for: .moraleBelow))
+            return ConditionDraft(kind: .moraleBelow, number: try takeNumberBelow(for: .moraleBelow))
         }
         if take(TemplateLexicon.range) {
-            guard let unitType = takeUnit() else {
-                throw .missingConditionParameter(.targetInRange)
-            }
-            return .targetInRange(unitType)
+            return ConditionDraft(kind: .targetInRange, unitType: takeUnit())
         }
         if let range = firstMatch(of: TemplateLexicon.nearest), let unitType = takeUnit() {
             consume(range)
-            return .nearestEnemyType(unitType)
+            return ConditionDraft(kind: .nearestEnemyType, unitType: unitType)
         }
         if take(TemplateLexicon.ally) {
-            return .allyCountBelow(count: try requireNumberBelow(for: .allyCountBelow))
+            return ConditionDraft(kind: .allyCountBelow, number: try takeNumberBelow(for: .allyCountBelow))
         }
         if contains(TemplateLexicon.enemy), take(TemplateLexicon.more) {
             _ = take(TemplateLexicon.enemy)
-            return .enemyDensityAbove(count: try requireNumber(for: .enemyDensityAbove))
+            return ConditionDraft(kind: .enemyDensityAbove, number: takeNumber())
         }
         return try takeEnemyWithin()
     }
@@ -160,7 +175,7 @@ struct TemplateFragment {
         tokens.indices.contains { !consumed[$0] && TemplateLexicon.isConditionalWord(tokens[$0].word) }
     }
 
-    private mutating func takeEnemyWithin() throws(RuleCompileError) -> Condition? {
+    private mutating func takeEnemyWithin() throws(RuleCompileError) -> ConditionDraft? {
         let cells = firstMatch(of: TemplateLexicon.cells)
         let near = firstMatch(of: TemplateLexicon.near)
         let isFar = contains(TemplateLexicon.far)
@@ -174,7 +189,7 @@ struct TemplateFragment {
         cells.map { consume($0) }
         near.map { consume($0) }
         _ = take(TemplateLexicon.enemy)
-        return .enemyWithin(cells: try requireNumber(for: .enemyWithin))
+        return ConditionDraft(kind: .enemyWithin, number: takeNumber())
     }
 
     private mutating func takeTerrain() -> Terrain? {
@@ -220,19 +235,12 @@ struct TemplateFragment {
         return previous >= 0 && TemplateLexicon.englishPrepositions.contains(tokens[previous].word)
     }
 
-    private mutating func requireNumberBelow(for kind: ConditionKind) throws(RuleCompileError) -> Int {
+    private mutating func takeNumberBelow(for kind: ConditionKind) throws(RuleCompileError) -> Int? {
         if contains(TemplateLexicon.more) {
             throw .unsupportedComparison(kind)
         }
         _ = take(TemplateLexicon.fewer)
-        return try requireNumber(for: kind)
-    }
-
-    private mutating func requireNumber(for kind: ConditionKind) throws(RuleCompileError) -> Int {
-        guard let number = takeNumber() else {
-            throw .missingConditionParameter(kind)
-        }
-        return number
+        return takeNumber()
     }
 
     /// The number a condition is about: one next to a measure ("3 kare", "%40", "10 saniye")

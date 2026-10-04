@@ -12,11 +12,14 @@ final class AccessibilityAuditUITests: XCTestCase {
     /// `testRuleEditorScreenHasNoAccessibilityIssues`) instead of silently swallowing every future one.
     @MainActor
     private func auditAndReport(
-        _ app: XCUIApplication, knownIssueLabels: Set<String> = [], file: StaticString = #filePath, line: UInt = #line
+        _ app: XCUIApplication, knownIssueLabels: Set<String> = [], knownIssueLabelPattern: Regex<Substring>? = nil,
+        file: StaticString = #filePath, line: UInt = #line
     ) throws {
         var issues: [String] = []
         try app.performAccessibilityAudit { issue in
-            guard let label = issue.element?.label, !knownIssueLabels.contains(label) else { return true }
+            guard let label = issue.element?.label, !knownIssueLabels.contains(label),
+                knownIssueLabelPattern.map({ (try? $0.wholeMatch(in: label)) == nil }) ?? true
+            else { return true }
             issues.append(
                 "\(issue.detailedDescription) | label=\(label) "
                     + "id=\(issue.element?.identifier ?? "?") frame=\(issue.element?.frame ?? .zero)")
@@ -106,7 +109,10 @@ final class AccessibilityAuditUITests: XCTestCase {
     /// which does scale — F1.13 already relies on that) — set the simulator to
     /// `content_size accessibility-extra-extra-extra-large` and screenshotted the same screen: "33 sn"
     /// grows right along with "emir"/"kayıp" beside it. Neither chased further than that (G15).
-    private static let debriefKnownIssueLabels: Set<String> = ["Sonraki Cephe", "33 sn"]
+    /// The duration is the battle's own length, so it's matched by shape: moving the level's
+    /// formations (5fb19e3) turned "33 sn" into "49 sn" without changing the label's element.
+    private static let debriefKnownIssueLabels: Set<String> = ["Sonraki Cephe"]
+    private static var debriefDurationLabel: Regex<Substring> { /\d+ sn/ }
 
     /// The battle (G15): the top bar, the trigger strip, and the table's figures as VoiceOver hears
     /// them. Paused first, so the audit doesn't sample a table that's moving under it.
@@ -128,7 +134,8 @@ final class AccessibilityAuditUITests: XCTestCase {
         app.launchArguments += ["-uiTestSandbox", "-uiTestDebrief", "2"]
         app.launch()
         XCTAssertTrue(app.staticTexts["Hat tutuldu."].waitForExistence(timeout: 10))
-        try auditAndReport(app, knownIssueLabels: Self.debriefKnownIssueLabels)
+        try auditAndReport(
+            app, knownIssueLabels: Self.debriefKnownIssueLabels, knownIssueLabelPattern: Self.debriefDurationLabel)
     }
 
     @MainActor
@@ -145,5 +152,27 @@ final class AccessibilityAuditUITests: XCTestCase {
         // combined frame isn't the text pixels. Treating as a tool limitation, not a real contrast
         // bug, until it can be reproduced against a plain `Text`-only element.
         try auditAndReport(app, knownIssueLabels: ["Okçu", "Kalkanlı"])
+    }
+
+    /// F2.4: a written order waiting to be sealed — slips with a blank, the quoted text, the review bar.
+    @MainActor
+    func testWrittenOrdersHaveNoAccessibilityIssues() throws {
+        let app = XCUIApplication()
+        app.launchArguments += [
+            "-uiTestWrittenOrder", "düşman yaklaşırsa geri çekil, canım %30'un altındaysa siper al",
+        ]
+        app.launch()
+        XCTAssertTrue(app.buttons["Vazgeç"].waitForExistence(timeout: 3))
+        // Same tab-row tool limitation as `testRuleEditorScreenHasNoAccessibilityIssues`. The order
+        // cards' priority digits and the written slip's blank condition (figure spaces under a solid
+        // underline, `OrderCard.blank`) also report `.contrast`, though each card is one combined
+        // element; pixel-sampled at the reported frames (F2.4): `paperInk` (42,38,34) on paper
+        // (223,218,207), 10.8:1, for the digits and the blank line alike. Neighbouring condition
+        // texts drawn the same way pass. Treated as the same tool limitation, by name.
+        try auditAndReport(
+            app,
+            knownIssueLabels: [
+                "Okçu", "Kalkanlı", "1", "2", "3", "4", "5", "düşman \u{2007}\u{2007}\u{2007} kareden yakınsa",
+            ])
     }
 }

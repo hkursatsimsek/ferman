@@ -7,6 +7,8 @@ enum OrderCardState: Equatable {
     case disabled
     case isDefault
     case editing
+    /// Written or spoken (F2.4) and still waiting to be sealed: a slip on the table, not yet in the stack.
+    case written
 }
 
 /// EmirPusulası — an order card. A physical object, not a row: paper cut at 2pt,
@@ -23,6 +25,13 @@ struct OrderCard: View {
     var foldedUnder: Int?
     /// Marks the condition's number with a dotted underline — "tap here to change it" (design mock).
     var highlightsParameter = false
+    /// Whether the clerk's ink has reached the words yet (ART-DIRECTION §8): flipping this to `true`
+    /// writes the condition, then the action, left to right.
+    var isInked = true
+
+    /// Where a written order (F2.4) left out a number or unit type; the card underlines it. Figure
+    /// spaces keep a number's width, and VoiceOver reads nothing for them.
+    nonisolated static let blank = "\u{2007}\u{2007}\u{2007}"
 
     /// A fixed badge that still grows with Dynamic Type — a bare `Circle` with only a minimum size takes
     /// every point the row offers and squeezes the order's words into a narrow column.
@@ -35,10 +44,12 @@ struct OrderCard: View {
                 Text(conditionText)
                     .font(FermanFont.orderCondition())
                     .foregroundStyle(conditionColor)
+                    .mask(alignment: .leading) { InkMask(isInked: isInked, duration: 0.45, delay: 0) }
                 Text(action)
                     .font(FermanFont.orderAction())
                     .tracking(FermanFont.Tracking.orderAction)
                     .foregroundStyle(actionColor)
+                    .mask(alignment: .leading) { InkMask(isInked: isInked, duration: 0.3, delay: 0.45) }
                 if let foldedUnder {
                     Text(String(localized: "\(foldedUnder). emir yüzünden hiç sıra gelmez."))
                         .font(FermanFont.caption())
@@ -61,6 +72,8 @@ struct OrderCard: View {
                     .offset(x: -6, y: 4)
                     .allowsHitTesting(false)
                     .accessibilityHidden(true)
+                    // Pressed down from above, then lifted away (F2.4's stamp).
+                    .transition(.scale(scale: 1.9).combined(with: .opacity))
             }
         }
         .overlay(alignment: .topTrailing) {
@@ -107,7 +120,7 @@ struct OrderCard: View {
         case .normal, .dragging:
             DotGridHandle()
                 .padding(.top, 4)
-        case .disabled, .isDefault, .editing:
+        case .disabled, .isDefault, .editing, .written:
             EmptyView()
         }
     }
@@ -118,7 +131,7 @@ struct OrderCard: View {
             // `.disabled` used to sit on a dim paper tint; a `performAccessibilityAudit()` failure
             // (F1.13) showed `paperInk` text needs a genuinely light card under it to stay readable,
             // so it now shares `.normal`'s full-strength card and dims only its badge stroke instead.
-            case .normal, .dragging, .triggered, .editing, .disabled:
+            case .normal, .dragging, .triggered, .editing, .disabled, .written:
                 Paper()
             case .isDefault:
                 Color.clear
@@ -128,9 +141,16 @@ struct OrderCard: View {
 
     @ViewBuilder
     private var border: some View {
-        if state == .isDefault {
+        switch state {
+        case .isDefault:
             RoundedRectangle(cornerRadius: FermanRadius.orderCard)
                 .strokeBorder(Color.paper.opacity(0.3), style: StrokeStyle(lineWidth: 1.5, dash: [5, 4]))
+        case .written:
+            // Not sealed yet: a brass pencil line around the slip, not part of the stack.
+            RoundedRectangle(cornerRadius: FermanRadius.orderCard)
+                .strokeBorder(Color.brass, style: StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+        default:
+            EmptyView()
         }
     }
 
@@ -143,9 +163,14 @@ struct OrderCard: View {
         }
     }
 
-    /// The condition, with its number (`3`, `%35`) dotted-underlined in brass when it can be tapped.
+    /// The condition, with its number (`3`, `%35`) dotted-underlined in brass when it can be tapped,
+    /// and a blank left by a written order underlined solid.
     private var conditionText: AttributedString {
         var text = AttributedString(condition)
+        if let blank = text.range(of: Self.blank) {
+            text[blank].underlineStyle = Text.LineStyle(pattern: .solid, color: .paperInk)
+            return text
+        }
         guard highlightsParameter, let match = condition.firstMatch(of: /%?\d+/),
             let range = Range(match.range, in: text)
         else { return text }
@@ -196,6 +221,21 @@ struct OrderCard: View {
             default:
                 AnyView(content.fermanCardShadow())
             }
+        }
+    }
+}
+
+/// Reveals what it masks left to right, like a pen crossing the line.
+private struct InkMask: View {
+    let isInked: Bool
+    let duration: Double
+    let delay: Double
+
+    var body: some View {
+        GeometryReader { proxy in
+            Rectangle()
+                .frame(width: isInked ? proxy.size.width : 0)
+                .animation(.easeInOut(duration: duration).delay(delay), value: isInked)
         }
     }
 }
@@ -383,6 +423,8 @@ private struct DotGridHandle: View {
             priority: 2, condition: "düşman 3 kareden yakınsa", action: "YERİNDE KAL", state: .normal, foldedUnder: 1,
             highlightsParameter: true)
         OrderCard(priority: 1, condition: "canım %35'in altındaysa", action: "SİPER AL", state: .normal, isSealed: true)
+        OrderCard(
+            priority: 3, condition: "düşman \(OrderCard.blank) kareden yakınsa", action: "GERİ ÇEKİL", state: .written)
     }
     .padding()
     .background(Color.ink)

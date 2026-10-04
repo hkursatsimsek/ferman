@@ -57,6 +57,10 @@ struct ContentView: View {
             RuleEditorView(model: Self.ruleEditorFixture())
         } else if ProcessInfo.processInfo.arguments.contains("-uiTestRuleEditorSample") {
             RuleEditorView(model: Self.ruleEditorFixture(programs: Self.sampleOrders))
+        } else if let text = UserDefaults.standard.string(forKey: "uiTestWrittenOrder") {
+            // `-uiTestWrittenOrder "<text>"`: the editor with that text already written and waiting
+            // to be sealed (F2.4) — a screenshot entry point, since this machine can't type into it.
+            WrittenOrderFixture(model: Self.ruleEditorFixture(programs: Self.sampleOrders), text: text)
         } else if ProcessInfo.processInfo.arguments.contains("-uiTestRulePicker") {
             RulePickerSheet(
                 mode: .add, constraints: .unrestricted, availableUnitTypes: ["mizrakci", "okcu", "suvari", "kalkan"],
@@ -327,6 +331,16 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+private struct WrittenOrderFixture: View {
+    @State var model: RuleEditorModel
+    let text: String
+
+    var body: some View {
+        RuleEditorView(model: model)
+            .task { await model.write(text) }
+    }
 }
 
 /// Runs a battle once, then shows what's built from its result — `-uiTestDebrief`'s way in.

@@ -14,6 +14,29 @@ struct EditableRule: Identifiable, Sendable, Hashable {
     }
 }
 
+/// One slip of a written order (F2.4): what the words said, possibly with its number or unit type
+/// still blank. A slip whose condition is `.always` replaces the unit type's default order.
+struct WrittenSlip: Identifiable, Sendable, Hashable {
+    let id: UUID
+    var draft: RuleDraft
+
+    init(id: UUID = UUID(), draft: RuleDraft) {
+        self.id = id
+        self.draft = draft
+    }
+
+    var isDefault: Bool { draft.conditionKind == .always }
+}
+
+/// What the player typed (or, from F2.5, said), read into slips but not yet sealed into the stack.
+/// Nothing here is part of `programs` or reaches a battle until the player has seen it and sealed
+/// it (CLAUDE.md rule 3).
+struct WrittenOrders: Sendable, Equatable {
+    let unitType: UnitTypeID
+    let text: String
+    var slips: [WrittenSlip]
+}
+
 /// A small built-in bundle of orders a player can drop into an empty stack (design brief §4.4's
 /// empty-state CTA). Not the same thing as the Emir Kütüphanesi (F4.8) — that saves a player's own
 /// sets; this is a fixed, shipped starting point.
@@ -60,6 +83,8 @@ final class RuleEditorModel {
     /// Why "Savaşı Başlat" is off — the first validation error, in terms a player can act on. The
     /// view turns it into a sentence (String Catalog), this model only decides which one it is.
     enum BattleBlocker: Equatable {
+        /// A written order is on the table, neither sealed nor discarded.
+        case unsealedOrders
         case budgetExceeded(used: Int, budget: Int)
         /// `priority` is 1-based, the number printed on the card.
         case invalidOrder(unitType: UnitTypeID, priority: Int)
@@ -79,7 +104,31 @@ final class RuleEditorModel {
     var selectedUnitType: UnitTypeID
     var lastCompileError: RuleCompileError?
 
+    /// Why a written order can't be sealed yet, slip by slip.
+    enum SlipIssue: Equatable {
+        /// The words left out the condition's number or unit type.
+        case blank
+        case conditionLocked
+        case actionLocked
+        case outOfRange(ClosedRange<Int>)
+    }
+
+    enum SealBlocker: Equatable {
+        case blank
+        case notAllowedHere
+        /// More new orders than the army-wide budget (D4) has room for.
+        case budget(needed: Int, remaining: Int)
+    }
+
+    private(set) var written: WrittenOrders?
+    /// Why the last text couldn't be read at all. Cleared as soon as the player edits the text.
+    var writeError: RuleCompileError?
+    private(set) var isWriting = false
+    /// Orders sealed a moment ago — the view presses the seal on these, then lets it fade.
+    private(set) var justSealed: Set<EditableRule.ID> = []
+
     private let compiler: any RuleCompiler<RuleDraft>
+    private let textCompiler: any RuleDrafter
     private let audio: any AudioPlaying
 
     init(
@@ -89,6 +138,7 @@ final class RuleEditorModel {
         enemyUnitTypes: [UnitTypeID]? = nil,
         initialPrograms: [RuleProgram] = [],
         compiler: any RuleCompiler<RuleDraft> = ManualCompiler(),
+        textCompiler: any RuleDrafter = TemplateCompiler(),
         audio: any AudioPlaying = SilentAudioPlaying()
     ) {
         precondition(!unitTypes.isEmpty, "RuleEditorModel needs at least one unit type")
@@ -99,6 +149,7 @@ final class RuleEditorModel {
         // Sis front later — F3.2): every type in the catalog is a possible target.
         self.enemyUnitTypes = enemyUnitTypes ?? catalog.map(\.id)
         self.compiler = compiler
+        self.textCompiler = textCompiler
         self.audio = audio
         self.selectedUnitType = unitTypes[0]
 
@@ -147,6 +198,9 @@ final class RuleEditorModel {
     }
 
     var battleBlocker: BattleBlocker? {
+        if written != nil {
+            return .unsealedOrders
+        }
         if let budget = validationErrors.lazy.compactMap(Self.budgetBlocker).first {
             return budget
         }
@@ -206,7 +260,8 @@ final class RuleEditorModel {
     // MARK: - Intents
 
     func selectUnitType(_ unitType: UnitTypeID) {
-        guard unitTypes.contains(unitType) else { return }
+        // A written order belongs to the tab it was written on; it's sealed or set aside first.
+        guard unitTypes.contains(unitType), written == nil else { return }
         selectedUnitType = unitType
     }
 
@@ -332,14 +387,142 @@ final class RuleEditorModel {
         }
     }
 
+    // MARK: - Written orders (F2.4)
+
+    var slipIssues: [WrittenSlip.ID: SlipIssue] {
+        guard let written else { return [:] }
+        var issues: [WrittenSlip.ID: SlipIssue] = [:]
+        var located: [(id: WrittenSlip.ID, rule: Rule)] = []
+        for slip in written.slips {
+            if let rule = try? slip.draft.rule() {
+                located.append((slip.id, rule))
+            } else {
+                issues[slip.id] = .blank
+            }
+        }
+        // The same validator every order passes (D18), on the written orders alone: a slip is
+        // flagged exactly when it would be once sealed. The default slip has to be last.
+        located = located.filter { $0.rule.condition != .always } + located.filter { $0.rule.condition == .always }
+        let program = RuleProgram(unitType: written.unitType, rules: located.map(\.rule))
+        for error in RuleValidator.validate(programs: [program], constraints: constraints) {
+            switch error {
+            case .conditionNotAvailable(_, let index, _):
+                issues[located[index].id] = issues[located[index].id] ?? .conditionLocked
+            case .actionNotAvailable(_, let index, _):
+                issues[located[index].id] = issues[located[index].id] ?? .actionLocked
+            case .conditionParameterOutOfRange(_, let index, _, _, let range):
+                issues[located[index].id] = issues[located[index].id] ?? .outOfRange(range)
+            case .alwaysRuleIsNotLast, .ruleBudgetExceeded:
+                break
+            }
+        }
+        return issues
+    }
+
+    var sealBlocker: SealBlocker? {
+        guard let written else { return nil }
+        let issues = slipIssues.values
+        if issues.contains(.blank) {
+            return .blank
+        }
+        if !issues.isEmpty {
+            return .notAllowedHere
+        }
+        let needed = written.slips.count { !$0.isDefault }
+        let remaining = max(0, constraints.maxRules - usedBudget)
+        if needed > remaining {
+            return .budget(needed: needed, remaining: remaining)
+        }
+        return nil
+    }
+
+    /// Reads typed (or spoken) text into slips for the selected unit type. Nothing joins the
+    /// stack until `sealWritten()`.
+    func write(_ text: String) async {
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, written == nil, !isWriting else { return }
+        let unitType = selectedUnitType
+        isWriting = true
+        defer { isWriting = false }
+        do {
+            let drafts = try await textCompiler.drafts(from: trimmed, context: compileContext)
+            written = WrittenOrders(unitType: unitType, text: trimmed, slips: drafts.map { WrittenSlip(draft: $0) })
+            writeError = nil
+            audio.play(.paper)
+        } catch {
+            writeError = error
+        }
+    }
+
+    func sealWritten() {
+        guard let written, sealBlocker == nil else { return }
+        var sealed: Set<EditableRule.ID> = []
+        for slip in written.slips {
+            guard let rule = try? slip.draft.rule() else { continue }
+            if slip.isDefault {
+                let id = defaultRuleByUnitType[written.unitType]?.id ?? UUID()
+                defaultRuleByUnitType[written.unitType] = EditableRule(id: id, rule: rule)
+                sealed.insert(id)
+            } else {
+                let order = EditableRule(rule: rule)
+                ordersByUnitType[written.unitType, default: []].append(order)
+                sealed.insert(order.id)
+            }
+        }
+        self.written = nil
+        justSealed = sealed
+        audio.play(.stamp)
+        refreshValidation()
+    }
+
+    func discardWritten() {
+        written = nil
+        writeError = nil
+    }
+
+    func clearJustSealed() {
+        justSealed = []
+    }
+
+    func removeSlip(_ id: WrittenSlip.ID) {
+        written?.slips.removeAll { $0.id == id }
+        if written?.slips.isEmpty == true {
+            written = nil
+        }
+    }
+
+    func updateSlip(_ id: WrittenSlip.ID, to draft: RuleDraft) {
+        guard let index = written?.slips.firstIndex(where: { $0.id == id }) else { return }
+        written?.slips[index].draft = draft
+    }
+
+    /// The number the dial edits on a written slip, blank or not — and where a blank one starts.
+    func slipNumericParameter(for id: WrittenSlip.ID) -> (value: Int, range: ClosedRange<Int>)? {
+        guard let draft = written?.slips.first(where: { $0.id == id })?.draft else { return nil }
+        switch draft.conditionKind.parameter {
+        case .cells(let range), .percent(let range), .count(let range), .seconds(let range):
+            return (draft.conditionNumericValue ?? RulePickerSheet.defaultNumericValue(for: draft.conditionKind), range)
+        case .none, .unitType, .terrain:
+            return nil
+        }
+    }
+
+    func setSlipNumber(_ value: Int, for id: WrittenSlip.ID) {
+        guard let index = written?.slips.firstIndex(where: { $0.id == id }) else { return }
+        written?.slips[index].draft.conditionNumericValue = value
+    }
+
     // MARK: - Compiling and validation
 
-    private func compile(_ draft: RuleDraft) async -> Rule? {
-        let context = CompileContext(
+    private var compileContext: CompileContext {
+        CompileContext(
             unitType: selectedUnitType, constraints: constraints, availableUnitTypes: unitTypes,
             remainingRuleBudget: max(0, constraints.maxRules - usedBudget))
+    }
+
+    private func compile(_ draft: RuleDraft) async -> Rule? {
         do {
-            let rules = try await compiler.compile(draft, context: context)
+            let rules = try await compiler.compile(draft, context: compileContext)
             lastCompileError = nil
             return rules.first
         } catch {
