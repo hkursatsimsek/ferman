@@ -4,6 +4,9 @@
     " " : {
 
     },
+    "“%@”" : {
+
+    },
     "%@ · %lld. emir bu cephede geçerli değil." : {
       "localizations" : {
         "tr" : {
@@ -44,6 +47,9 @@
         }
       }
     },
+    "%@ arazideysem" : {
+
+    },
     "%@ YÜKLEN" : {
 
     },
@@ -58,6 +64,9 @@
       }
     },
     "%@, komutan" : {
+
+    },
+    "%@. saniyeden sonra" : {
 
     },
     "%lld" : {
@@ -180,6 +189,9 @@
     "adet" : {
 
     },
+    "Alttaki emir henüz pusulaya geçmedi. “Yaz”a dokun ya da sil." : {
+
+    },
     "Arazi" : {
 
     },
@@ -213,6 +225,12 @@
     "Belirli bir andan sonra" : {
 
     },
+    "Bir boşluk var. Pusulaya dokunup doldur." : {
+
+    },
+    "Bir cümlede iki eylem var. Emirleri virgülle ayır." : {
+
+    },
     "Bir figüre dokun." : {
 
     },
@@ -231,6 +249,15 @@
     "Boş hücre" : {
 
     },
+    "Boşlukları doldur, sonra mühürle." : {
+
+    },
+    "Bu cephede bu eylem yok. Dokunup değiştir ya da sil." : {
+
+    },
+    "Bu cephede bu koşul yok. Dokunup değiştir ya da sil." : {
+
+    },
     "Bu cephede emir yazılmaz." : {
 
     },
@@ -240,13 +267,35 @@
     "Bu cephede yeni emir" : {
 
     },
+    "Bu durumu tanımıyorum. “Emir ekle” ile seçerek yazabilirsin." : {
+
+    },
     "Bu emir hiç çalışmadı." : {
+
+    },
+    "Bu emri şimdi okuyamadım. “Emir ekle” ile seçerek yazabilirsin." : {
 
     },
     "Bu emrin bir parametresi eksik kaldı. Tekrar dene." : {
 
     },
+    "Bu sayı %lld ile %lld arasında olmalı. Dokunup düzelt." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Bu sayı %1$lld ile %2$lld arasında olmalı. Dokunup düzelt."
+          }
+        }
+      }
+    },
+    "Bu yalnızca “altındaysa” diye sorulur: “canım %40'ın altındaysa”." : {
+
+    },
     "Bulunduğum arazi" : {
+
+    },
+    "Bunu bir emre çeviremedim. Örneğin: “düşman 3 kareden yakınsa geri çekil”." : {
 
     },
     "Bütçe" : {
@@ -285,6 +334,12 @@
     "Dengeli" : {
 
     },
+    "Dinliyorum…" : {
+
+    },
+    "Doğruysa mühürle. Yanlışsa pusulaya dokunup düzelt." : {
+
+    },
     "Dostlarım azaldığında" : {
 
     },
@@ -295,6 +350,9 @@
 
     },
     "Düşman " : {
+
+    },
+    "düşman %@ kareden yakınsa" : {
 
     },
     "düşman %lld kareden yakınsa" : {
@@ -325,6 +383,9 @@
 
     },
     "düşük" : {
+
+    },
+    "Düzeltmek için dokun." : {
 
     },
     "Düzenle" : {
@@ -361,6 +422,12 @@
 
     },
     "Emri Düzenle" : {
+
+    },
+    "Emri söyle" : {
+
+    },
+    "Emri yaz" : {
 
     },
     "En yakın / en zayıf" : {
@@ -420,6 +487,9 @@
     "İçerik yüklenemedi." : {
 
     },
+    "İki ayrı varsayılan emir yazdın. Birini seç." : {
+
+    },
     "İlerle" : {
 
     },
@@ -436,6 +506,9 @@
 
     },
     "İlk üç cephenin kalem notları, oyunu bir sonraki açışında yeniden görünecek." : {
+
+    },
+    "İşaretli pusulaları düzelt ya da sil." : {
 
     },
     "İzle" : {
@@ -535,6 +608,19 @@
     "Kural hakkın doldu. Yeni emir için birini sil." : {
 
     },
+    "Kural hakkın dolu. Yığından bir emri sil ya da vazgeç." : {
+
+    },
+    "Kural hakkında %lld yer var, %lld emir yazdın. Birini sil." : {
+      "localizations" : {
+        "tr" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Kural hakkında %1$lld yer var, %2$lld emir yazdın. Birini sil."
+          }
+        }
+      }
+    },
     "Kuru Vadi" : {
 
     },
@@ -559,6 +645,15 @@
     "Mesafe" : {
 
     },
+    "Mesafe yalnızca “yakınsa” diye sorulur: “düşman 3 kareden yakınsa”." : {
+
+    },
+    "Mikrofon bulunamadı. Emri yazabilirsin." : {
+
+    },
+    "Mikrofon izni kapalı. Ayarlar'dan açabilir ya da emri yazabilirsin." : {
+
+    },
     "MIZRAK DUVARI" : {
 
     },
@@ -577,7 +672,16 @@
     "Moralim azaldığında" : {
 
     },
+    "Mühürle" : {
+
+    },
+    "Ne yapacaklarını anlayamadım. Eylemi başka bir sözle yaz: “… geri çekil”." : {
+
+    },
     "Ne yapsın?" : {
+
+    },
+    "Ne zaman olacağı belli, ne yapacakları değil. Sonuna bir eylem ekle: “… geri çekil”." : {
 
     },
     "Ne zaman?" : {
@@ -670,6 +774,21 @@
     "Ses" : {
 
     },
+    "Ses paketi henüz inmedi. Mikrofona dokunup indirebilirsin." : {
+
+    },
+    "Ses paketi iniyor…" : {
+
+    },
+    "Ses paketini indir" : {
+
+    },
+    "Sesini şimdi duyamadım. Tekrar söyle ya da yaz." : {
+
+    },
+    "Sesle emir" : {
+
+    },
     "Sil" : {
 
     },
@@ -710,6 +829,12 @@
 
     },
     "Sonuç" : {
+
+    },
+    "Söylediğin emri yazıya dökmek için ses paketi bir kez indirilir. Sonra internetsiz çalışır; sesin cihazdan çıkmaz." : {
+
+    },
+    "Söylemeyi bitir" : {
 
     },
     "Su" : {
@@ -876,6 +1001,9 @@
     "Varsayılan emri uygular: İLERLE. Savaşı başlat ve izle." : {
 
     },
+    "Varsayılan emrin yerine geçer." : {
+
+    },
     "Vazgeç" : {
 
     },
@@ -892,6 +1020,9 @@
 
     },
     "Yaz" : {
+
+    },
+    "Yazdığın emri mühürle ya da vazgeç." : {
 
     },
     "Yazılan emir" : {
