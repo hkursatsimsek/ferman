@@ -222,6 +222,7 @@ struct TemplateCompilerTests {
             ("canım azalırsa siper al", .missingConditionParameter(.healthBelow)),
             ("menzilimde düşman varsa yüklen", .missingConditionParameter(.targetInRange)),
             ("düşman 3 kareden yakınsa", .missingAction(.enemyWithin)),
+            ("protect the general if morale is under 30%", .unrecognizedAction(.moraleBelow)),
             ("düşman görünce geri çekil", .unrecognizedCondition),
             ("canım %40'ın üstündeyse ilerle", .unsupportedComparison(.healthBelow)),
             ("düşman 3 kareden uzaksa ilerle", .unsupportedComparison(.enemyWithin)),

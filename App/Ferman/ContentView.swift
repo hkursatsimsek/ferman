@@ -151,7 +151,7 @@ struct ContentView: View {
                             enemyUnitTypes: catalog.units.map(\.id).filter { enemyTypes.contains($0) },
                             // The template first, the on-device model for what it doesn't read (D30);
                             // with Apple Intelligence off the chain is simply the template (F2.6).
-                            textCompiler: CompilerChain(model: FoundationModelsCompiler()),
+                            textCompiler: CompilerChain(model: Self.languageModel),
                             listener: SpeechOrderListener(),
                             audio: AudioService.shared),
                         battleSetup: RuleEditorView.BattleSetup(
@@ -320,6 +320,17 @@ struct ContentView: View {
             ])
     ]
 
+    /// The on-device model behind the template (D30). `-uiTestAppleIntelligenceOff` swaps in what
+    /// `FoundationModelsCompiler` does with Apple Intelligence off — every request `.modelUnavailable` —
+    /// for F2.6's end-to-end test, since the Simulator's model follows the host Mac's setting.
+    private static var languageModel: any RuleDrafter {
+        if ProcessInfo.processInfo.arguments.contains("-uiTestAppleIntelligenceOff") {
+            AppleIntelligenceOff()
+        } else {
+            FoundationModelsCompiler()
+        }
+    }
+
     private static func ruleEditorFixture(
         programs: [RuleProgram] = [], listener: (any OrderListening)? = nil
     ) -> RuleEditorModel {
@@ -341,6 +352,13 @@ struct ContentView: View {
 
 #Preview {
     ContentView()
+}
+
+/// `FoundationModelsCompiler` with Apple Intelligence turned off, as far as `CompilerChain` can tell.
+private nonisolated struct AppleIntelligenceOff: RuleDrafter {
+    func drafts(from text: String, context: CompileContext) async throws(RuleCompileError) -> [RuleDraft] {
+        throw .modelUnavailable
+    }
 }
 
 private struct WrittenOrderFixture: View {
