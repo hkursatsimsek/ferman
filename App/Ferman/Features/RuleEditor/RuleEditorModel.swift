@@ -85,6 +85,9 @@ final class RuleEditorModel {
     enum BattleBlocker: Equatable {
         /// A written order is on the table, neither sealed nor discarded.
         case unsealedOrders
+        /// Text is still in the write field — typed, or dictated through the keyboard — and was never
+        /// turned into slips. Without this the battle started as if it weren't there.
+        case unwrittenText
         case budgetExceeded(used: Int, budget: Int)
         /// `priority` is 1-based, the number printed on the card.
         case invalidOrder(unitType: UnitTypeID, priority: Int)
@@ -121,6 +124,9 @@ final class RuleEditorModel {
     }
 
     private(set) var written: WrittenOrders?
+    /// What's in the write field. Emptied once it becomes slips; kept, with `writeError`, when it can't
+    /// be read, so the player can correct it.
+    var writeText = ""
     /// Why the last text couldn't be read at all. Cleared as soon as the player edits the text.
     var writeError: RuleCompileError?
     private(set) var isWriting = false
@@ -220,6 +226,9 @@ final class RuleEditorModel {
     var battleBlocker: BattleBlocker? {
         if written != nil {
             return .unsealedOrders
+        }
+        if !writeText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return .unwrittenText
         }
         if let budget = validationErrors.lazy.compactMap(Self.budgetBlocker).first {
             return budget
@@ -467,6 +476,7 @@ final class RuleEditorModel {
         do {
             let drafts = try await textCompiler.drafts(from: trimmed, context: compileContext)
             written = WrittenOrders(unitType: unitType, text: trimmed, slips: drafts.map { WrittenSlip(draft: $0) })
+            writeText = ""
             writeError = nil
             audio.play(.paper)
         } catch {
@@ -576,6 +586,9 @@ final class RuleEditorModel {
     func startListening() async {
         guard let listener, listening == .idle, written == nil else { return }
         listeningError = nil
+        // A new spoken order replaces whatever was left in the field, never continues it.
+        writeText = ""
+        writeError = nil
         do {
             let order = try await listener.startListening()
             spokenOrder = order

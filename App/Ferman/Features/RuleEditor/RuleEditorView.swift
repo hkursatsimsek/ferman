@@ -17,7 +17,6 @@ struct RuleEditorView: View {
     @State private var sheet: SheetKind?
     @State private var dialTarget: EditableRule.ID?
     @State private var showingPresets = false
-    @State private var writeText = ""
     @State private var slipDialTarget: WrittenSlip.ID?
     @State private var offeringSpeechDownload = false
     @FocusState private var isWriteFieldFocused: Bool
@@ -206,6 +205,8 @@ struct RuleEditorView: View {
         switch blocker {
         case .unsealedOrders:
             String(localized: "Yazdığın emri mühürle ya da vazgeç.")
+        case .unwrittenText:
+            String(localized: "Alttaki emir henüz pusulaya geçmedi. “Yaz”a dokun ya da sil.")
         case .budgetExceeded(let used, let budget):
             String(localized: "Kural hakkın \(budget), \(used) emir yazdın. Birini sil.")
         case .invalidOrder(let unitType, let priority):
@@ -445,7 +446,7 @@ struct RuleEditorView: View {
                     // The prompt stays this short even beside the microphone, whose own label says
                     // "Emri söyle": "Emri söyle ya da yaz" clipped at large Dynamic Type sizes there.
                     TextField(
-                        String(localized: "Emri yaz"), text: $writeText,
+                        String(localized: "Emri yaz"), text: $model.writeText,
                         prompt: Text(String(localized: "Emri yaz")).foregroundStyle(Color.paper.opacity(0.7))
                     )
                     .font(FermanFont.body())
@@ -458,7 +459,7 @@ struct RuleEditorView: View {
                     if model.isWriting {
                         ProgressView()
                             .tint(Color.paper)
-                    } else if !writeText.trimmingCharacters(in: .whitespaces).isEmpty {
+                    } else if !model.writeText.trimmingCharacters(in: .whitespaces).isEmpty {
                         Button(String(localized: "Yaz"), action: submitWriting)
                             .buttonStyle(FermanButton.Chip())
                     }
@@ -484,7 +485,7 @@ struct RuleEditorView: View {
         }
         .padding(.horizontal, FermanSpacing.md)
         .padding(.top, FermanSpacing.sm)
-        .onChange(of: writeText) {
+        .onChange(of: model.writeText) {
             model.writeError = nil
         }
         .confirmationDialog(
@@ -527,7 +528,7 @@ struct RuleEditorView: View {
                 Task {
                     let transcript = await model.stopListening()
                     guard !transcript.isEmpty else { return }
-                    writeText = transcript
+                    model.writeText = transcript
                     submitWriting()
                 }
             } label: {
@@ -542,11 +543,10 @@ struct RuleEditorView: View {
     }
 
     private func submitWriting() {
-        let text = writeText
+        let text = model.writeText
         Task {
             await model.write(text)
             if model.written != nil {
-                writeText = ""
                 isWriteFieldFocused = false
             }
         }
