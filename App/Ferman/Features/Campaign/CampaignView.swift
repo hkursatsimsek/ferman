@@ -10,6 +10,8 @@ struct CampaignView: View {
     /// clears its pin and opens the next.
     var loadFronts: () -> [CampaignFront] = { [] }
     @State private var selectedFront: CampaignFront?
+    /// The level sheet's own height once it has measured itself; `.medium` only until then.
+    @State private var levelSheetHeight: CGFloat?
     @Environment(AppRouter.self) private var router
     @Environment(\.frontTransition) private var frontTransition
 
@@ -54,11 +56,13 @@ struct CampaignView: View {
         .toolbarBackground(Color.ink.opacity(0.92), for: .navigationBar)
         .toolbarBackground(.visible, for: .navigationBar)
         .sheet(item: $selectedFront) { front in
-            LevelSheet(front: front) {
+            LevelSheet(front: front, onIdealHeight: { levelSheetHeight = $0 }) {
                 selectedFront = nil
                 router.push(.armySetup(front))
             }
-            .presentationDetents([.medium, .large])
+            // Sized to what the sheet holds, so "Hazırlan" is on screen without scrolling; taller than
+            // the screen (the largest text sizes) the system stops it at full height and the details scroll.
+            .presentationDetents(levelSheetHeight.map { [.height($0)] } ?? [.medium])
             .presentationDragIndicator(.hidden)
             .presentationBackground(.clear)
             // Without this, the system falls back to its own default corner radius for the sheet

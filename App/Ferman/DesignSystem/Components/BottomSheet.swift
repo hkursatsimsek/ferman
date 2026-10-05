@@ -4,6 +4,9 @@ import SwiftUI
 struct BottomSheet<Content: View>: View {
     @ViewBuilder var content: Content
 
+    /// The drag handle's band above `content` — for a sheet that sizes its detent to what it holds.
+    static var handleHeight: CGFloat { FermanSpacing.sm + 4 + FermanSpacing.md + 2 }
+
     var body: some View {
         VStack(spacing: 0) {
             Capsule()
@@ -13,11 +16,17 @@ struct BottomSheet<Content: View>: View {
                 .padding(.bottom, FermanSpacing.md + 2)
             content
         }
-        .background(Color.slateRaised)
-        .clipShape(UnevenRoundedRectangle(topLeadingRadius: FermanRadius.panel, topTrailingRadius: FermanRadius.panel))
+        // The surface runs on under the home indicator; otherwise the clear system sheet shows the
+        // table through a strip below the content.
+        .background {
+            UnevenRoundedRectangle(topLeadingRadius: FermanRadius.panel, topTrailingRadius: FermanRadius.panel)
+                .fill(Color.slateRaised)
+                .ignoresSafeArea(edges: .bottom)
+        }
         .overlay(alignment: .top) {
             UnevenRoundedRectangle(topLeadingRadius: FermanRadius.panel, topTrailingRadius: FermanRadius.panel)
                 .strokeBorder(Color.paper.opacity(0.12), lineWidth: 1)
+                .ignoresSafeArea(edges: .bottom)
         }
         .fermanSheetShadow()
     }

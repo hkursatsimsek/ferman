@@ -5,46 +5,70 @@ import SwiftUI
 /// enemy as iron figures, the budgets side by side (a deliberate gap the player should notice, brief
 /// §4.2), the order allowance, and — when this front brings a new kind of order — a sealed dispatch
 /// announcing it.
+///
+/// "Hazırlan" stays pinned below the details, never scrolled out of reach; the details scroll only
+/// when they can't fit (the largest text sizes). `onIdealHeight` reports the height the whole sheet
+/// needs, so its presenter can size the detent to it instead of a fixed `.medium` that hid the button.
 struct LevelSheet: View {
     let front: CampaignFront
+    var onIdealHeight: (CGFloat) -> Void = { _ in }
     var onConfirm: () -> Void
+
+    @State private var detailsHeight: CGFloat = 0
+    @State private var confirmBarHeight: CGFloat = 0
 
     var body: some View {
         BottomSheet {
             ScrollView {
-                VStack(alignment: .leading, spacing: FermanSpacing.lg) {
-                    VStack(alignment: .leading, spacing: FermanSpacing.xs) {
-                        Text(String(localized: "\(front.id). Cephe — \(front.title)"))
-                            .font(FermanFont.screenTitle())
-                            .tracking(FermanFont.Tracking.screenTitle)
-                            .foregroundStyle(Color.paper)
-                        if !front.briefing.isEmpty {
-                            Text(front.briefing)
-                                .font(FermanFont.body())
-                                .foregroundStyle(Color.paper.opacity(0.85))
-                                .fixedSize(horizontal: false, vertical: true)
-                        }
-                    }
-
-                    if !front.enemyComposition.isEmpty, front.constraintBadge == nil {
-                        enemy
-                    }
-                    budgets
-                    statRow(label: String(localized: "Kural hakkın"), value: "\(front.ruleBudget)")
-                    if let badge = front.constraintBadge {
-                        statRow(label: String(localized: "Kısıt"), value: "\(badge.title) — \(badge.detail)")
-                    }
-                    if !front.newOrders.isEmpty {
-                        dispatch
-                    }
-
-                    Button(String(localized: "Hazırlan"), action: onConfirm)
-                        .buttonStyle(FermanButton.Primary())
-                }
-                .padding(.horizontal, FermanSpacing.lg)
-                .padding(.bottom, FermanSpacing.xl)
+                details
+                    .onGeometryChange(for: CGFloat.self, of: \.size.height) { detailsHeight = $0 }
+            }
+            .scrollBounceBehavior(.basedOnSize)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Button(String(localized: "Hazırlan"), action: onConfirm)
+                    .buttonStyle(FermanButton.Primary())
+                    .padding(.horizontal, FermanSpacing.lg)
+                    .padding(.top, FermanSpacing.md)
+                    .padding(.bottom, FermanSpacing.lg)
+                    .background(Color.slateRaised)
+                    .onGeometryChange(for: CGFloat.self, of: \.size.height) { confirmBarHeight = $0 }
             }
         }
+        .onChange(of: detailsHeight + confirmBarHeight, initial: true) { _, contentHeight in
+            guard detailsHeight > 0, confirmBarHeight > 0 else { return }
+            onIdealHeight((BottomSheet<EmptyView>.handleHeight + contentHeight).rounded(.up))
+        }
+    }
+
+    private var details: some View {
+        VStack(alignment: .leading, spacing: FermanSpacing.lg) {
+            VStack(alignment: .leading, spacing: FermanSpacing.xs) {
+                Text(String(localized: "\(front.id). Cephe — \(front.title)"))
+                    .font(FermanFont.screenTitle())
+                    .tracking(FermanFont.Tracking.screenTitle)
+                    .foregroundStyle(Color.paper)
+                if !front.briefing.isEmpty {
+                    Text(front.briefing)
+                        .font(FermanFont.body())
+                        .foregroundStyle(Color.paper.opacity(0.85))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            if !front.enemyComposition.isEmpty, front.constraintBadge == nil {
+                enemy
+            }
+            budgets
+            statRow(label: String(localized: "Kural hakkın"), value: "\(front.ruleBudget)")
+            if let badge = front.constraintBadge {
+                statRow(label: String(localized: "Kısıt"), value: "\(badge.title) — \(badge.detail)")
+            }
+            if !front.newOrders.isEmpty {
+                dispatch
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, FermanSpacing.lg)
     }
 
     private var enemy: some View {
@@ -72,7 +96,8 @@ struct LevelSheet: View {
         let scale = CGFloat(max(front.enemyBudget, front.playerBudget, 1))
         return VStack(alignment: .leading, spacing: FermanSpacing.xs) {
             budgetBar(
-                label: String(localized: "Düşman bütçesi"), value: front.enemyBudget, fraction: CGFloat(front.enemyBudget) / scale,
+                label: String(localized: "Düşman bütçesi"), value: front.enemyBudget,
+                fraction: CGFloat(front.enemyBudget) / scale,
                 color: .iron)
             budgetBar(
                 label: String(localized: "Senin bütçen"), value: front.playerBudget,

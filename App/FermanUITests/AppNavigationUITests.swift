@@ -40,6 +40,33 @@ final class AppNavigationUITests: XCTestCase {
         }
     }
 
+    /// The sheet used to open at `.medium` with "Hazırlan" scrolled below its bottom edge. `isHittable`
+    /// doesn't scroll, so this fails wherever the button isn't on screen as the sheet opens.
+    @MainActor
+    func testTheLevelSheetShowsHazirlanWithoutScrolling() throws {
+        // 3: briefing, enemy, both budgets and a new-order dispatch; 8: the largest enemy.
+        for frontID in [3, 8] {
+            let app = launchApp()
+            app.buttons["home.seferberlik"].tap()
+            let front = app.buttons["campaign.front.\(frontID)"]
+            XCTAssertTrue(front.waitForExistence(timeout: 3))
+            front.tap()
+
+            let prepare = app.buttons["Hazırlan"]
+            XCTAssertTrue(prepare.waitForExistence(timeout: 3))
+            // Let the sheet settle at the height it measured for itself.
+            Thread.sleep(forTimeInterval: 1)
+            XCTAssertTrue(prepare.isHittable, "front \(frontID)")
+            XCTAssertLessThanOrEqual(prepare.frame.maxY, app.windows.firstMatch.frame.maxY, "front \(frontID)")
+
+            let screenshot = XCTAttachment(screenshot: app.screenshot())
+            screenshot.name = "level-sheet-\(frontID)"
+            screenshot.lifetime = .keepAlways
+            add(screenshot)
+            app.terminate()
+        }
+    }
+
     @MainActor
     func testHazirlanPushesIntoArmySetupWithTheFrontsBudget() throws {
         let app = launchApp()
